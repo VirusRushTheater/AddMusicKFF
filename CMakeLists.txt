@@ -6,8 +6,26 @@ project(AddMusicK
 	LANGUAGES	C CXX
 )
 
+# Defining AddMusicK compiling options
+option(ADDMUSICK_CREATE_EXECUTABLE
+	"Compile AddMusicK as an executable"
+ON)
+option(ADDMUSICK_CREATE_SHARED_LIB
+	"Compile AddMusicK as a shared library (TODO)"
+OFF)
+option(ADDMUSICK_CREATE_STATIC_LIB
+	"Compile AddMusicK as a static library (TODO)"
+OFF)
+
 # Standardize this as much as possible.
 set(CMAKE_CXX_STANDARD		17)
 set(CMAKE_CXX_EXTENSIONS 	OFF)
 
+# Command Asar to be compiled only as a static library
+set(ASAR_GEN_EXE 			OFF)
+set(ASAR_GEN_DLL 			OFF)
+set(ASAR_GEN_LIB 			ON)
+
+# Branch the build to these directories
+add_subdirectory(third-party)
 add_subdirectory(src)

@@ -356,7 +356,7 @@ void Music::init()
 		}
 
 #if PARSER_VERSION != 4
-#error You forgot to update the #amk syntax.  Aren't you glad you at least remembered to put in this warning?
+#error You forgot to update the #amk syntax.  Arent you glad you at least remembered to put in this warning?
 #endif
 		/*			targetAMKVersion = 0;
 		if (backup.find('\r') != -1)

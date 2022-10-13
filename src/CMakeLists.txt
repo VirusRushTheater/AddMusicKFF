@@ -1,1 +1,2 @@
+add_subdirectory(AM405Remover)
 add_subdirectory(AddmusicK)

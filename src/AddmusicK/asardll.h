@@ -5,7 +5,7 @@
 
 #define expectedapiversion 200
 
-//#include <stdbool.h>
+#include <stdbool.h>
 
 //These structures are returned from various functions.
 struct errordata {
