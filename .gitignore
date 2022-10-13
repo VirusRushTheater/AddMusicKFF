@@ -1,8 +1,8 @@
 *.o
 *.exe
-!asar.exe
 *.spc
 .DS_Store
+build/
 src/.vs
 src/Release
 src/Debug
@@ -10,7 +10,6 @@ src/**/Release
 src/**/Debug
 !**/addmusick/
 **/addmusick
-**/asar
 tempmain.asm
 asm/SFX1DF9Table.bin
 asm/SFX1DFCTable.bin
