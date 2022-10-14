@@ -1,4 +1,5 @@
-#define NULL 0
+#define NULL 	(void*) 0
+
 #ifdef _WIN32
 	#include <windows.h>
 	#define getlib() LoadLibrary("asar.dll")
@@ -12,38 +13,60 @@
 	#else
 		#define EXTENSION ".so"
 	#endif
-	inline void * getlib()
+
+	// The "inline" directive made the compiler not detect this function.
+	void* __getlib()
 	{
-		char libname[256];
-		const char * names[]={"./libasar" EXTENSION, "libasar", NULL};
-		for (int i=0;names[i];i++)
+		// Tests names libasar.so and libasar as Asar DLL libraries.
+		const char * names[] = {"./libasar" EXTENSION, "libasar", NULL};
+		for (int i = 0; names[i]; i++)
 		{
-			void * rval=dlopen(names[i], RTLD_LAZY);
-const char*e=dlerror();if(e)puts(e);
-			if (rval) return rval;
+			void * rval = 		dlopen(names[i], RTLD_LAZY);
+			const char* e = 	dlerror();
+			if(e)
+				puts(e);
+			if (rval)
+				return rval;
 		}
 		return NULL;
 	}
-	#define loadraw(name, target) *(void **)(&target)=dlsym(asardll, name); require(target)
-	#define closelib(var) dlclose(var)
+	
+	#define getlib()					__getlib()
+	#define loadraw(name, target)		*(void **)(&target) = dlsym(asardll, name); require(target)
+	#define closelib(var)				dlclose(var)
 #endif
+
 #define asarfunc
 #include "asardll.h"
 
+// Asar DLL object
 static void * asardll=NULL;
 
+// Internal initializing functions for Asar
 static bool (*asar_i_init)();
 static void (*asar_i_close)();
 
 bool asar_init()
 {
-#define require(b) if (!(b)) { asardll=NULL; return false; }
-	if (asardll) return true;
-	asardll=getlib();
+#define require(b) \
+	if (!(b)) { \
+		asardll = NULL; \
+		return false; \
+	}
+
+	if (asardll)
+		return true;
+	
+	asardll = getlib();
 	require(asardll);
 	//void * tmp;
-#define loadi(name) loadraw("asar_"#name, asar_i_##name)
-#define load(name) loadraw("asar_"#name, asar_##name)
+
+#define loadi(name)	\
+	loadraw("asar_"#name, asar_i_##name)
+
+#define load(name) \
+	loadraw("asar_"#name, asar_##name)
+
 	loadi(init);
 	loadi(close);
 	load(version);
@@ -59,7 +82,12 @@ bool asar_init()
 	load(getdefine);
 	load(getalldefines);
 	load(math);
-	if (asar_apiversion()<expectedapiversion || (asar_apiversion()/100)>(expectedapiversion/100)) return false;
+	
+	if (asar_apiversion() < expectedapiversion || 
+		(asar_apiversion() / 100) > (expectedapiversion / 100)
+	)
+		return false;
+	
 	require(asar_i_init());
 	return true;
 }

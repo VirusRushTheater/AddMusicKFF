@@ -53,6 +53,8 @@ class SampleGroup;
 #include <sys/types.h>
 #include <sys/stat.h>
 
+// ASAR dependencies
+// #include <asar/interface-lib.h>
 
 //extern ROM rom;
 extern std::vector<uint8_t> rom;

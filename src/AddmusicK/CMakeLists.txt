@@ -21,8 +21,11 @@ set(ADDMUSICK_HEADERS
 )
 
 # Include Asar dependencies as explained in its git repository
-get_target_property(ASAR_INCLUDE_DIR asar-static INCLUDE_DIRECTORIES)
-include_directories(${ASAR_INCLUDE_DIR})
+# get_target_property(ASAR_INCLUDE_DIR asar-static INCLUDE_DIRECTORIES)
+
+# Used the .. directive in order to explicitly include <asar/interface-lib.h>
+# instead of <interface-lib.h> for code readability.
+include_directories(${ASAR_INCLUDE_DIR}/..)
 
 if (ADDMUSICK_CREATE_EXECUTABLE)
 	add_executable(AddmusicK
@@ -34,7 +37,6 @@ if (ADDMUSICK_CREATE_EXECUTABLE)
 	# and asar as a library.
 	target_link_libraries(AddmusicK PUBLIC
 		AM405Remover
-		asar-static
 	)
 endif()
 

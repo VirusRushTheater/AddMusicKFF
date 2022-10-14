@@ -17,3 +17,27 @@ Please clone this repository by using:
 ```
 git clone --recursive https://github.com/VirusRushTheater/AddMusicKFF.git
 ```
+
+## Building the project with CMake ##
+
+First of all, create a folder named `build` in the repositor root.
+
+```
+mkdir build
+```
+
+Then, configure the project. Enter the `build` directory and call `cmake ..`
+from there.
+
+```
+cd build
+cmake ..
+```
+
+And compile it. This will copy the executable into the `deploy` folder. The
+project is still dependent on an external `libasar.so`/`asar.dll` provided
+manually by you.
+
+```
+cmake --build .
+```

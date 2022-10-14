@@ -9,10 +9,14 @@
 #include <stack>
 #include <algorithm>
 
+// ASAR dependencies
+// #include <asar/interface-lib.h>
+
 #include "fs.h"		// // //
 
 #include "Directory.h"
 #include "globals.h"
+
 //ROM rom;
 std::vector<uint8_t> rom;
 

@@ -1,3 +1,4 @@
 [submodule "third-party/asar"]
 	path = third-party/asar
 	url = https://github.com/RPGHacker/asar.git
+	branch = 1.81

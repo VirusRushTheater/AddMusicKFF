@@ -7,6 +7,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //These structures are returned from various functions.
 struct errordata {
 	const char * fullerrdata;
@@ -99,3 +103,7 @@ asarfunc const char * (*asar_resolvedefines)(const char * data, bool learnnew);
 // see if it's successful (NULL) or if it failed (non-NULL, contains a descriptive string). It does
 // not affect asar_geterrors.
 asarfunc double (*asar_math)(const char * math, const char ** error);
+
+#ifdef __cplusplus
+}
+#endif

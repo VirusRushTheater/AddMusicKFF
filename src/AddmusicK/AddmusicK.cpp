@@ -1,3 +1,4 @@
+// C++ STL dependencies
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -5,13 +6,21 @@
 #include <iomanip>
 #include <cstring>
 #include <cstdlib>
-#include "globals.h"
 #include <ctime>
-#include "../AM405Remover/AM405Remover.h"
-#include "fs.h"		// // //
 #include <cstdint>
-#include "lodepng.h"
 #include <thread>
+
+// ASAR dependencies
+#include "asardll.h"
+// #include <asar/interface-lib.h>
+
+// Neighboring lib dependencies
+#include "../AM405Remover/AM405Remover.h"
+
+// Local dependencies
+#include "fs.h"
+#include "globals.h"
+#include "lodepng.h"
 
 
 bool waitAtEnd = true;
@@ -168,8 +177,6 @@ int main(int argc, char* argv[]) try		// // //
 			useAsarDLL = false;
 		else
 			useAsarDLL = true;
-
-
 
 		std::string tempROMName = ROMName.cStr();
 		if (fileExists(tempROMName + ".smc") && fileExists(tempROMName + ".sfc"))
@@ -336,14 +343,9 @@ void cleanROM()
 	//tryToCleanAMMData();
 	tryToCleanSampleToolData();
 
-
 	if (rom[0x70000] == 0x3E && rom[0x70001] == 0x0E)	// If this is a "clean" ROM, then we don't need to do anything.
 	{
-
-
 		//displayNewUserMessage();
-
-
 		writeFile("asm/SNES/temp.sfc", rom);
 		return;
 	}
