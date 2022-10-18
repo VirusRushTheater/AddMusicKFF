@@ -29,6 +29,12 @@
 #define DATA_VERSION 0				// Used to keep track of incompatible changes to any and all compiled data, either to the SNES or to the PC
 
 #include <cstdint>		// // //
+#include <string>
+#include <vector>
+#include <fstream>
+#include <map>
+#include <memory>
+
 //class ROM;
 class Music;
 class SoundEffect;
@@ -43,18 +49,12 @@ class SampleGroup;
 #include "SampleGroup.h"
 #include "Directory.h"
 #include "BankDefine.h"
-#include <string>
-#include <vector>
-#include <fstream>
-#include <map>
-#include <memory>
 #include "Directory.h"
-#include "asardll.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
 // ASAR dependencies
-// #include <asar/interface-lib.h>
+#include <asar/interface-lib.h>
 
 //extern ROM rom;
 extern std::vector<uint8_t> rom;
@@ -96,7 +96,7 @@ extern int highestGlobalSong;
 extern int songCount;
 extern int songSampleListSize;
 
-extern bool useAsarDLL;
+// extern bool useAsarDLL;
 
 // Return true if an error occurred (if "dieOnError" is true).
 bool asarCompileToBIN(const File &patchName, const File &binOutput, bool dieOnError = true);

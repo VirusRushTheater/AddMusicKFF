@@ -6,6 +6,7 @@
 
 # Exclude every leftover from Cmake.
 build/
+**/build/
 
 !**/addmusick/
 **/addmusick
@@ -16,6 +17,8 @@ deploy/asm/SFX1DFCTable.bin
 deploy/asm/SFXData.bin
 deploy/asm/main.bin
 deploy/asm/tempmain.asm
+deploy/asm/SNES/SongSampleList.asm
+deploy/asm/SNES/bin/
 
 deploy/stats/*
 deploy/SPCs/*
@@ -32,5 +35,6 @@ temp.txt
 
 # Ignore deployed binaries
 deploy/AddmusicK
+deploy/AddmusicK.exe
 deploy/libasar.so
 deploy/asar.dll

@@ -11,8 +11,7 @@
 #include <thread>
 
 // ASAR dependencies
-#include "asardll.h"
-// #include <asar/interface-lib.h>
+#include <asar/interface-lib.h>
 
 // Neighboring lib dependencies
 #include "../AM405Remover/AM405Remover.h"
@@ -173,10 +172,7 @@ int main(int argc, char* argv[]) try		// // //
 			puts("\n\n");
 		}
 
-		if (asar_init() == false)
-			useAsarDLL = false;
-		else
-			useAsarDLL = true;
+		// Changed: ASAR is included as a static library now
 
 		std::string tempROMName = ROMName.cStr();
 		if (fileExists(tempROMName + ".smc") && fileExists(tempROMName + ".sfc"))
@@ -1968,8 +1964,8 @@ void tryToCleanAM4Data()
 			printError("Addmusic 4.05 ROMs can only be cleaned if they have a header. This does not\napply to any other aspect of the program.", true);
 
 		char **am405argv;
-		am405argv = (char **)malloc(sizeof(char **) * 2);
-		am405argv[1] = (char *)malloc(ROMName.size() + 1);
+		am405argv = 	(char **)malloc(sizeof(char **) * 2);
+		am405argv[1] = 	(char *)malloc(ROMName.size() + 1);
 		strcpy(am405argv[1], ROMName.cStr());
 		am405argv[1][ROMName.size()] = 0;
 		std::cout << "Attempting to erase data from Addmusic 4.05:" << std::endl;

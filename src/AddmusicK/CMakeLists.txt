@@ -1,5 +1,4 @@
 set(ADDMUSICK_SOURCES
-	asardll.c
 	AddmusicK.cpp
 	globals.cpp
 	lodepng.cpp
@@ -8,7 +7,6 @@ set(ADDMUSICK_SOURCES
 )
 
 set(ADDMUSICK_HEADERS
-	asardll.h
 	BankDefine.h
 	Directory.h
 	fs.h
@@ -21,13 +19,14 @@ set(ADDMUSICK_HEADERS
 )
 
 # Include Asar dependencies as explained in its git repository
-# get_target_property(ASAR_INCLUDE_DIR asar-static INCLUDE_DIRECTORIES)
+get_target_property(ASAR_INCLUDE_DIR ${ASAR_LIB_TARGET} INCLUDE_DIRECTORIES)
 
 # Used the .. directive in order to explicitly include <asar/interface-lib.h>
 # instead of <interface-lib.h> for code readability.
 include_directories(${ASAR_INCLUDE_DIR}/..)
 
-if (ADDMUSICK_CREATE_EXECUTABLE)
+if (ADDMUSICK_BUILD_EXECUTABLE)
+	message(STATUS "AddMusicK set to be built as an executable.")
 	add_executable(AddmusicK
 		${ADDMUSICK_HEADERS}
 		${ADDMUSICK_SOURCES}
@@ -37,13 +36,9 @@ if (ADDMUSICK_CREATE_EXECUTABLE)
 	# and asar as a library.
 	target_link_libraries(AddmusicK PUBLIC
 		AM405Remover
+		${ASAR_LIB_TARGET}
 	)
-endif()
-
-if (ADDMUSICK_CREATE_SHARED_LIB)
-	message("Compilation of AddmusicK as a library is not yet supported")
-endif()
-
-if (ADDMUSICK_CREATE_STATIC_LIB)
-	message("Compilation of AddmusicK as a library is not yet supported")
-endif()
+elseif (ADDMUSICK_BUILD_LIBRARY)
+	message(STATUS "AddMusicK set to be built as a library.")
+	add_library(AddmusicK)
+endif ()

@@ -10,7 +10,7 @@
 #include <algorithm>
 
 // ASAR dependencies
-// #include <asar/interface-lib.h>
+#include <asar/interface-lib.h>
 
 #include "fs.h"		// // //
 
@@ -58,7 +58,7 @@ int highestGlobalSong;
 int totalSampleCount;
 int songCount = 0;
 int songSampleListSize;
-bool useAsarDLL;
+// bool useAsarDLL;
 
 void openFile(const File &fileName, std::vector<uint8_t> &v)
 {
@@ -979,8 +979,6 @@ void preprocess(std::string &str, const std::string &filename, int &version)
 	if (level != 0)
 		error("There was an #ifdef, #ifndef, or #if without a matching #endif.");
 
-
-
 	i = 0;
 	if (version != -2)			// For now, skip comment erasing for #amm songs.  #amk songs will follow suit in a later version.
 	{
@@ -1006,59 +1004,48 @@ bool asarCompileToBIN(const File &patchName, const File &binOutputFile, bool die
 	removeFile("temp.log");
 	removeFile("temp.txt");
 
-	if (useAsarDLL)
+	int binlen = 0;
+	int buflen = 0x10000;		// 0x10000 instead of 0x8000 because a few things related to sound effects are stored at 0x8000 at times.
+
+	uint8_t *binOutput = (uint8_t *)malloc(buflen);
+
+	asar_patch(patchName.cStr(), (char *)binOutput, buflen, &binlen);
+	int count = 0, currentCount = 0;
+	std::string printout;
+
+	asar_getprints(&count);
+
+	while (currentCount != count)
 	{
-		int binlen = 0;
-		int buflen = 0x10000;		// 0x10000 instead of 0x8000 because a few things related to sound effects are stored at 0x8000 at times.
-
-		uint8_t *binOutput = (uint8_t *)malloc(buflen);
-
-		asar_patch(patchName.cStr(), (char *)binOutput, buflen, &binlen);
-		int count = 0, currentCount = 0;
-		std::string printout;
-
-		asar_getprints(&count);
-
-		while (currentCount != count)
-		{
-			printout += asar_getprints(&count)[currentCount];
-			printout += "\n";
-			currentCount++;
-		}
-		if (count > 0)
-			writeTextFile("temp.txt", printout);
+		printout += asar_getprints(&count)[currentCount];
+		printout += "\n";
+		currentCount++;
+	}
+	if (count > 0)
+		writeTextFile("temp.txt", printout);
 ///////////////////////////////////////////////////////////////////////////////
-		count = 0; currentCount = 0;
-		printout.clear();
+	count = 0; currentCount = 0;
+	printout.clear();
 
-		asar_geterrors(&count);
+	asar_geterrors(&count);
 
-		while (currentCount != count)
-		{
-			printout += asar_geterrors(&count)[currentCount].fullerrdata + (std::string)"\n";
-			currentCount++;
-		}
-		if (count > 0)
-		{
-			writeTextFile("temp.log", printout);
-			free(binOutput);
-			return false;
-		}
-
-		std::vector<uint8_t> v;
-		v.assign(binOutput, binOutput + binlen);
-		writeFile(binOutputFile, v);
-		free(binOutput);
-		return true;
-	}
-	else
+	while (currentCount != count)
 	{
-		remove(binOutputFile);
-		std::string s = "asar " + (std::string)patchName + " " + (std::string)binOutputFile + " 2> temp.log > temp.txt";
-		execute(s);
-		if (dieOnError && fileExists("temp.log") && getFileSize("temp.log") != 0) return false;
-		return true;
+		printout += asar_geterrors(&count)[currentCount].fullerrdata + (std::string)"\n";
+		currentCount++;
 	}
+	if (count > 0)
+	{
+		writeTextFile("temp.log", printout);
+		free(binOutput);
+		return false;
+	}
+
+	std::vector<uint8_t> v;
+	v.assign(binOutput, binOutput + binlen);
+	writeFile(binOutputFile, v);
+	free(binOutput);
+	return true;
 }
 
 bool asarPatchToROM(const File &patchName, const File &romName, bool dieOnError)
@@ -1066,54 +1053,44 @@ bool asarPatchToROM(const File &patchName, const File &romName, bool dieOnError)
 	removeFile("temp.log");
 	removeFile("temp.txt");
 
-	if (useAsarDLL)
+	int binlen = 0;
+	int buflen;
+
+	std::vector<uint8_t> patchrom;
+	openFile(romName, patchrom);
+	buflen = patchrom.size();
+
+	asar_patch(patchName.cStr(), (char *)patchrom.data(), buflen, &buflen);
+	int count = 0, currentCount = 0;
+	std::string printout;
+
+	asar_getprints(&count);
+
+	while (currentCount != count)
 	{
-		int binlen = 0;
-		int buflen;
-
-		std::vector<uint8_t> patchrom;
-		openFile(romName, patchrom);
-		buflen = patchrom.size();
-
-		asar_patch(patchName.cStr(), (char *)patchrom.data(), buflen, &buflen);
-		int count = 0, currentCount = 0;
-		std::string printout;
-
-		asar_getprints(&count);
-
-		while (currentCount != count)
-		{
-			printout += asar_getprints(&count)[currentCount];
-			printout += "\n";
-			currentCount++;
-		}
-		if (count > 0)
-			writeTextFile("temp.txt", printout);
+		printout += asar_getprints(&count)[currentCount];
+		printout += "\n";
+		currentCount++;
+	}
+	if (count > 0)
+		writeTextFile("temp.txt", printout);
 ///////////////////////////////////////////////////////////////////////////////
-		count = 0; currentCount = 0;
-		printout.clear();
+	count = 0; currentCount = 0;
+	printout.clear();
 
-		asar_geterrors(&count);
+	asar_geterrors(&count);
 
-		while (currentCount != count)
-		{
-			printout += asar_geterrors(&count)[currentCount].fullerrdata + (std::string)"\n";
-			currentCount++;
-		}
-		if (count > 0)
-		{
-			writeTextFile("temp.log", printout);
-			return false;
-		}
-
-		writeFile(romName, patchrom);
-		return true;
-	}
-	else
+	while (currentCount != count)
 	{
-		std::string s = "asar " + (std::string)patchName + " " + (std::string)romName + " 2> temp.log > temp.txt";
-		execute(s);
-		if (dieOnError && fileExists("temp.log") && getFileSize("temp.log") != 0) return false;
-		return true;
+		printout += asar_geterrors(&count)[currentCount].fullerrdata + (std::string)"\n";
+		currentCount++;
 	}
+	if (count > 0)
+	{
+		writeTextFile("temp.log", printout);
+		return false;
+	}
+
+	writeFile(romName, patchrom);
+	return true;
 }
