@@ -13,6 +13,7 @@ image:
   - Ubuntu
 
 before_build:
+  - git submodule update --init --recursive
   - mkdir build
   - cd build
   - cmake -DADDMUSICK_COMPILE_AMKGUI=OFF ..
