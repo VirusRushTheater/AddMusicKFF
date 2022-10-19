@@ -1,7 +1,7 @@
 version: 1.0.9.{build}
 
 platform:
-  - x86
+  # - x86
   - x64
 
 configuration:
@@ -16,7 +16,8 @@ before_build:
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake -DADDMUSICK_COMPILE_AMKGUI=OFF ..
+  - ps: cmake -DCMAKE_BUILD_TYPE=$env:CONFIGURATION ..  
+  - sh: cmake -DCMAKE_BUILD_TYPE=${CONFIGURATION} -DADDMUSICK_COMPILE_AMKGUI=OFF ..
 
 build_script:
   - cmake --build . 

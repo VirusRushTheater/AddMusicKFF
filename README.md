@@ -6,7 +6,8 @@ KungFuFurby's AddMusicKFF v1.0.8:
 * Remove Visual Studio dependencies and use a CMake build based system.
 * Tidy up program dependencies, moving them to the `deploy` folder.
 * Make it multiplatform with minor modifications.
-* Static Linkage with Asar, which would allow a more seamless integration.
+* Including Asar repository into the building system, allowing a more straightforward usage of it as a library.
+* Merge the music hacking base directory system (in other words, the clean `deploy` folder) into the program, so it can be restored to a clean slate with a single call, relieving the user of the burden of making backup directories.
 * Compiling AddMusicKFF as a library, which would allow for more complex
   SMW hacking tools to integrate it easily.
 
@@ -31,13 +32,10 @@ from there.
 
 ```
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
 
-And compile it. This will copy the executable into the `deploy` folder. The
-project is still dependent on an external `libasar.so`/`asar.dll` provided
-manually by you.
-
+And compile it. This will copy the executable and the Asar library that will be used together with it into the `deploy` folder.
 ```
 cmake --build .
 ```
