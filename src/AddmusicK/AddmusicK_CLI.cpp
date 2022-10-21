@@ -26,6 +26,7 @@ struct Addmusic_arglist
 	bool redirectStandardStreams = false;
 	bool noSFX = false;
 
+	std::string workFolder = "./";
 	bool preserveTemp = false;
 
 	bool justSPCsPlease = false;
@@ -43,23 +44,24 @@ int main (int argc, char** argv)
 
 	// TODO: Help me with better descriptions
 	options.add_options()
-		("a,aggressive", "Aggressive", cxxopts::value<bool>())
-		("b,bank_start", "Set bank start address on 0x080000", cxxopts::value<bool>())
-		("c,convert", "NOT Convert", cxxopts::value<bool>())
-		("d,dup_check", "NOT Dup check", cxxopts::value<bool>())
-		("e,check_echo", "NOT Check echo", cxxopts::value<bool>())
-		("p,do_not_patch", "Do not patch", cxxopts::value<bool>())
+		("a,aggressive", "Aggressive free space finding", cxxopts::value<bool>())
+		("b,bank_start", "DISABLE bank optimizations", cxxopts::value<bool>())
+		("c,convert", "DISABLE conversion for backwards compatibility", cxxopts::value<bool>())
+		("d,dup_check", "DISABLE sample duplication check", cxxopts::value<bool>())
+		("e,check_echo", "DISABLE echo buffer boundary check", cxxopts::value<bool>())
+		("p,do_not_patch", "Do not patch the ROM, only generate temporary files", cxxopts::value<bool>())
 		("r,reset", "Reset Addmusic directory structure", cxxopts::value<bool>())
-		("s,sa1", "Disable SA1 usage", cxxopts::value<bool>())
+		("s,sa1", "DISABLE SA-1 addressing", cxxopts::value<bool>())
 		("t,preserve", "Preserve temporarily generated files", cxxopts::value<bool>())
-		("u,optimize_sp", "NOT Optimize sample usage", cxxopts::value<bool>())
+		("u,optimize_sp", "DISABLE cleaning unused samples", cxxopts::value<bool>())
 		("v,verbose", "Verbose output", cxxopts::value<bool>())
-		("x,validate_hex", "NOT Validate hex", cxxopts::value<bool>())
+		("w,work_folder", "Use another work folder", cxxopts::value<std::string>())
+		("x,validate_hex", "DISABLE hex command validation", cxxopts::value<bool>())
 		("z,visualize", "Generate song visualization", cxxopts::value<bool>())
 
 		("h,help", "Print usage", cxxopts::value<bool>())
 
-		("dumpsfx", "Dump SFX", cxxopts::value<bool>())
+		("dumpsfx", "Dump SFXs to the SPC folders", cxxopts::value<bool>())
 		("norom", "Generate only SPCs")
 		("version", "Program version")
 
@@ -73,10 +75,18 @@ int main (int argc, char** argv)
 	// If the -h argument was passed, display help and quit.
 	if (argp.count("help"))
     {
-      	std::cout << options.help() << std::endl;
+      	std::cout << options.help() << std::endl << std::endl;
+
+		std::cout << "BASIC USAGE: \"" << argv[0] << " smwrom.smc\" will be enough in most cases." <<std::endl << std::endl;
+		
+		std::cout << "For a more detailed description of the command line arguments, please" << std::endl <<
+		"read the \"Advanced Use\" readme file." << std::endl << std::endl;
       	exit(0);
     }
 
+	// Work folder and Reset may work together.
+	if (argp.count("work_folder"))
+		am.workFolder =			argp["work_folder"].as<std::string>(); // new
 	if (argp.count("reset"))
 	{
 		// TODO: Reset folder state
