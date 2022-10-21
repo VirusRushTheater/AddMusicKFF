@@ -16,7 +16,7 @@ before_build:
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - ps: cmake -DCMAKE_BUILD_TYPE=$env:CONFIGURATION ..  
+  - ps: cmake -DCMAKE_BUILD_TYPE=$env:CONFIGURATION -DADDMUSICK_COMPILE_AMKGUI=OFF ..  
   - sh: cmake -DCMAKE_BUILD_TYPE=${CONFIGURATION} -DADDMUSICK_COMPILE_AMKGUI=OFF ..
 
 build_script:

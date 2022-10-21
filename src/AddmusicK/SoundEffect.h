@@ -1,8 +1,6 @@
 #ifndef _SOUNDEFFECT_H
 #define _SOUNDEFFECT_H
 
-#include "globals.h"
-
 class SoundEffect
 {
 	int getHex();

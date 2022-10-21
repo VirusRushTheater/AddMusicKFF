@@ -1,8 +1,6 @@
 #ifndef _SAMPLE_H
 #define _SAMPLE_H
 
-#include "globals.h"
-
 class Sample
 {
 public:

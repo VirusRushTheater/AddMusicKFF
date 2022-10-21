@@ -18,7 +18,7 @@ option(ADDMUSICK_BUILD_LIBRARY
 OFF)
 option(ADDMUSICK_COMPILE_AMKGUI
 	"Compile AMKGUI (Supported only if you have Visual Studio available)"
-ON)
+OFF)
 option(ADDMUSICK_COMPILE_AM4BATCH
 	"Compile AM4Batch"
 ON)
@@ -29,6 +29,12 @@ ON)
 # Throws an error if you're trying to build simultaneously AddMusicK as an executable and as a library.
 if ((ADDMUSICK_BUILD_EXECUTABLE AND ADDMUSICK_BUILD_LIBRARY) OR ((NOT ADDMUSICK_BUILD_EXECUTABLE) AND (NOT ADDMUSICK_BUILD_LIBRARY)))
 	message(FATAL_ERROR "ADDMUSICK_BUILD_EXECUTABLE and ADDMUSICK_BUILD_LIBRARY are mutually exclusive.")
+endif()
+if (ADDMUSICK_COMPILE_AMKGUI)
+	message(FATAL_ERROR "No support yet for building AMKGUI.")
+endif()
+if (ADDMUSICK_BUILD_LIBRARY)
+	message(FATAL_ERROR "No support yet for compiling AddMusicK as library.")
 endif()
 
 # Standardize this as much as possible.

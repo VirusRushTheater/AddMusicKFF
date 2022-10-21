@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "globals.h"
 
 struct SpaceInfo {
 	int songStartPos;
