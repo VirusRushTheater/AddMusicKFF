@@ -1,8 +1,13 @@
+#pragma once
+
 #ifdef __STDC_LIB_EXT1__		// // //
 #define __STDC_WANT_LIB_EXT1__ 1
 #endif
 
 #include <stdio.h>
+
+namespace AM405Remover
+{
 
 class AddMusic
 {
@@ -31,3 +36,5 @@ private:
 	unsigned int TableAddress;
 	unsigned int OWMusicAddress;
 };
+
+}

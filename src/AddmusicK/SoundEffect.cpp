@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iomanip>
 
+using namespace AddMusic;
+
 static unsigned int pos;
 static int line;
 static bool triplet;

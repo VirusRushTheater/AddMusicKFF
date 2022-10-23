@@ -11,6 +11,7 @@
 
 //#include "Preprocessor.h"
 
+using namespace AddMusic;
 
 #define skipSpaces				\
 while (pos < text.size() && isspace(text[pos]))	\

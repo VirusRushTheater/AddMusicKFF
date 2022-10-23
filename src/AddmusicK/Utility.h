@@ -6,6 +6,9 @@
 
 #include "Directory.h"	// File class
 
+namespace AddMusic
+{
+
 /**
  * @brief Opens a file and fills a vector with its contents.
  * 
@@ -86,5 +89,7 @@ void writeTextFile(const File &fileName, const std::string &string);
  * @param str 
  */
 void insertValue(int value, int length, const std::string &find, std::string &str);
+
+}
 
 #endif /* A19FB42A_015E_4F89_AEB5_F7F45463F2B3 */

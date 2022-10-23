@@ -8,6 +8,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+using namespace AM405Remover;
+
 inline int macro_SNEStoPC(int a) {
 	return ((((a & 0x7F0000) / 2) | (a & 0x7FFF)) + 0x200);
 }

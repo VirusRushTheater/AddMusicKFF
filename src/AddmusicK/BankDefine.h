@@ -3,6 +3,9 @@
 
 #include <memory>
 
+namespace AddMusic
+{
+
 class BankDefine
 {
 public:
@@ -10,5 +13,7 @@ public:
 	std::vector<std::unique_ptr<const std::string>> samples;
 	std::vector<bool> importants;
 };
+
+}
 
 #endif

@@ -9,6 +9,8 @@
 #include "Utility.h"
 #include "Directory.h"
 
+using namespace AddMusic;
+
 void openFile(const File &fileName, std::vector<uint8_t> &v)
 {
 	std::ifstream is (fileName.cStr(), std::ios::binary);

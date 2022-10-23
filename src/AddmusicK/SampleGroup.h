@@ -4,11 +4,16 @@
 #include <string>
 #include <vector>
 
+namespace AddMusic
+{
+
 class SampleGroup 
 {
 public:
 	std::string name;
 	std::vector<std::string> samples;
 };
+
+}
 
 #endif

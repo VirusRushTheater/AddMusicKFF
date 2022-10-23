@@ -4,6 +4,9 @@
 #include <string>
 #include <map>
 
+namespace AddMusic
+{
+
 struct SpaceInfo {
 	int songStartPos;
 	int songEndPos;
@@ -196,5 +199,7 @@ private:
 	
 	void markEchoBufferAllocVCMD();		// Called when the Hot Patch VCMD is manually defined. Required because of a bit that handles a special case when the echo buffer size is zero.
 };
+
+}
 
 #endif

@@ -1,6 +1,9 @@
 #ifndef _SAMPLE_H
 #define _SAMPLE_H
 
+namespace AddMusic
+{
+
 class Sample
 {
 public:
@@ -20,5 +23,7 @@ public:
 		isBNK = false;
 	}
 };
+
+}
 
 #endif

@@ -1,36 +1,9 @@
-#include <cxxopts.hpp>
 #include <iostream>
 
-/**
- * @brief Convenient way to specify default arguments for the Addmusic class.
- * TODO: Put this into a header file
- */
-struct Addmusic_arglist
-{
-	bool convert = true;
-	bool checkEcho = true;
-	bool forceSPCGeneration = false;
-	int  bankStart = 0x200000;
-	bool verbose = false;
-	bool aggressive = false;
-	bool dupCheck = true;
-	bool validateHex = true;
-	bool doNotPatch = false;
-	int  errorCount = 0;
-	bool optimizeSampleUsage = true;
-	bool usingSA1 = false;
-	bool allowSA1 = true;
-	bool forceNoContinuePrompt = false;
-	bool sfxDump = false;
-	bool visualizeSongs = false;
-	bool redirectStandardStreams = false;
-	bool noSFX = false;
+#include <cxxopts.hpp>
+#include "AddmusicK.hpp"
 
-	std::string workFolder = "./";
-	bool preserveTemp = false;
-
-	bool justSPCsPlease = false;
-};
+using namespace AddMusic;
 
 /*
  * Only the argument passing mechanism will be implemented on the main function. 
@@ -49,7 +22,7 @@ int main (int argc, char** argv)
 		("c,convert", "DISABLE conversion for backwards compatibility", cxxopts::value<bool>())
 		("d,dup_check", "DISABLE sample duplication check", cxxopts::value<bool>())
 		("e,check_echo", "DISABLE echo buffer boundary check", cxxopts::value<bool>())
-		("p,do_not_patch", "Do not patch the ROM, only generate temporary files", cxxopts::value<bool>())
+		("p,do_not_patch", "Do not patch the ROM, only generate a patch file", cxxopts::value<bool>())
 		("r,reset", "Reset Addmusic directory structure", cxxopts::value<bool>())
 		("s,sa1", "DISABLE SA-1 addressing", cxxopts::value<bool>())
 		("t,preserve", "Preserve temporarily generated files", cxxopts::value<bool>())
@@ -59,13 +32,14 @@ int main (int argc, char** argv)
 		("x,validate_hex", "DISABLE hex command validation", cxxopts::value<bool>())
 		("z,visualize", "Generate song visualization", cxxopts::value<bool>())
 
-		("h,help", "Print usage", cxxopts::value<bool>())
-
 		("dumpsfx", "Dump SFXs to the SPC folders", cxxopts::value<bool>())
 		("norom", "Generate only SPCs")
+		("noblock", "Continue even after an error")
 		("version", "Program version")
 
 		("romname", "ROM name", cxxopts::value<std::string>())
+
+		("h,help", "Print help", cxxopts::value<bool>())
 	;
 
 	// The unnamed, positional argument will be the name of the rom to be patched.
@@ -114,6 +88,7 @@ int main (int argc, char** argv)
 	am.visualizeSongs =			argp["visualize"].as<bool>();
 	am.sfxDump =				argp["dumpsfx"].as<bool>();
 	am.justSPCsPlease =			argp["norom"].as<bool>();
+	am.forceNoContinuePrompt =	argp["noblock"].as<bool>();
 
 	// Treatment depending on the presence of a ROM to be hacked.
 	if (argp.count("romname") == 0)

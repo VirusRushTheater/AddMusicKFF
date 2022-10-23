@@ -1,6 +1,9 @@
 #ifndef _SOUNDEFFECT_H
 #define _SOUNDEFFECT_H
 
+namespace AddMusic
+{
+
 class SoundEffect
 {
 	int getHex();
@@ -48,5 +51,7 @@ public:
 	std::vector<int> jmpPoses;
 
 };
+
+}
 
 #endif

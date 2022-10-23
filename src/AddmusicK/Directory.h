@@ -2,6 +2,10 @@
 #define _FILE_H
 
 #include <string>
+
+namespace AddMusic
+{
+
 class File
 {
 
@@ -84,5 +88,7 @@ public:
 		return filePath.size();
 	}
 };
+
+}
 
 #endif
