@@ -52,6 +52,7 @@ typedef enum __Addmusic_error
 	ADDMUSICERROR_NO_AM4_HEADER,	// No AddMusic 4.05 header
 	ADDMUSICERROR_NO_AMM_HEADER,	// No AddMusicM header
 	ADDMUSICERROR_NO_INIT_ASM,		// No INIT.asm to remove AddMusicM from the ROM.
+	ADDMUSICERROR_NO_AMK_SIGNATURE,	// A ROM that is supposed to have been edited previously by this tool has no "@AMK" signature. 
 } Addmusic_error;
 
 // Error management routines
@@ -63,7 +64,7 @@ typedef enum __Addmusic_error
 	if (ISCRITICAL) return(RETVAL); \
 	}
 
-#define AMKLOG(STR)					std::cout << STR << std::endl;
+#define AMKLOG(STR)					std::cerr << STR << std::endl;
 #define AMKWARNING(STR)				__AMKERROR(STR,RETVAL,false)
 #define AMKERROR(STR,RETVAL)		__AMKERROR(STR,RETVAL,true)
 #define AMKASSERT(CONDITION,STR)	\
@@ -123,6 +124,10 @@ class AddMusicK
 	{
 	}
 
+	~AddMusicK()
+	{
+	}
+
 	/**
 	 * @brief Loads a Super Mario World ROM from the file system, preparing it
 	 * to apply a music patch. The ROM file is not affected.
@@ -134,9 +139,7 @@ class AddMusicK
 	 */
 	Addmusic_error loadRom(std::string rom_path);
 
-	~AddMusicK()
-	{
-	}
+	
 
 	/**
 	 * @brief Tries to clear any patches made by AddMusic 4.05. Requires a ROM
@@ -152,6 +155,9 @@ class AddMusicK
 	 * @brief Tries to clear any patches made by AddMusicM. Requires a ROM
 	 * to be loaded.
 	 * 
+	 * TODO: Merge the addmusicMRemover.pl and xkasAnti utilities; and do
+	 * more stuff in order to demand a clean ROM from the user.
+	 * 
 	 * @return 
 	 * ADDMUSICERROR_SUCCESS if the ROM was successfully cleared,
 	 * ADDMUSICERROR_NO_AMM_HEADER if the ROM has no AddMusic 4.05 header.
@@ -161,6 +167,9 @@ class AddMusicK
 	/**
 	 * @brief Cleans the Super Mario World ROM of info from any modern AMK
 	 * utility. Requires a ROM to be loaded.
+	 * 
+	 * CHANGES: It previously dumped the clean ROM to asm/SNES/temp.sfc.
+	 * These changes are already in this->rom.
 	 * 
 	 * @return
 	 * ADDMUSICERROR_SUCCESS if the ROM was successfully cleared,
@@ -175,6 +184,37 @@ class AddMusicK
 	 */
 	Addmusic_error tryToCleanSampleToolData();
 
+	/**
+	 * @brief Clears the STAR signature in a certain offset.
+	 * 
+	 * TODO: Document this better.
+	 * 
+	 * @param offset 
+	 * @return int 
+	 */
+	int clearRATS(int offset);
+
+	/**
+	 * @brief Some stuff that has to do with address translation
+	 * I guess.
+	 * 
+	 * TODO: Document this better.
+	 * 
+	 * @param addr 
+	 * @return int 
+	 */
+	static int PCToSNES(int addr)
+
+	/**
+	 * @brief Some stuff that has to do with address translation
+	 * I guess.
+	 * 
+	 * TODO: Document this better.
+	 * 
+	 * @param addr 
+	 * @return int 
+	 */
+	static int SNESToPC(int addr)
 	
 
 	File ROMName;					// ROM name in the file system
