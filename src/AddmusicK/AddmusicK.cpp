@@ -1,39 +1,42 @@
 
 #include <regex>
 
-#include "AM405Remover.h"
-
 #include "AddmusicK.hpp"
+#include "AM405Remover.h"
 #include "Utility.h"
 #include "globals.h"
+#include "lodepng.h"
 
 // ASAR dependencies
 #include <asar-dll-bindings/c/asardll.h>
 
 using namespace AddMusic;
+namespace fs = std::filesystem;
 
-void AddMusicK::loadRom(std::string rom_path)
+inline size_t getFileSize(fs::path file)
 {
-	ROMName = rom_path;
-	std::string tempROMName = ROMName.cStr();
+	return fs::file_size(file);
+}
+
+void AddMusicK::loadRom(fs::path rom_path)
+{
 
 	// ROM is loaded into memory (this->rom)
-	if (fileExists(tempROMName + ".smc") && fileExists(tempROMName + ".sfc"))
+	if (fs::exists(rom_path.string() + ".smc") && fs::exists(rom_path.string() + ".sfc"))
 	{
 		throw AddmusicException("Ambiguity detected; there were two ROMs with the specified name "
 			"(one with a .smc extension and one with a .sfc extension). Either delete one "
-			"or include the extension in your filename.", AddmusicErrorcode::ADDMUSICERROR_IO_ERROR);
+			"or include the extension in your filename.", AddmusicErrorcode::IO_ERROR);
 	}
-	else if (fileExists(tempROMName + ".smc"))
-		tempROMName += ".smc";
-	else if (fileExists(tempROMName + ".sfc"))
-		tempROMName += ".sfc";
-	else if (fileExists(tempROMName)) ;
+	else if (fs::exists(rom_path.string() + ".smc"))
+		rom_path += ".smc";
+	else if (fs::exists(rom_path.string() + ".sfc"))
+		rom_path += ".sfc";
+	else if (fs::exists(rom_path)) ;
 	else
-		throw AddmusicException("ROM not found.", AddmusicErrorcode::ADDMUSICERROR_IO_ERROR);
+		throw AddmusicException("ROM not found.", AddmusicErrorcode::IO_ERROR);
 	
-	ROMName = tempROMName;
-	openFile(ROMName, rom);
+	openFile(rom_path, rom);
 
 	this->tryToCleanAM4Data();
 	this->tryToCleanAMMData();
@@ -51,7 +54,7 @@ void AddMusicK::loadRom(std::string rom_path)
 
 	if (rom.size() <= 0x80000)
 		throw AddmusicException("Error: Your ROM is too small. Save a level in "
-			"Lunar Magic or expand it with Lunar Expand, then try again.", AddmusicErrorcode::ADDMUSICERROR_ROM_TOO_SMALL);
+			"Lunar Magic or expand it with Lunar Expand, then try again.", AddmusicErrorcode::ROM_TOO_SMALL);
 
 	usingSA1 = (rom[SNESToPC(0xFFD5)] == 0x23 && p.allowSA1);
 
@@ -67,13 +70,13 @@ void AddMusicK::tryToCleanAM4Data()
 	{
 		if (rom.size() % 0x8000 == 0)
 			throw AddmusicException("Addmusic 4.05 ROMs can only be cleaned if they "
-				"have a header. This does not\napply to any other aspect of the program.", AddmusicErrorcode::ADDMUSICERROR_NO_AM4_HEADER);
+				"have a header. This does not\napply to any other aspect of the program.", AddmusicErrorcode::NO_AM4_HEADER);
 
 		char **am405argv;
 		am405argv = 	(char **)malloc(sizeof(char **) * 2);
-		am405argv[1] = 	(char *)malloc(ROMName.size() + 1);
-		strcpy(am405argv[1], ROMName.cStr());
-		am405argv[1][ROMName.size()] = 0;
+		am405argv[1] = 	(char *)malloc(ROMName.string().size() + 1);
+		strcpy(am405argv[1], ROMName.c_str());
+		am405argv[1][ROMName.string().size()] = 0;
 
 		log.debug("Attempting to erase data from Addmusic 4.05");
 
@@ -95,13 +98,13 @@ void AddMusicK::tryToCleanAMMData()
 	{
 		if (rom.size() % 0x8000 == 0)
 			throw AddmusicException("AddmusicM ROMs can only be cleaned if they "
-				"have a header. This does not\napply to any other aspect of the program.", AddmusicErrorcode::ADDMUSICERROR_NO_AMM_HEADER);
+				"have a header. This does not\napply to any other aspect of the program.", AddmusicErrorcode::NO_AMM_HEADER);
 
 		if (fileExists("INIT.asm") == false)
 			throw AddmusicException("AddmusicM was detected. In order to remove it "
 				"from this ROM, you must put AddmusicM's INIT.asm as well as xkasAnti "
 				"and a clean ROM (named clean.smc) in the same folder as this program. "
-				"Then attempt to run this program once more.", AddmusicErrorcode::ADDMUSICERROR_NO_INIT_ASM);
+				"Then attempt to run this program once more.", AddmusicErrorcode::NO_INIT_ASM);
 
 		log.debug("AddmusicM detected.  Attempting to remove...");
 
@@ -137,7 +140,7 @@ void AddMusicK::cleanROM()
 			throw AddmusicException((std::stringstream{} << "Error: The identifier "
 				"for this ROM, \"" << romprogramname << "\", could not be identified. It should "
 				"be \"@AMK\". This either means that some other program has modified this area of "
-				"your ROM, or your ROM is corrupted.").str(), AddmusicErrorcode::ADDMUSICERROR_NO_AMK_SIGNATURE);
+				"your ROM, or your ROM is corrupted.").str(), AddmusicErrorcode::NO_AMK_SIGNATURE);
 			
 			// The CLI is lenient about letting you continue even after this problem
 			// arises. The library approach throws an exception. You can catch it
@@ -315,7 +318,7 @@ void AddMusicK::loadConfigFiles()
 void AddMusicK::loadMusicList()
 {
 	std::string musicFile;
-	openTextFile(workdir + "/" + paths.songlist, musicFile); 	// Addmusic_list.txt
+	openTextFile(workdir / paths.songlist, musicFile); 	// Addmusic_list.txt
 
 	if (musicFile[musicFile.length()-1] != '\n')
 		musicFile += '\n';
@@ -355,14 +358,14 @@ void AddMusicK::loadMusicList()
 		}
 
 		if (!inGlobals && !inLocals)
-			throw AddmusicException("Error: Could not find \"Globals:\" label in list.txt", AddmusicErrorcode::ADDMUSICERROR_IO_ERROR);
+			throw AddmusicException("Error: Could not find \"Globals:\" label in list.txt", AddmusicErrorcode::IO_ERROR);
 
 		if (index < 0)
 		{
 			if      ('0' <= musicFile[i] && musicFile[i] <= '9') index = musicFile[i++] - '0';
 			else if ('A' <= musicFile[i] && musicFile[i] <= 'F') index = musicFile[i++] - 'A' + 10;
 			else if ('a' <= musicFile[i] && musicFile[i] <= 'f') index = musicFile[i++] - 'a' + 10;
-			else throw AddmusicException("Invalid number in list.txt.", AddmusicErrorcode::ADDMUSICERROR_MUSICLIST_PARSING_ERROR);
+			else throw AddmusicException("Invalid number in list.txt.", AddmusicErrorcode::MUSICLIST_PARSING_ERROR);
 
 			index <<= 4;
 
@@ -370,15 +373,15 @@ void AddMusicK::loadMusicList()
 			else if ('A' <= musicFile[i] && musicFile[i] <= 'F') index |= musicFile[i++] - 'A' + 10;
 			else if ('a' <= musicFile[i] && musicFile[i] <= 'f') index |= musicFile[i++] - 'a' + 10;
 			else if (isspace(musicFile[i])) index >>= 4;
-			else throw AddmusicException("Invalid number in list.txt.", AddmusicErrorcode::ADDMUSICERROR_MUSICLIST_PARSING_ERROR);
+			else throw AddmusicException("Invalid number in list.txt.", AddmusicErrorcode::MUSICLIST_PARSING_ERROR);
 
 			if (!isspace(musicFile[i]))
-				throw AddmusicException("Invalid number in list.txt.", AddmusicErrorcode::ADDMUSICERROR_MUSICLIST_PARSING_ERROR);
+				throw AddmusicException("Invalid number in list.txt.", AddmusicErrorcode::MUSICLIST_PARSING_ERROR);
 			if (inGlobals)
 				highestGlobalSong = std::max(highestGlobalSong, index);
 			if (inLocals)
 				if (index <= highestGlobalSong)
-					throw AddmusicException("Error: Local song numbers must be greater than the largest global song number.", AddmusicErrorcode::ADDMUSICERROR_MUSICLIST_PARSING_ERROR);
+					throw AddmusicException("Error: Local song numbers must be greater than the largest global song number.", AddmusicErrorcode::MUSICLIST_PARSING_ERROR);
 		}
 		else
 		{
@@ -387,7 +390,7 @@ void AddMusicK::loadMusicList()
 				musics[index].name = tempName;
 				if (inLocals && p.justSPCsPlease == false)
 				{
-					openTextFile((workdir + "/" + std::string("music") + "/" + tempName), musics[index].text);
+					openTextFile((workdir / "music" / tempName), musics[index].text);
 				}
 				musics[index].exists = true;
 				index = -1;
@@ -418,7 +421,7 @@ void AddMusicK::loadMusicList()
 void AddMusicK::loadSampleList()
 {
 	std::string str;
-	openTextFile(workdir + "/" + paths.samplegroups, str); // Addmusic_sample groups.txt
+	openTextFile(workdir / paths.samplegroups, str); // Addmusic_sample groups.txt
 
 	std::string groupName;
 	std::string tempName;
@@ -461,7 +464,7 @@ void AddMusicK::loadSampleList()
 				}
 				else
 				{
-					throw AddmusicException("Error parsing sample groups.txt. Expected opening curly brace.", AddmusicErrorcode::ADDMUSICERROR_SAMPLE_PARSING_ERROR);
+					throw AddmusicException("Error parsing sample groups.txt. Expected opening curly brace.", AddmusicErrorcode::SAMPLE_PARSING_ERROR);
 				}
 			}
 		}
@@ -528,13 +531,13 @@ void AddMusicK::loadSampleList()
 					if (bankDefines[bankDefines.size() - 1]->importants.size() == 0)
 						throw AddmusicException("Error parsing Addmusic_sample groups.txt: "
 							"Importance specifier ('!') must come after a sample declaration, "
-							"not before it.", AddmusicErrorcode::ADDMUSICERROR_SAMPLE_PARSING_ERROR);
+							"not before it.", AddmusicErrorcode::SAMPLE_PARSING_ERROR);
 					bankDefines[bankDefines.size() - 1]->importants[bankDefines[bankDefines.size() - 1]->importants.size() - 1] = true;
 					i++;
 				}
 				else
 				{
-					throw AddmusicException("Error parsing sample groups.txt. Expected opening quote.", AddmusicErrorcode::ADDMUSICERROR_SAMPLE_PARSING_ERROR);
+					throw AddmusicException("Error parsing sample groups.txt. Expected opening quote.", AddmusicErrorcode::SAMPLE_PARSING_ERROR);
 				}
 			}
 		}
@@ -544,7 +547,7 @@ void AddMusicK::loadSampleList()
 void AddMusicK::loadSFXList()
 {
 	std::string str;
-	openTextFile(workdir + "/" + paths.sfxlist, str);	// Addmusic_sound effects.txt
+	openTextFile(workdir / paths.sfxlist, str);	// Addmusic_sound effects.txt
 
 	if (str[str.length()-1] != '\n')
 		str += '\n';
@@ -587,14 +590,14 @@ void AddMusicK::loadSFXList()
 		}
 
 		if (!in1DF9 && !in1DFC)
-			throw AddmusicException("Error: Could not find \"SFX1DF9:\" label in sound effects.txt", AddmusicErrorcode::ADDMUSICERROR_SFX_PARSING_ERROR);
+			throw AddmusicException("Error: Could not find \"SFX1DF9:\" label in sound effects.txt", AddmusicErrorcode::SFX_PARSING_ERROR);
 
 		if (index < 0)
 		{
 			if      ('0' <= str[i] && str[i] <= '9') index = str[i++] - '0';
 			else if ('A' <= str[i] && str[i] <= 'F') index = str[i++] - 'A' + 10;
 			else if ('a' <= str[i] && str[i] <= 'f') index = str[i++] - 'a' + 10;
-			else throw AddmusicException("Invalid number in sound effects.txt.", AddmusicErrorcode::ADDMUSICERROR_SFX_PARSING_ERROR);
+			else throw AddmusicException("Invalid number in sound effects.txt.", AddmusicErrorcode::SFX_PARSING_ERROR);
 
 			index <<= 4;
 
@@ -603,11 +606,11 @@ void AddMusicK::loadSFXList()
 			else if ('A' <= str[i] && str[i] <= 'F') index |= str[i++] - 'A' + 10;
 			else if ('a' <= str[i] && str[i] <= 'f') index |= str[i++] - 'a' + 10;
 			else if (isspace(str[i])) index >>= 4;
-			else throw AddmusicException("Invalid number in sound effects.txt.", AddmusicErrorcode::ADDMUSICERROR_SFX_PARSING_ERROR);
+			else throw AddmusicException("Invalid number in sound effects.txt.", AddmusicErrorcode::SFX_PARSING_ERROR);
 
 
 			if (!isspace(str[i]))
-				throw AddmusicException("Invalid number in sound effects.txt.", AddmusicErrorcode::ADDMUSICERROR_SFX_PARSING_ERROR);
+				throw AddmusicException("Invalid number in sound effects.txt.", AddmusicErrorcode::SFX_PARSING_ERROR);
 		}
 		else
 		{
@@ -639,7 +642,7 @@ void AddMusicK::loadSFXList()
 							soundEffects[0][index].add0 = true;
 
 						if (!isPointer)
-							openTextFile((workdir + "/" + std::string("1DF9/") + tempName), soundEffects[0][index].text);
+							openTextFile((workdir / "1DF9" / tempName), soundEffects[0][index].text);
 					}
 					else
 					{
@@ -656,7 +659,7 @@ void AddMusicK::loadSFXList()
 							soundEffects[1][index].add0 = true;
 
 						if (!isPointer)
-							openTextFile((workdir + "/" + std::string("1DFC/") + tempName), soundEffects[1][index].text);
+							openTextFile((workdir / "1DFC" / tempName), soundEffects[1][index].text);
 					}
 
 					index = -1;
@@ -707,9 +710,9 @@ void AddMusicK::assembleSNESDriver()
 
 void AddMusicK::assembleSPCDriver()
 {
-	remove(File("temp.log"));
+	remove(("temp.log"));
 
-	remove(File("asm/main.bin"));
+	remove(("asm/main.bin"));
 	std::string patch;
 	openTextFile("asm/main.asm", patch);
 	programPos = scanInt(patch, "base ");
@@ -719,7 +722,7 @@ void AddMusicK::assembleSPCDriver()
 
 	//if (fileExists("temp.log"))
 	if (!asarCompileToBIN("asm/main.asm", "asm/main.bin"))
-		throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.", AddmusicErrorcode::ADDMUSICERROR_ASAR_ERROR);
+		throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.", AddmusicErrorcode::ASAR_ERROR);
 
 	std::string temptxt;
 	openTextFile("temp.txt", temptxt);
@@ -762,7 +765,7 @@ void AddMusicK::compileSFX()
 					std::ostringstream r;
 					r << std::hex << j;
 					throw AddmusicException(std::string("Error: The sound effect that sound effect 0x") + r.str() + std::string(" points to could not be found."), 
-						AddmusicErrorcode::ADDMUSICERROR_SFX_NOT_FOUND_ERROR);
+						AddmusicErrorcode::SFX_NOT_FOUND_ERROR);
 				}
 			}
 		}
@@ -817,13 +820,13 @@ void AddMusicK::compileGlobalData()
 				DF9Pointers.push_back(DF9Pointers[soundEffects[0][i].pointsTo]);
 			else
 				throw AddmusicException("Error: A sound effect that is a pointer to another sound effect must come after the sound effect that it points to.",
-					AddmusicErrorcode::ADDMUSICERROR_SFX_COMPILATION_ERROR);
+					AddmusicErrorcode::SFX_COMPILATION_ERROR);
 		}
 	}
 
 	if (errorCount > 0)
 		throw AddmusicException("There were errors when compiling the sound effects. Compilation aborted. Your ROM has not been modified.",
-			AddmusicErrorcode::ADDMUSICERROR_SFX_COMPILATION_ERROR);
+			AddmusicErrorcode::SFX_COMPILATION_ERROR);
 
 	for (int i = 0; i <= DFCCount; i++)
 	{
@@ -844,13 +847,13 @@ void AddMusicK::compileGlobalData()
 				DFCPointers.push_back(DFCPointers[soundEffects[1][i].pointsTo]);
 			else
 				throw AddmusicException("Error: A sound effect that is a pointer to another sound effect must come after\nthe sound effect that it points to.", 
-					AddmusicErrorcode::ADDMUSICERROR_SFX_COMPILATION_ERROR);
+					AddmusicErrorcode::SFX_COMPILATION_ERROR);
 		}
 	}
 
 	if (errorCount > 0)
 		throw AddmusicException("There were errors when compiling the sound effects.  Compilation aborted.  Your\nROM has not been modified.", 
-			AddmusicErrorcode::ADDMUSICERROR_SFX_COMPILATION_ERROR);
+			AddmusicErrorcode::SFX_COMPILATION_ERROR);
 
 	log.debug(std::stringstream("Total space used by 1DF9 sound effects: 0x") << std::hex << std::setw(4) << std::uppercase << std::setfill('0') << (DF9DataTotal + DF9Count * 2) << std::dec);
 	log.debug(std::stringstream("Total space used by 1DFC sound effects: 0x") << std::hex << std::setw(4) << std::uppercase << std::setfill('0') << (DFCDataTotal + DFCCount * 2) << std::dec);
@@ -891,24 +894,24 @@ void AddMusicK::compileGlobalData()
 
 	pos = str.find("SFXTable0:");
 	if (pos == -1)
-		throw AddmusicException("SFXTable0 not found in main.asm.", AddmusicErrorcode::ADDMUSICERROR_SFX_TABLE0_NOTFOUND);
+		throw AddmusicException("SFXTable0 not found in main.asm.", AddmusicErrorcode::SFX_TABLE0_NOTFOUND);
 	str.insert(pos+10, "\r\nincbin \"SFX1DF9Table.bin\"\r\n");
 
 	pos = str.find("SFXTable1:");
 	if (pos == -1)
-		throw AddmusicException("SFXTable1 not found in main.asm.", AddmusicErrorcode::ADDMUSICERROR_SFX_TABLE1_NOTFOUND);
+		throw AddmusicException("SFXTable1 not found in main.asm.", AddmusicErrorcode::SFX_TABLE1_NOTFOUND);
 	str.insert(pos+10, "\r\nincbin \"SFX1DFCTable.bin\"\r\nincbin \"SFXData.bin\"\r\n");
 
 	writeTextFile("asm/tempmain.asm", str);
 
-	remove(File("asm/main.bin"));
+	remove("asm/main.bin");
 
 	log.debug("Compiling main SPC program, pass 2.");
 
 	//execute("asar asm/tempmain.asm asm/main.bin 2> temp.log > temp.txt");
 	//if (fileExists("temp.log"))
 	if (!asarCompileToBIN("asm/tempmain.asm", "asm/main.bin"))
-		throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.", AddmusicErrorcode::ADDMUSICERROR_ASAR_ERROR);
+		throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.", AddmusicErrorcode::ASAR_ERROR);
 
 	programSize = getFileSize("asm/main.bin");
 
@@ -1007,7 +1010,7 @@ void AddMusicK::compileMusic()
 	s = songSampleList.str();
 	std::stringstream tempstream;
 
-	tempstream << "org $" << hex6 << PCToSNES(findFreeSpace(songSampleListSize, bankStart, rom)) << "\n\n" << std::endl;
+	tempstream << "org $" << hex6 << PCToSNES(findFreeSpace(songSampleListSize, p.bankStart, rom)) << "\n\n" << std::endl;
 
 	s.insert(0, tempstream.str());
 
@@ -1216,7 +1219,7 @@ void AddMusicK::fixMusicPointers()
 				if (checkPos > 0x10000)
 				{
 					throw AddmusicException(std::stringstream(musics[i].name) << ": Echo buffer exceeded total space in ARAM by 0x" << hex4 << checkPos - 0x10000 << " bytes." << std::dec,
-						AddmusicErrorcode::ADDMUSICERROR_ECHO_BUFFER_OVERFLOW);
+						AddmusicErrorcode::ECHO_BUFFER_OVERFLOW);
 				}
 			}
 		}
@@ -1240,7 +1243,7 @@ void AddMusicK::fixMusicPointers()
 	//if (fileExists("temp.log"))
 	if (!asarCompileToBIN("asm/tempmain.asm", "asm/SNES/bin/main.bin"))
 		throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.",
-			AddmusicErrorcode::ADDMUSICERROR_ASAR_ERROR);
+			AddmusicErrorcode::ASAR_ERROR);
 	//}
 
 	programSize = getFileSize("asm/SNES/bin/main.bin");
@@ -1567,7 +1570,7 @@ void AddMusicK::assembleSNESDriver2()
 	pos = patch.find("MusicPtrs:");
 	if (pos == -1)
 	{
-		throw AddmusicException("Error: \"MusicPtrs:"" could not be found.", AddmusicErrorcode::ADDMUSICERROR_MUSICPTRS_NOTFOUND);		// // //
+		throw AddmusicException("Error: \"MusicPtrs:"" could not be found.", AddmusicErrorcode::MUSICPTRS_NOTFOUND);		// // //
 	}
 
 	patch = patch.substr(0, pos);
@@ -1595,10 +1598,10 @@ void AddMusicK::assembleSNESDriver2()
 			std::stringstream musicBinPath;
 			musicBinPath << "asm/SNES/bin/music" << hex2 << i << ".bin";
 			requestSize = getFileSize(musicBinPath.str());
-			freeSpace = findFreeSpace(requestSize, bankStart, rom);
+			freeSpace = findFreeSpace(requestSize, p.bankStart, rom);
 			if (freeSpace == -1)
 			{
-				throw AddmusicException("Error: Your ROM is out of free space.", AddmusicErrorcode::ADDMUSICERROR_ROM_OUT_OF_FREE_SPACE);
+				throw AddmusicException("Error: Your ROM is out of free space.", AddmusicErrorcode::ROM_OUT_OF_FREE_SPACE);
 			}
 
 			freeSpace = PCToSNES(freeSpace);
@@ -1646,10 +1649,10 @@ void AddMusicK::assembleSNESDriver2()
 			writeFile(filename.str(), temp);
 
 			int requestSize = getFileSize(filename.str());
-			int freeSpace = findFreeSpace(requestSize, bankStart, rom);
+			int freeSpace = findFreeSpace(requestSize, p.bankStart, rom);
 			if (freeSpace == -1)
 			{
-				throw AddmusicException("Error: Your ROM is out of free space.", AddmusicErrorcode::ADDMUSICERROR_ROM_OUT_OF_FREE_SPACE);
+				throw AddmusicException("Error: Your ROM is out of free space.", AddmusicErrorcode::ROM_OUT_OF_FREE_SPACE);
 			}
 
 			freeSpace = PCToSNES(freeSpace);
@@ -1711,7 +1714,7 @@ void AddMusicK::assembleSNESDriver2()
 		//execute("asar asm/SNES/temppatch.asm asm/SNES/temp.sfc 2> temp.log");
 		//if (fileExists("temp.log"))
 		if (!asarPatchToROM("asm/SNES/temppatch.asm", "asm/SNES/temp.sfc"))
-			throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.", AddmusicErrorcode::ADDMUSICERROR_ASAR_ERROR);
+			throw AddmusicException("asar reported an error while assembling asm/main.asm. Refer to temp.log for details.", AddmusicErrorcode::ASAR_ERROR);
 
 		//execute("asar asm/SNES/tweaks.asm asm/SNES/temp.sfc 2> temp.log");
 		//if (fileExists("temp.log"))
@@ -1765,16 +1768,16 @@ void AddMusicK::cleanUpTempFiles()
 	if (p.doNotPatch)		// If this is specified, then the user might need these temp files.  Keep them.
 		return;
 
-	removeFile("asm/tempmain.asm");
-	removeFile("asm/main.bin");
-	removeFile("asm/SFX1DF9Table.bin");
-	removeFile("asm/SFX1DFCTable.bin");
-	removeFile("asm/SFXData.bin");
+	fs::remove("asm/tempmain.asm");
+	fs::remove("asm/main.bin");
+	fs::remove("asm/SFX1DF9Table.bin");
+	fs::remove("asm/SFX1DFCTable.bin");
+	fs::remove("asm/SFXData.bin");
 
-	removeFile("asm/SNES/temppatch.asm");
-	removeFile("asm/SNES/temp.sfc");
-	removeFile("temp.log");
-	removeFile("temp.txt");
+	fs::remove("asm/SNES/temppatch.asm");
+	fs::remove("asm/SNES/temp.sfc");
+	fs::remove("temp.log");
+	fs::remove("temp.txt");
 }
 
 void AddMusicK::generatePNGs()

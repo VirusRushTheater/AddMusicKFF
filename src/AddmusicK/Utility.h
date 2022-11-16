@@ -1,10 +1,12 @@
-#ifndef A19FB42A_015E_4F89_AEB5_F7F45463F2B3
-#define A19FB42A_015E_4F89_AEB5_F7F45463F2B3
+#pragma once
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
-#include "Directory.h"	// File class
+#define hex2 std::setw(2) << std::setfill('0') << std::uppercase << std::hex
+#define hex4 std::setw(4) << std::setfill('0') << std::uppercase << std::hex
+#define hex6 std::setw(6) << std::setfill('0') << std::uppercase << std::hex
 
 namespace AddMusic
 {
@@ -15,7 +17,7 @@ namespace AddMusic
  * @param fileName 	File name
  * @param v 		Vector to be filled
  */
-void openFile(const File &fileName, std::vector<uint8_t> &v);
+void openFile(const std::filesystem::path &fileName, std::vector<uint8_t> &v);
 
 /**
  * @brief Opens a file and fills a string with its contents.
@@ -23,7 +25,7 @@ void openFile(const File &fileName, std::vector<uint8_t> &v);
  * @param fileName 	File name
  * @param s 		String to be filled
  */
-void openTextFile(const File &fileName, std::string &s);
+void openTextFile(const std::filesystem::path &fileName, std::string &s);
 
 /**
  * @brief Get a file's time stamp.
@@ -34,10 +36,7 @@ void openTextFile(const File &fileName, std::string &s);
  */
 time_t getTimeStamp(const File &file);
 
-void printError(const std::string &error, bool isFatal, const std::string &fileName, int line);
-void printWarning(const std::string &error, const std::string &fileName, int line = 0);
-void quit(int code);
-int execute(const File &command, bool prepend);
+int execute(const std::filesystem::path &command, bool prepend);
 
 /**
  * @brief Scans an integer value that comes after the specified string within
@@ -50,35 +49,28 @@ int execute(const File &command, bool prepend);
 int scanInt(const std::string &str, const std::string &value);
 
 /**
- * @brief Checks whether a file exists or not
- * 
- * @param fileName 	Name of the file to be checked.
- * @return 
- */
-bool fileExists(const File &fileName);
-
-/**
- * @brief Gets the size, in bytes, of a certain file.
- * 
- * @param fileName 	Name of the file to be checked.
- * @return unsigned int 
- */
-unsigned int getFileSize(const File &fileName);
-
-/**
- * @brief Removes a file.
- * 
- * @param fileName 	Name of the file to be removed.
- */
-void removeFile(const File &fileName);
-
-/**
- * @brief Writes a file with the contents of a certain string.
+ * @brief Dumps a file with the contents of a certain string.
  * 
  * @param fileName 	Name of the file to be written.
  * @param string 	Contents of such file.
  */
-void writeTextFile(const File &fileName, const std::string &string);
+void writeTextFile(const std::filesystem::path &fileName, const std::string &string);
+
+/**
+ * @brief Dumps a binary file with the contents of a certain vector.
+ * 
+ * @tparam T 		Vector type
+ * @param fileName 	Name of the new file
+ * @param vector 	Vector to be dumped
+ */
+template <typename T>
+void writeFile(const std::filesystem::path &fileName, const std::vector<T> &vector)
+{
+	std::ofstream ofs;
+	ofs.open(fileName, std::ios::binary);
+	ofs.write((const char *)vector.data(), vector.size() * sizeof(T));
+	ofs.close();
+}
 
 /**
  * @brief ?
@@ -91,5 +83,3 @@ void writeTextFile(const File &fileName, const std::string &string);
 void insertValue(int value, int length, const std::string &find, std::string &str);
 
 }
-
-#endif /* A19FB42A_015E_4F89_AEB5_F7F45463F2B3 */

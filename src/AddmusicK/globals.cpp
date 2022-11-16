@@ -12,10 +12,9 @@
 // ASAR dependencies
 #include <asar-dll-bindings/c/asardll.h>
 
-#include "fs.h"		// // //
-
-#include "Directory.h"
 #include "globals.h"
+
+namespace fs = std::filesystem;
 
 //ROM rom;
 std::vector<uint8_t> rom;
@@ -28,7 +27,7 @@ SoundEffect soundEffectsDFC[256];
 SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
 //std::vector<SampleGroup> sampleGroups;
 std::vector<std::unique_ptr<BankDefine>> bankDefines;
-std::map<File, int> sampleToIndex;
+std::map<std::filesystem::path, int> sampleToIndex;
 
 bool convert = true;
 bool checkEcho = true;
@@ -60,81 +59,6 @@ int songCount = 0;
 int songSampleListSize;
 // bool useAsarDLL;
 
-void openFile(const File &fileName, std::vector<uint8_t> &v)
-{
-
-	std::ifstream is(fileName.cStr(), std::ios::binary);
-
-	if (!is)
-		printError(std::string("Error: File \"") + fileName.cStr() + std::string("\" not found."), true);
-
-	is.seekg(0, std::ios::end);
-	unsigned int length = (unsigned int)is.tellg();
-	is.seekg(0, std::ios::beg);
-	v.clear();
-	v.reserve(length);
-
-	while (length > 0)
-	{
-		char temp;
-		is.read(&temp, 1);
-		v.push_back(temp);
-		length--;
-	}
-
-	is.close();
-}
-
-
-
-void openTextFile(const File &fileName, std::string &s)
-{
-	std::ifstream is(fileName.cStr());
-
-	if (!is)
-		printError(std::string("Error: File \"") + fileName.cStr() + std::string("\" not found."), true);
-
-	s.assign( (std::istreambuf_iterator<char>(is)), (std::istreambuf_iterator<char>()) );
-}
-
-time_t getTimeStamp(const File &file)
-{
-	struct stat s;
-	if (stat(file, &s) == -1)
-	{
-		//std::cout << "Could not determine timestamp of \"" << file << "\"." << std::endl;
-		return 0;
-	}
-	return s.st_mtime;
-}
-
-
-void printError(const std::string &error, bool isFatal, const std::string &fileName, int line)
-{
-	std::ostringstream oss;
-	if (line >= 0)
-	{
-		oss << std::dec << "File: " << fileName << " Line: " << line << ":\n";
-	}
-	errorCount++;
-	fputs((oss.str() + error).c_str(), stderr);
-	fputc('\n', stderr);
-	//puts((oss.str() + error).c_str());
-	//putchar('\n');
-	if (isFatal) quit(1);
-}
-
-void printWarning(const std::string &error, const std::string &fileName, int line)
-{
-	std::ostringstream oss;
-	if (line >= 0)
-	{
-		oss << "File: " << fileName << " Line: " << line << ":\n";
-	}
-	puts((oss.str() + error).c_str());
-	putchar('\n');
-}
-
 void quit(int code)
 {
 	if (forceNoContinuePrompt == false)
@@ -165,49 +89,6 @@ int scanInt(const std::string &str, const std::string &value)		// Scans an integ
 
 	std::sscanf(str.c_str() + i + value.length(), "$%X", &ret);	// Woo C functions in C++ code!
 	return ret;
-}
-
-bool fileExists(const File &fileName)
-{
-	std::ifstream is(fileName.cStr(), std::ios::binary);
-
-	bool yes = !(!is);
-
-	if (yes)
-	{
-		is.seekg(0, std::ios::end);
-		unsigned int length = (unsigned int)is.tellg();
-		is.seekg(0, std::ios::beg);
-
-	}
-
-
-	is.close();
-
-	return yes;
-}
-
-unsigned int getFileSize(const File &fileName)
-{
-	std::ifstream is(fileName.cStr(), std::ios::binary);
-
-	if (!is) return 0;
-
-	is.seekg(0, std::ios::end);
-	unsigned int length = (unsigned int)is.tellg();
-	is.close();
-	return length;
-}
-
-void removeFile(const File &fileName)
-{
-	if (remove(fileName.cStr()) == 1)
-	{
-		std::cerr << "Could not delete critical file \"" << fileName.cStr() << "\"." << std::endl;		// // //
-		quit(1);
-	}
-
-
 }
 
 void writeTextFile(const File &fileName, const std::string &string)
@@ -1000,8 +881,8 @@ void preprocess(std::string &str, const std::string &filename, int &version)
 
 bool asarCompileToBIN(const File &patchName, const File &binOutputFile, bool dieOnError)
 {
-	removeFile("temp.log");
-	removeFile("temp.txt");
+	fs::remove("temp.log");
+	fs::remove("temp.txt");
 
 	int binlen = 0;
 	int buflen = 0x10000;		// 0x10000 instead of 0x8000 because a few things related to sound effects are stored at 0x8000 at times.
@@ -1049,8 +930,8 @@ bool asarCompileToBIN(const File &patchName, const File &binOutputFile, bool die
 
 bool asarPatchToROM(const File &patchName, const File &romName, bool dieOnError)
 {
-	removeFile("temp.log");
-	removeFile("temp.txt");
+	fs::remove("temp.log");
+	fs::remove("temp.txt");
 
 	int binlen = 0;
 	int buflen;

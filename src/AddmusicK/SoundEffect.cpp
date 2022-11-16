@@ -2,6 +2,7 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
 
 using namespace AddMusic;
 
@@ -10,6 +11,8 @@ static int line;
 static bool triplet;
 static int defaultNoteValue;
 static bool inDefineBlock;
+
+namespace fs = std::filesystem;
 
 #define skipSpaces		\
 while (isspace(text[pos]))	\
@@ -485,8 +488,8 @@ void SoundEffect::compileASM()
 		codePositions.push_back(code.size());
 
 		std::stringstream asmCode;
-		removeFile("temp.bin");
-		removeFile("temp.asm");
+		fs::remove("temp.bin");
+		fs::remove("temp.asm");
 		asmCode << "arch spc700-raw\n\norg $000000\nincsrc \"" << "asm/main.asm" << "\"\nbase $" << hex4 << posInARAM + code.size() + data.size() << "\n\norg $008000\n\n" << asmStrings[i];
 		writeTextFile("temp.asm", asmCode.str());
 

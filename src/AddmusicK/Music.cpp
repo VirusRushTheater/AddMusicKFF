@@ -30,6 +30,11 @@ inline std::string errormsg(const std::string& str, const std::string& fileName,
 	return (str + "; file: " + fileName + " L" + std::to_string(line));
 }
 
+inline bool fileExists(fs::path path)
+{
+	return fs::exists(path);
+}
+
 #define error(str) {				\
 	logger.warning(errormsg(str, fileName, line));	\
 	return; }
@@ -128,7 +133,13 @@ static int lastFAGainValue[9];
 static int lastFCGainValue[9];
 static int lastFCDelayValue[9];
 
-
+/**
+ * @brief Exception with file location info
+ */
+inline AddmusicException musicFileException(const std::string& msg, AddmusicErrorcode code, fs::path name, int line)
+{
+	return AddmusicException(msg + " [@" + name.string() + ", L" + std::to_string(line) + "]", AddmusicErrorcode::MUSIC_INFINITE_RECURSION);
+}
 
 bool sortFunction(const std::pair<const std::string, std::string> *s1, const std::pair<const std::string, std::string> *s2)
 {
@@ -141,8 +152,7 @@ bool Music::doReplacement()
 
 	if (r == 500)
 	{
-		printError("Infinite Recursion Kitty disapproves of your antics.", true, name, line);
-		return false;
+		throw musicFileException("Infinite Recursion Kitty disapproves of your antics.", AddmusicErrorcode::MUSIC_INFINITE_RECURSION, name, line);
 	}
 
 	if (sortReplacements)
@@ -3669,4 +3679,238 @@ int Music::multiplyByTempoRatio(int value)
 		printError("Using the tempo ratio on this value would cause it to overflow.", false, name, line);
 
 	return temp;
+}
+
+void Music::addSample(const File &fileName, Music *music, bool important)
+{
+	std::vector<uint8_t> temp;
+	std::string actualPath = "";
+
+	std::string relativeDir = music->name;
+	std::string absoluteDir = "samples/" + (std::string)fileName;
+	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
+	relativeDir = "music/" + relativeDir;
+	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
+	relativeDir += "/" + (std::string)fileName;
+
+	if (fileExists(relativeDir))
+		actualPath = relativeDir;
+	else if (fileExists(absoluteDir))
+		actualPath = absoluteDir;
+	else
+		printError("Could not find sample " + (std::string)fileName, true, music->name);
+
+	openFile(actualPath, temp);
+	addSample(temp, actualPath, music, important, false);
+}
+
+void Music::addSample(const std::vector<uint8_t> &sample, const std::string &name, Music *music, bool important, bool noLoopHeader, int loopPoint, bool isBNK)
+{
+	Sample newSample;
+	newSample.important = important;
+	newSample.isBNK = isBNK;
+
+	if (sample.size() != 0)
+	{
+		if (!noLoopHeader)
+		{
+			if ((sample.size() - 2) % 9 != 0)
+			{
+				std::stringstream errstream;
+
+				errstream << "The sample \"" + name + "\" was of an invalid length (the filesize - 2 should be a multiple of 9).  Did you forget the loop header?" << std::endl;
+				printError(errstream.str(), true);
+			}
+
+			newSample.loopPoint = (sample[1] << 8) | (sample[0]);
+			newSample.data.assign(sample.begin() + 2, sample.end());
+		}
+		else
+		{
+			newSample.data.assign(sample.begin(), sample.end());
+			newSample.loopPoint = loopPoint;
+		}
+	}
+	newSample.exists = true;
+	newSample.name = name;
+
+	if (dupCheck)
+	{
+		for (int i = 0; i < samples.size(); i++)
+		{
+			if (samples[i].name == newSample.name)
+			{
+				music->mySamples.push_back(i);
+				return;						// Don't add two of the same sample.
+			}
+		}
+
+		for (int i = 0; i < samples.size(); i++)
+		{
+			if (samples[i].data == newSample.data)
+			{
+				//Don't add samples from BNK files to the sampleToIndex map, because they're not valid filenames.
+				if (!(newSample.isBNK)) {
+					sampleToIndex[name] = i;
+				}
+				music->mySamples.push_back(i);
+				return;
+			}
+		}
+		//BNK files don't qualify for the next check. 
+		if (!(newSample.isBNK)) {
+			fs::path p1 = "./"+newSample.name;
+			//If the sample in question was taken from a sample group, then use the sample group's important flag instead.
+			for (int i = 0; i < bankDefines.size(); i++)
+			{
+				for (int j = 0; j < bankDefines[i]->samples.size(); j++)
+				{
+					fs::path p2 = "./samples/"+*(bankDefines[i]->samples[j]);
+					if (fs::equivalent(p1, p2))
+					{
+						//Copy the important flag from the sample group definition.
+						newSample.important = bankDefines[i]->importants[j];
+						break;
+					}
+				}
+			}
+		}
+	}
+	//Don't add samples from BNK files to the sampleToIndex map, because they're not valid filenames.
+	if (!(newSample.isBNK)) {
+		sampleToIndex[newSample.name] = samples.size();
+	}
+	music->mySamples.push_back(samples.size());
+	samples.push_back(newSample);					// This is a sample we haven't encountered before.  Add it.
+}
+
+void Music::addSampleGroup(const File &groupName, Music *music)
+{
+
+	for (int i = 0; i < bankDefines.size(); i++)
+	{
+		if ((std::string)groupName == bankDefines[i]->name)
+		{
+			for (int j = 0; j < bankDefines[i]->samples.size(); j++)
+			{
+				std::string temp;
+				//temp += "samples/";
+				temp += *(bankDefines[i]->samples[j]);
+				addSample((File)temp, music, bankDefines[i]->importants[j]);
+			}
+			return;
+		}
+	}
+	std::cerr << music->name << ":\n";		// // //
+	std::cerr << "The specified sample group, \"" << groupName << "\", could not be found." << std::endl;
+	quit(1);
+}
+
+int bankSampleCount = 0;			// Used to give unique names to sample bank brrs.
+
+void Music::addSampleBank(const File &fileName, Music *music)
+{
+	std::vector<uint8_t> bankFile;
+	std::string actualPath = "";
+
+	std::string relativeDir = music->name;
+	std::string absoluteDir = "samples/" + (std::string)fileName;
+	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
+	relativeDir = "music/" + relativeDir;
+	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
+	relativeDir += "/" + (std::string)fileName;
+
+	if (fileExists(relativeDir))
+		actualPath = relativeDir;
+	else if (fileExists(absoluteDir))
+		actualPath = absoluteDir;
+	else
+		printError("Could not find sample bank " + (std::string)fileName, true, music->name);
+
+
+
+
+	openFile(actualPath, bankFile);
+
+	if (bankFile.size() != 0x8000)
+		printError("The specified bank file was an illegal size.", true);
+	bankFile.erase(bankFile.begin(), bankFile.begin() + 12);
+	//Sample bankSamples[0x40];
+	Sample tempSample;
+	int currentSample = 0;
+	for (currentSample = 0; currentSample < 0x40; currentSample++)
+	{
+		unsigned short startPosition = bankFile[currentSample * 4 + 0] | (bankFile[currentSample * 4 + 1] << 8);
+		tempSample.loopPoint = (bankFile[currentSample * 4 + 2] | bankFile[currentSample * 4 + 3] << 8) - startPosition;
+		tempSample.data.clear();
+
+		if (startPosition == 0 && tempSample.loopPoint == 0)
+		{
+			addSample("EMPTY.brr", music, true);
+			continue;
+		}
+
+		startPosition -= 0x8000;
+
+		int pos = startPosition;
+
+		while (pos < bankFile.size())
+		{
+			for (int i = 0; i < 9; i++)
+			{
+				tempSample.data.push_back(bankFile[pos]);
+				pos++;
+			}
+
+			if ((tempSample.data[tempSample.data.size() - 9] & 1) == 1)
+			{
+				break;
+			}
+		}
+
+		char temp[20];
+		sprintf(temp, "__SRCNBANKBRR%04X", bankSampleCount++);
+		tempSample.name = temp;
+		addSample(tempSample.data, tempSample.name, music, true, true, tempSample.loopPoint, true);
+	}
+}
+
+int Music::getSample(const File &name, Music *music)
+{
+	std::string actualPath = "";
+
+	std::string relativeDir = music->name;
+	std::string absoluteDir = "samples/" + (std::string)name;
+	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
+	relativeDir = "music/" + relativeDir;
+	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
+	relativeDir += "/" + (std::string)name;
+
+	if (fileExists(relativeDir))
+		actualPath = relativeDir;
+	else if (fileExists(absoluteDir))
+		actualPath = absoluteDir;
+	else
+		printError("Could not find sample " + (std::string)name, true, music->name);
+
+
+
+	File ftemp = actualPath;
+	std::map<File, int>::const_iterator it = sampleToIndex.begin();
+
+	fs::path p1 = actualPath;
+
+	while (it != sampleToIndex.end())
+	{
+		fs::path p2 = (std::string)it->first;
+		if (fs::equivalent(p1, p2))
+			return it->second;
+
+		//if ((std::string)it->first == (std::string)ftemp)
+		//	return it->second;
+		it++;
+	}
+
+
+	return -1;
 }

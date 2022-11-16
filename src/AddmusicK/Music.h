@@ -3,7 +3,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <filesystem>
 
+#include "AddmusicException.hpp"
 #include "logging.hpp"
 
 namespace AddMusic
@@ -23,10 +25,10 @@ struct SpaceInfo {
 
 };
 
+namespace fs = std::filesystem;
+
 class Music
 {
-
-
 public:
 	double introSeconds;
 	double mainSeconds;
@@ -200,6 +202,13 @@ private:
 	void addNoteLength(double ticks);				// Call this every note.  The correct channel/loop will be automatically updated.
 	
 	void markEchoBufferAllocVCMD();		// Called when the Hot Patch VCMD is manually defined. Required because of a bit that handles a special case when the echo buffer size is zero.
+
+	// Ported from globals.cpp
+	void addSample(const fs::path &fileName, Music *music, bool important);
+	void addSample(const std::vector<uint8_t> &sample, const std::string &name, Music *music, bool important, bool noLoopHeader, int loopPoint, bool isBNK);
+	void addSampleGroup(const fs::path &groupName, Music *music);
+	void addSampleBank(const fs::path &fileName, Music *music);
+	int getSample(const fs::path &name, Music *music);
 
 	virusrt::Logger& logger {virusrt::Logger::getLogger("AddMusicK")};
 };

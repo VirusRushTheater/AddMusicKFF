@@ -4,19 +4,17 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <filesystem>
 #include <sys/stat.h>
 
 #include "Utility.h"
-#include "Directory.h"
 
 using namespace AddMusic;
+namespace fs = std::filesystem;
 
-void openFile(const File &fileName, std::vector<uint8_t> &v)
+void openFile(const fs::path &fileName, std::vector<uint8_t> &v)
 {
-	std::ifstream is (fileName.cStr(), std::ios::binary);
-
-	// if (!is)
-	// 	printError(std::string("Error: File \"") + fileName.cStr() + std::string("\" not found."), true);
+	std::ifstream is (fileName, std::ios::binary);
 
 	is.seekg(0, std::ios::end);
 	unsigned int length = (unsigned int)is.tellg();
@@ -35,49 +33,21 @@ void openFile(const File &fileName, std::vector<uint8_t> &v)
 	is.close();
 }
 
-void openTextFile(const File &fileName, std::string &s)
+void openTextFile(const fs::path &fileName, std::string &s)
 {
-	std::ifstream is(fileName.cStr());
-
-	// if (!is)
-	// 	printError(std::string("Error: File \"") + fileName.cStr() + std::string("\" not found."));
+	std::ifstream is(fileName);
 
 	s.assign( (std::istreambuf_iterator<char>(is)), (std::istreambuf_iterator<char>()) );
 }
 
-time_t getTimeStamp(const File &file)
+time_t getTimeStamp(const fs::path &file)
 {
 	struct stat s;
-	if (stat(file, &s) == -1)
+	if (stat(file.c_str(), &s) == -1)
 	{
-		//std::cout << "Could not determine timestamp of \"" << file << "\"." << std::endl;
 		return 0;
 	}
 	return s.st_mtime;
-}
-
-
-void printError(const std::string &error, bool isFatal, const std::string &fileName, int line)
-{
-	std::ostringstream oss;
-	if (line >= 0)
-	{
-		oss << std::dec << "File: " << fileName << " Line: " << line << ":\n";
-	}
-
-	fputs((oss.str() + error).c_str(), stderr);
-	fputc('\n', stderr);
-}
-
-void printWarning(const std::string &error, const std::string &fileName, int line)
-{
-	std::ostringstream oss;
-	if (line >= 0)
-	{
-		oss << "File: " << fileName << " Line: " << line << ":\n";
-	}
-	puts((oss.str() + error).c_str());
-	putchar('\n');
 }
 
 void quit(int code)
@@ -85,9 +55,9 @@ void quit(int code)
 	exit(code);
 }
 
-int execute(const File &command, bool prepend)
+int execute(const fs::path &command, bool prepend)
 {
-     std::string tempstr = command.cStr();
+     std::string tempstr = command;
      if (prepend)
      {
 #ifndef _WIN32
@@ -107,50 +77,10 @@ int scanInt(const std::string &str, const std::string &value)		// Scans an integ
 	return ret;
 }
 
-bool fileExists(const File &fileName)
-{
-	std::ifstream is(fileName.cStr(), std::ios::binary);
-
-	bool yes = !(!is);
-
-	if (yes)
-	{
-		is.seekg(0, std::ios::end);
-		unsigned int length = (unsigned int)is.tellg();
-		is.seekg(0, std::ios::beg);
-
-	}
-
-	is.close();
-
-	return yes;
-}
-
-unsigned int getFileSize(const File &fileName)
-{
-	std::ifstream is(fileName.cStr(), std::ios::binary);
-
-	if (!is) return 0;
-
-	is.seekg(0, std::ios::end);
-	unsigned int length = (unsigned int)is.tellg();
-	is.close();
-	return length;
-}
-
-void removeFile(const File &fileName)
-{
-	if (remove(fileName.cStr()) == 1)
-	{
-		std::cerr << "Could not delete critical file \"" << fileName.cStr() << "\"." << std::endl;		// // //
-		// quit(1);
-	}
-}
-
-void writeTextFile(const File &fileName, const std::string &string)
+void writeTextFile(const fs::path &fileName, const std::string &string)
 {
 	std::ofstream ofs;
-	ofs.open(fileName.cStr(), std::ios::binary);
+	ofs.open(fileName, std::ios::binary);
 
 	std::string n = string;
 

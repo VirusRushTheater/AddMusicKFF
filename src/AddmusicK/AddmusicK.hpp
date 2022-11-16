@@ -9,10 +9,11 @@
 #include "Sample.h"
 #include "SoundEffect.h"
 #include "SampleGroup.h"
-#include "Directory.h"
 #include "BankDefine.h"
-#include "Directory.h"
 
+#include "AddmusicException.hpp"
+
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -43,92 +44,6 @@
 namespace AddMusic
 {
 
-enum class AddmusicErrorcode
-{
-	ADDMUSICERROR_SUCCESS = 0,				// No problem
-	ADDMUSICERROR_UNKNOWN,					// Unknown error
-	ADDMUSICERROR_ROM_NOT_LOADED,			// ROM not loaded
-	ADDMUSICERROR_ASSERTION_FAILED,			// Assertion failed
-	ADDMUSICERROR_ROM_TOO_SMALL,			// ROM is too small (<= 512 kB)
-	ADDMUSICERROR_IO_ERROR,					// Filesystem error
-	ADDMUSICERROR_NO_AM4_HEADER,			// No AddMusic 4.05 header
-	ADDMUSICERROR_NO_AMM_HEADER,			// No AddMusicM header
-	ADDMUSICERROR_NO_INIT_ASM,				// No INIT.asm to remove AddMusicM from the ROM.
-	ADDMUSICERROR_NO_AMK_SIGNATURE,			// A ROM that is supposed to have been edited previously by this tool has no "@AMK" signature. 
-	ADDMUSICERROR_MUSICLIST_PARSING_ERROR,	// Error parsing Addmusic_song list.txt
-	ADDMUSICERROR_SAMPLE_PARSING_ERROR,		// Error parsing Addmusic_sample groups.txt
-	ADDMUSICERROR_ASAR_ERROR,				// Error from asar compilation
-	ADDMUSICERROR_SFX_PARSING_ERROR,		// Error parsing Addmusic_sound effects.txt
-	ADDMUSICERROR_SFX_COMPILATION_ERROR,	// Failed to compile some SFX file
-	ADDMUSICERROR_SFX_NOT_FOUND_ERROR,		// Some SFX file was not found
-	ADDMUSICERROR_SFX_TABLE0_NOTFOUND,		// SFX Table0 not found in main.asm
-	ADDMUSICERROR_SFX_TABLE1_NOTFOUND,		// SFX Table1 not found in main.asm
-	ADDMUSICERROR_ECHO_BUFFER_OVERFLOW,		// Echo buffer exceeded total space in ARAM
-	ADDMUSICERROR_MUSICPTRS_NOTFOUND,		// MusicPtrs: could not be found
-	ADDMUSICERROR_ROM_OUT_OF_FREE_SPACE,	// Your ROM is out of free space
-};
-
-class AddmusicException : public std::exception
-{
-	public:
-	AddmusicException(
-		std::string message,
-		AddmusicErrorcode code = AddmusicErrorcode::ADDMUSICERROR_UNKNOWN
-	) : _msg(message), _code(code)
-	{
-		std::exception();
-	}
-
-	const std::string getMessage() const
-	{
-		return std::string {_msg};
-	}
-
-	AddmusicErrorcode getCode() const
-	{
-		return _code;
-	}
-
-	std::string getCodeAsText(AddmusicErrorcode code) const
-	{
-		switch (code)
-		{
-			case AddmusicErrorcode::ADDMUSICERROR_SUCCESS: return ("SUCCESS");
-			case AddmusicErrorcode::ADDMUSICERROR_UNKNOWN: return ("UNKNOWN");
-			case AddmusicErrorcode::ADDMUSICERROR_ROM_NOT_LOADED: return ("ROM_NOT_LOADED");
-			case AddmusicErrorcode::ADDMUSICERROR_ASSERTION_FAILED: return ("ASSERTION_FAILED");
-			case AddmusicErrorcode::ADDMUSICERROR_ROM_TOO_SMALL: return ("ROM_TOO_SMALL");
-			case AddmusicErrorcode::ADDMUSICERROR_IO_ERROR: return ("IO_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_NO_AM4_HEADER: return ("NO_AM4_HEADER");
-			case AddmusicErrorcode::ADDMUSICERROR_NO_AMM_HEADER: return ("NO_AMM_HEADER");
-			case AddmusicErrorcode::ADDMUSICERROR_NO_INIT_ASM: return ("NO_INIT_ASM");
-			case AddmusicErrorcode::ADDMUSICERROR_NO_AMK_SIGNATURE: return ("NO_AMK_SIGNATURE");
-			case AddmusicErrorcode::ADDMUSICERROR_MUSICLIST_PARSING_ERROR: return ("MUSICLIST_PARSING_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_SAMPLE_PARSING_ERROR: return ("SAMPLE_PARSING_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_ASAR_ERROR: return ("ASAR_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_SFX_PARSING_ERROR: return ("SFX_PARSING_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_SFX_COMPILATION_ERROR: return ("SFX_COMPILATION_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_SFX_NOT_FOUND_ERROR: return ("SFX_NOT_FOUND_ERROR");
-			case AddmusicErrorcode::ADDMUSICERROR_SFX_TABLE0_NOTFOUND: return ("SFX_TABLE0_NOTFOUND");
-			case AddmusicErrorcode::ADDMUSICERROR_SFX_TABLE1_NOTFOUND: return ("SFX_TABLE1_NOTFOUND");
-			case AddmusicErrorcode::ADDMUSICERROR_ECHO_BUFFER_OVERFLOW: return ("ECHO_BUFFER_OVERFLOW");
-			case AddmusicErrorcode::ADDMUSICERROR_ROM_OUT_OF_FREE_SPACE: return ("ROM_OUT_OF_FREE_SPACE");
-			default: return "?";
-		}
-	}
-
-	const char *what() const noexcept
-	{
-		std::stringstream rtext;
-		rtext << "[" << getCodeAsText(_code) << "] " << _msg << std::endl;
-		return rtext.str().c_str();
-	}
-
-	private:
-	std::string _msg;
-	AddmusicErrorcode _code;
-};
-
 /**
  * @brief Convenient way to specify, manipulate and pass default arguments
  * for the Addmusic class.
@@ -149,7 +64,7 @@ struct Addmusic_arglist
 	bool sfxDump {false};						// Dumps all sound effects to the SPC folder inside their respective SFX directories. Note the samples used will be from the song you specify or, when modifying a ROM, the lowest numbered local song. Please make sure !noSFX is set to !false in asm/UserDefines.asm: otherwise, this option will not work.
 	bool visualizeSongs {false};				// Creates a series of PNG files for the memory usage of local song(s). Each PNG contains a set of color strips, 16 bytes per column, that contains a certain memory usage data.
 
-	std::string workFolder {"."};				// Work folder where your song structure is stored.
+	std::filesystem::path workFolder {"."};				// Work folder where your song structure is stored.
 	bool preserveTemp {false};					// Preserve the temporary files generated in the process. Normally developers will be interested in this.
 
 	bool justSPCsPlease {false};				// Only do what's necessary to generate SPC files; this makes it possible to generate SPCs without a Super Mario World ROM. After using this option, you must specify the files you wish to compile (with quotes if they contain spaces). For example, -norom test.txt "test2.txt". Please note that global songs and sound effects must still be parsed, so Addmusic_list.txt, Addmusic_sound effects.txt, and Addmusic_sample groups.txt must all be valid.
@@ -161,11 +76,9 @@ struct Addmusic_arglist
  */
 struct Addmusic_relpaths
 {
-	std::string amk_yaml = 		"addmusic.yml";					// TODO: Merge these three files into one YAML file.
-
-	std::string songlist = 		"Addmusic_list.txt";			// Song list text file
-	std::string samplegroups = 	"Addmusic_sample groups.txt";	// Sample groups text file
-	std::string sfxlist = 		"Addmusic_sound effects.txt";	// SFX text file
+	std::filesystem::path songlist  		{"Addmusic_list.txt"};			// Song list text file
+	std::filesystem::path samplegroups  	{"Addmusic_sample groups.txt"};	// Sample groups text file
+	std::filesystem::path sfxlist 	 		{"Addmusic_sound effects.txt"};	// SFX text file
 };
 
 class AddMusicK
@@ -202,7 +115,7 @@ class AddMusicK
 	 * ADDMUSICERROR_ROM_TOO_SMALL if the ROM needs to be expanded (is 512kB)
 	 * ADDMUSICERROR_IO_ERROR if the file does not exist or is not readable.
 	 */
-	void loadRom(std::string rom_path);
+	void loadRom(std::filesystem::path rom_path);
 	
 	/**
 	 * @brief Loads and parses the music list, SFX list and sample list files.
@@ -216,11 +129,11 @@ class AddMusicK
 	 */
 	void loadConfigFiles();
 
-	AddMusic::File ROMName;			// ROM name in the file system
+	std::filesystem::path ROMName;			// ROM name in the file system
 
 	std::vector<uint8_t> rom;		// ROM in memory
 	std::vector<uint8_t> romHeader;	// SMC file header (the first 512 bytes)
-	std::string tempDir;			// Temporary directory path. To be used by compilation purposes.
+	std::filesystem::path tempDir;			// Temporary directory path. To be used by compilation purposes.
 
 	protected:
 
@@ -324,7 +237,7 @@ class AddMusicK
 	void generatePNGs();
 
 	// Variables of general use
-	std::string workdir;					// Working directory
+	std::filesystem::path workdir;			// Working directory
 	Addmusic_relpaths paths;				// Default paths
 	Addmusic_arglist p;						// Arguments passed when initializing this instance.
 	std::string last_error_details = "";	// Last error details. Changes whenever a state function returns something different than zero.
@@ -353,12 +266,11 @@ class AddMusicK
 	SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
 	std::vector<std::unique_ptr<BankDefine>> bankDefines;
 	std::map<File, int> sampleToIndex;
+	bool usingSA1 = false;
 
 	// Logger instance. Uses some custom logger in development I'll eventually
 	// expand for use in GUIs.
 	virusrt::Logger& log {virusrt::Logger::getLogger("AddMusicK")};
-
-	bool usingSA1 = false;
 };
 
 }

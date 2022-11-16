@@ -38,6 +38,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <filesystem>
 
 //class ROM;
 class Music;
@@ -51,63 +52,19 @@ class SampleGroup;
 #include "Sample.h"
 #include "SoundEffect.h"
 #include "SampleGroup.h"
-#include "Directory.h"
 #include "BankDefine.h"
-#include "Directory.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
 // ASAR dependencies
 #include <asar-dll-bindings/c/asardll.h>
 
-//extern ROM rom;
-extern std::vector<uint8_t> rom;
-
-extern Music musics[256];
-//extern Sample samples[256];
-extern std::vector<Sample> samples;
-extern SoundEffect *soundEffects[2];	// soundEffects[2][256];
-extern std::vector<std::unique_ptr<BankDefine>> bankDefines;
-
-extern std::map<File, int> sampleToIndex;
-
-extern bool convert;
-extern bool checkEcho;
-extern bool forceSPCGeneration;
-extern int bankStart;
-extern bool verbose;
-extern bool aggressive;
-extern bool dupCheck;
-extern bool validateHex;
-extern bool doNotPatch;
-extern int errorCount;
-extern bool optimizeSampleUsage;
-extern bool usingSA1;
-extern bool allowSA1;
-extern bool forceNoContinuePrompt;
-extern bool sfxDump;
-extern bool visualizeSongs;
-extern bool redirectStandardStreams;
-extern bool noSFX;
-
-extern int programPos;
-extern int programUploadPos;
-extern int reuploadPos;
-extern int mainLoopPos;
-extern int programSize;
-extern int highestGlobalSong;
-//extern int totalSampleCount;
-extern int songCount;
-extern int songSampleListSize;
-
-// extern bool useAsarDLL;
-
 // Return true if an error occurred (if "dieOnError" is true).
-bool asarCompileToBIN(const File &patchName, const File &binOutput, bool dieOnError = true);
-bool asarPatchToROM(const File &patchName, const File &romName, bool dieOnError = true);
+bool asarCompileToBIN(const std::filesystem::path &patchName, const std::filesystem::path &binOutput, bool dieOnError = true);
+bool asarPatchToROM(const std::filesystem::path &patchName, const std::filesystem::path &romName, bool dieOnError = true);
 
-void openFile(const File &fileName, std::vector<uint8_t> &vector);
-void openTextFile(const File &fileName, std::string &string);
+void openFile(const std::filesystem::path &fileName, std::vector<uint8_t> &vector);
+void openTextFile(const std::filesystem::path &fileName, std::string &string);
 
 std::string getQuotedString(const std::string &string, int startPos, int &rawLength);
 
@@ -116,7 +73,7 @@ std::string getQuotedString(const std::string &string, int startPos, int &rawLen
 #define hex6 std::setw(6) << std::setfill('0') << std::uppercase << std::hex
 
 template <typename T>
-void writeFile(const File &fileName, const std::vector<T> &vector)
+void writeFile(const std::filesystem::path &fileName, const std::vector<T> &vector)
 {
 	std::ofstream ofs;
 	ofs.open(fileName, std::ios::binary);
@@ -124,8 +81,8 @@ void writeFile(const File &fileName, const std::vector<T> &vector)
 	ofs.close();
 }
 
-void writeTextFile(const File &fileName, const std::string &string);
-int execute(const File &command, bool prepentDotSlash = true);
+void writeTextFile(const std::filesystem::path &fileName, const std::string &string);
+int execute(const std::filesystem::path &command, bool prepentDotSlash = true);
 
 void printError(const std::string &error, bool isFatal, const std::string &fileName = "", int line = -1);
 void printWarning(const std::string &error, const std::string &fileName = "", int line = -1);
@@ -133,12 +90,6 @@ void printWarning(const std::string &error, const std::string &fileName = "", in
 void quit(int code);
 
 int scanInt(const std::string &str, const std::string &value);
-
-bool fileExists(const File &fileName);
-
-unsigned int getFileSize(const File &fileName);
-
-void removeFile(const File &fileName);
 
 //int getSampleIndex(const std::string &name);
 
@@ -155,12 +106,12 @@ int PCToSNES(int addr);
 int clearRATS(int PCaddr);
 bool findRATS(int addr);
 
-void addSample(const File &fileName, Music *music, bool important);
+void addSample(const std::filesystem::path &fileName, Music *music, bool important);
 void addSample(const std::vector<uint8_t> &sample, const std::string &name, Music *music, bool important, bool noLoopHeader, int loopPoint = 0, bool isBNK = false);
-void addSampleGroup(const File &fileName, Music *music);
-void addSampleBank(const File &fileName, Music *music);
+void addSampleGroup(const std::filesystem::path &fileName, Music *music);
+void addSampleBank(const std::filesystem::path &fileName, Music *music);
 
-int getSample(const File &name, Music *music);
+int getSample(const std::filesystem::path &name, Music *music);
 
 void preprocess(std::string &str, const std::string &filename, int &version);
 
@@ -169,6 +120,6 @@ int strToInt(const std::string &str);
 //#define max(a, b) (a > b) ? a : b
 //#define min(a, b) (a < b) ? a : b
 
-time_t getTimeStamp(const File &file);
+time_t getTimeStamp(const std::filesystem::path &file);
 
 #endif
