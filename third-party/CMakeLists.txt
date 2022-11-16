@@ -6,6 +6,7 @@ set(ASAR_GEN_DLL 			ON CACHE BOOL "" FORCE)
 set(ASAR_GEN_EXE_TEST 		OFF CACHE BOOL "" FORCE)
 set(ASAR_GEN_DLL_TEST 		OFF CACHE BOOL "" FORCE)
 set(ASAR_GEN_LIB 			OFF  CACHE BOOL "" FORCE)
-
 add_subdirectory(asar/src)
+
 add_subdirectory(cxxopts)
+add_subdirectory(plog)

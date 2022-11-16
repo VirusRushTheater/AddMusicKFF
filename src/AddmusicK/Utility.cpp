@@ -67,9 +67,6 @@ void printError(const std::string &error, bool isFatal, const std::string &fileN
 
 	fputs((oss.str() + error).c_str(), stderr);
 	fputc('\n', stderr);
-	//puts((oss.str() + error).c_str());
-	//putchar('\n');
-	if (isFatal) quit(1);
 }
 
 void printWarning(const std::string &error, const std::string &fileName, int line)
@@ -146,7 +143,7 @@ void removeFile(const File &fileName)
 	if (remove(fileName.cStr()) == 1)
 	{
 		std::cerr << "Could not delete critical file \"" << fileName.cStr() << "\"." << std::endl;		// // //
-		quit(1);
+		// quit(1);
 	}
 }
 
@@ -177,7 +174,7 @@ void writeTextFile(const File &fileName, const std::string &string)
 void insertValue(int value, int length, const std::string &find, std::string &str)
 {
 	int pos = str.find(find);
-	if (pos == -1)	{ std::cerr << "Error: \"" << find << "\" could not be found." << std::endl; quit(1); }		// // //
+	// if (pos == -1)	{ std::cerr << "Error: \"" << find << "\" could not be found." << std::endl; quit(1); }		// // //
 	pos += find.length();
 
 	std::stringstream ss;

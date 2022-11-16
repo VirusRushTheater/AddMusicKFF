@@ -1,22 +1,25 @@
 set(ADDMUSICK_SOURCES
-	# AddmusicK.cpp
-	# lodepng.cpp
-	# Music.cpp
-	# SoundEffect.cpp
-	# Utility.cpp
+	AddmusicK.cpp
+	lodepng.cpp
+	Music.cpp
+	SoundEffect.cpp
+	Utility.cpp
+	logging.cpp
 	AddmusicK_CLI.cpp
 )
 
 set(ADDMUSICK_HEADERS
-	# BankDefine.h
-	# Directory.h
-	# fs.h
-	# lodepng.h
-	# Music.h
-	# SampleGroup.h
-	# Sample.h
-	# SoundEffect.h
-	# Utility.h
+	AddmusicK.hpp
+	logging.hpp
+	BankDefine.h
+	Directory.h
+	fs.h
+	lodepng.h
+	Music.h
+	SampleGroup.h
+	Sample.h
+	SoundEffect.h
+	Utility.h
 )
 
 # Include Asar dependencies as explained in its git repository
@@ -37,8 +40,13 @@ if (ADDMUSICK_BUILD_EXECUTABLE)
 	# and asar as a library.
 	target_link_libraries(AddmusicK PUBLIC
 		AM405Remover
+
 		${ASAR_LIB_TARGET}
-		cxxopts
+		cxxopts		# Command line libraries
+	)
+
+	target_include_directories(AddmusicK PUBLIC
+		${ASAR_INCLUDE_DIR}/..
 	)
 
 elseif (ADDMUSICK_BUILD_LIBRARY)

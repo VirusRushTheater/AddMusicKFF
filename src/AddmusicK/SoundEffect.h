@@ -1,6 +1,10 @@
 #ifndef _SOUNDEFFECT_H
 #define _SOUNDEFFECT_H
 
+#include <string>
+#include <vector>
+#include <cstdint>
+
 namespace AddMusic
 {
 

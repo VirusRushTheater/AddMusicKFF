@@ -5,3 +5,21 @@
 [submodule "third-party/cxxopts"]
 	path = third-party/cxxopts
 	url = https://github.com/jarro2783/cxxopts.git
+[submodule "third-party/loguru"]
+	path = third-party/loguru
+	url = https://github.com/emilk/loguru.git
+[submodule "third-party/Catch2"]
+	path = third-party/Catch2
+	url = https://github.com/catchorg/Catch2.git
+[submodule "third-party/lodepng"]
+	path = third-party/lodepng
+	url = https://github.com/lvandeve/lodepng.git
+[submodule "third-party/yaml-cpp"]
+	path = third-party/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "third-party/libarchive"]
+	path = third-party/libarchive
+	url = https://github.com/libarchive/libarchive.git
+[submodule "third-party/plog"]
+	path = third-party/plog
+	url = https://github.com/SergiusTheBest/plog.git

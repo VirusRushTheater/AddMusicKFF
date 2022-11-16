@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include <cxxopts.hpp>
 #include "AddmusicK.hpp"
@@ -27,7 +28,7 @@ int main (int argc, char** argv)
 		("s,sa1", "DISABLE SA-1 addressing", cxxopts::value<bool>())
 		("t,preserve", "Preserve temporarily generated files", cxxopts::value<bool>())
 		("u,optimize_sp", "DISABLE cleaning unused samples", cxxopts::value<bool>())
-		("v,verbose", "Verbose output", cxxopts::value<bool>())
+		("v,verbose", "Verbose output (also outputs the log in a .log file)", cxxopts::value<bool>())
 		("w,work_folder", "Use another work folder", cxxopts::value<std::string>())
 		("x,validate_hex", "DISABLE hex command validation", cxxopts::value<bool>())
 		("z,visualize", "Generate song visualization", cxxopts::value<bool>())
@@ -41,7 +42,7 @@ int main (int argc, char** argv)
 
 		("h,help", "Print help", cxxopts::value<bool>())
 	;
-
+	
 	// The unnamed, positional argument will be the name of the rom to be patched.
 	options.parse_positional({"romname"});
 	auto argp = options.parse(argc, argv);
@@ -101,7 +102,14 @@ int main (int argc, char** argv)
 	}
 	else
 	{
-		std::cout << "Rom name is supposed to be: " << argp["romname"].as<std::string>() << std::endl;
+		std::string rom_path = argp["romname"].as<std::string>();
+
+		// Normal procedure to call the AddMusic instance and 
+		// do the job in a very-high level.
+		// AddMusicK amk_instance(am);
+		// amk_instance.loadRom(rom_path);
+
+		std::cout << "Rom name is supposed to be: " << rom_path << std::endl;
 	}
 
 	return 0;

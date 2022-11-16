@@ -1,5 +1,4 @@
-#ifndef _FILE_H
-#define _FILE_H
+#pragma once
 
 #include <string>
 
@@ -10,6 +9,11 @@ class File
 {
 
 public:
+	// #ifdef _WIN32
+	// static constexpr std::string sep {"\\"};
+	// #else
+	// static constexpr std::string sep {"/"};
+	// #endif
 
 	std::string filePath;
 
@@ -90,5 +94,3 @@ public:
 };
 
 }
-
-#endif

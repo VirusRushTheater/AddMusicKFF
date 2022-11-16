@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#include "logging.hpp"
+
 namespace AddMusic
 {
 
@@ -198,6 +200,8 @@ private:
 	void addNoteLength(double ticks);				// Call this every note.  The correct channel/loop will be automatically updated.
 	
 	void markEchoBufferAllocVCMD();		// Called when the Hot Patch VCMD is manually defined. Required because of a bit that handles a special case when the echo buffer size is zero.
+
+	virusrt::Logger& logger {virusrt::Logger::getLogger("AddMusicK")};
 };
 
 }

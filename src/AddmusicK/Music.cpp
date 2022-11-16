@@ -8,8 +8,10 @@
 #include <cmath>
 #include <sstream>
 #include <algorithm>
+#include <exception>
 
 //#include "Preprocessor.h"
+#include "logging.hpp"
 
 using namespace AddMusic;
 
@@ -23,13 +25,19 @@ if (text[pos] == '\n')			\
 
 #define append(value) data[channel].push_back(value)
 
+inline std::string errormsg(const std::string& str, const std::string& fileName, int line)
+{
+	return (str + "; file: " + fileName + " L" + std::to_string(line));
+}
+
 #define error(str) {				\
-	printError(str, false, name, line);	\
-	return; }				\
+	logger.warning(errormsg(str, fileName, line));	\
+	return; }
 
 #define fatalError(str) {			\
-	printError(str, true, name, line);	\
-	return; }				\
+	logger.error(errormsg(str, fileName, line));	\
+	throw std::exception(str); \
+	return; }
 
 static unsigned int pos = 0;
 static int line, channel, prevChannel, octave, prevNoteLength, defaultNoteLength;
