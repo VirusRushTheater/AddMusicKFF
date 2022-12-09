@@ -1,5 +1,5 @@
 set(ADDMUSICK_SOURCES
-	AddmusicK.cpp
+	AddmusicK_core.cpp
 	lodepng.cpp
 	Music.cpp
 	SoundEffect.cpp
@@ -10,10 +10,9 @@ set(ADDMUSICK_SOURCES
 
 set(ADDMUSICK_HEADERS
 	AddmusicK.hpp
+	AddmusicK_core.hpp
 	logging.hpp
 	BankDefine.h
-	Directory.h
-	fs.h
 	lodepng.h
 	Music.h
 	SampleGroup.h

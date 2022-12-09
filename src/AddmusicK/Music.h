@@ -1,12 +1,16 @@
-#ifndef _MUSIC_H
-#define _MUSIC_H
+#pragma once
+
 #include <vector>
 #include <string>
 #include <map>
 #include <filesystem>
+#include <memory>
 
+#include "defines.h"
 #include "AddmusicException.hpp"
+//#include "AddmusicK_core.hpp"
 #include "logging.hpp"
+
 
 namespace AddMusic
 {
@@ -26,6 +30,9 @@ struct SpaceInfo {
 };
 
 namespace fs = std::filesystem;
+
+class AddMusicK;
+class AddMusic_arglist;
 
 class Music
 {
@@ -57,7 +64,6 @@ public:
 	std::vector<uint8_t> finalData;
 
 	SpaceInfo spaceInfo;
-
 
 	unsigned int introLength;
 	unsigned int mainLength;
@@ -103,10 +109,17 @@ public:
 
 	std::map<std::string, std::string> replacements;
 	std::vector<const std::pair<const std::string, std::string> *> sortedReplacements;
+
 	Music();
+	Music(fs::path path);
+	Music(const std::string& musicdata);
 
 	void init();
 	bool doReplacement();
+
+	void setCore(AddMusicK* _core);
+	void setGlobalParameters(const AddMusic_arglist& _params);
+
 private:
 	void pointersFirstPass();
 	void parseComment();
@@ -210,9 +223,11 @@ private:
 	void addSampleBank(const fs::path &fileName, Music *music);
 	int getSample(const fs::path &name, Music *music);
 
+	AddMusicK* core;
+	std::unique_ptr<AddMusic_arglist> _p;
 	virusrt::Logger& logger {virusrt::Logger::getLogger("AddMusicK")};
+
+	friend class Music;
 };
 
 }
-
-#endif

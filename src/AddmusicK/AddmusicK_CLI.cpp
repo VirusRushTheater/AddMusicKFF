@@ -2,6 +2,7 @@
 #include <string>
 
 #include <cxxopts.hpp>
+
 #include "AddmusicK.hpp"
 
 using namespace AddMusic;
@@ -11,7 +12,7 @@ using namespace AddMusic;
 */
 int main (int argc, char** argv)
 {
-	Addmusic_arglist am;
+	AddMusic_arglist am;
 
 	// Using new CXXOpts parsing system.
 	cxxopts::Options options("AddmusicK", "Rom hacking tool to insert custom music into a Super Mario World ROM");
@@ -61,7 +62,7 @@ int main (int argc, char** argv)
 
 	// Work folder and Reset may work together.
 	if (argp.count("work_folder"))
-		am.workFolder =			argp["work_folder"].as<std::string>(); // new
+		am.workDir =			argp["work_folder"].as<std::filesystem::path>(); // new
 	if (argp.count("reset"))
 	{
 		// TODO: Reset folder state

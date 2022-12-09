@@ -3,6 +3,7 @@
 
 using namespace virusrt;
 
+/*
 std::map<std::string, std::shared_ptr<Logger> > Logger::_logger_map;
 
 Logger& Logger::getLogger(const std::string& logger_name)
@@ -98,3 +99,4 @@ void Logger::critical(const std::stringstream& msg)
 {
 	this->__msg<LoggingSeverity::LOGGING_CRITICAL>(msg);
 }
+*/

@@ -25,8 +25,20 @@ enum class AddmusicErrorcode
 	ECHO_BUFFER_OVERFLOW,		// Echo buffer exceeded total space in ARAM
 	MUSICPTRS_NOTFOUND,			// MusicPtrs: could not be found
 	ROM_OUT_OF_FREE_SPACE,		// Your ROM is out of free space
+	FINDFREESPACE_ERROR,		// Error on findFreeSpace function
+	ADDSAMPLE_ERROR,			// Error on addSample function
+	ADDSAMPLEGROUP_ERROR,		// Error on addSampleGroup function
 
 	MUSIC_INFINITE_RECURSION,	// Infinite recursion in your music file
+	MUSIC_TARGET_NOT_SPECIFIED,	// Song did not specify target program with #amk, #am4, or #amm.
+	MUSIC_NEWER_AMK_VERSION,	// This song was made for a newer version of AddmusicK.
+	MUSIC_UNKNOWN_HEX_COMMAND,	// Unknown hex command
+	MUSIC_UNEXPECTED_CHARACTER,	// Parser hit an unexpected character
+	MUSIC_ILLEGAL_COMMENT,		// Illegal use of comments. Sorry about that. Should be fixed in AddmusicK 2
+	MUSIC_CHANNELDIRECTIVE_ERROR,		// channel directive error
+	MUSIC_LDIRECTIVE_ERROR,		// L directive error
+	MUSIC_GLOBALVOLUME_ERROR,		// L directive error
+	MUSIC_VOLUME_ERROR,		// L directive error
 };
 
 class AddmusicException : public std::exception
@@ -34,16 +46,24 @@ class AddmusicException : public std::exception
 	public:
 	AddmusicException(
 		const std::string& message,
-		AddmusicErrorcode code = AddmusicErrorcode::UNKNOWN
-	) : _msg(message), _code(code)
+		AddmusicErrorcode code = AddmusicErrorcode::UNKNOWN,
+		const std::string& filename = "",
+		unsigned int line = 0
+	) : _msg(message),
+		_code(code),
+		_fullmsg(message)
 	{
+		if (filename != "")
+			_fullmsg += "  [@" + filename + ", L" + std::to_string(line) + "]";
 		std::exception();
 	}
 
 	AddmusicException(
 		std::stringstream message,
-		AddmusicErrorcode code = AddmusicErrorcode::UNKNOWN
-	) : AddmusicException(message.str(), code)
+		AddmusicErrorcode code = AddmusicErrorcode::UNKNOWN,
+		const std::string& filename = "",
+		unsigned int line = 0
+	) : AddmusicException(message.str(), code, filename, line)
 	{
 	}
 
@@ -81,8 +101,20 @@ class AddmusicException : public std::exception
 			case AddmusicErrorcode::SFX_TABLE1_NOTFOUND:		return ("SFX_TABLE1_NOTFOUND");
 			case AddmusicErrorcode::ECHO_BUFFER_OVERFLOW:		return ("ECHO_BUFFER_OVERFLOW");
 			case AddmusicErrorcode::ROM_OUT_OF_FREE_SPACE:		return ("ROM_OUT_OF_FREE_SPACE");
+			case AddmusicErrorcode::FINDFREESPACE_ERROR:		return ("FINDFREESPACE_ERROR");
+			case AddmusicErrorcode::ADDSAMPLE_ERROR:			return ("ADDSAMPLE_ERROR");
+			case AddmusicErrorcode::ADDSAMPLEGROUP_ERROR:		return ("ADDSAMPLEGROUP_ERROR");
 
 			case AddmusicErrorcode::MUSIC_INFINITE_RECURSION:	return ("MUSIC_INFINITE_RECURSION");
+			case AddmusicErrorcode::MUSIC_TARGET_NOT_SPECIFIED:	return ("MUSIC_TARGET_NOT_SPECIFIED");
+			case AddmusicErrorcode::MUSIC_NEWER_AMK_VERSION:	return ("MUSIC_NEWER_AMK_VERSION");
+			case AddmusicErrorcode::MUSIC_UNKNOWN_HEX_COMMAND:	return ("MUSIC_UNKNOWN_HEX_COMMAND");
+			case AddmusicErrorcode::MUSIC_UNEXPECTED_CHARACTER:	return ("MUSIC_UNEXPECTED_CHARACTER");
+			case AddmusicErrorcode::MUSIC_ILLEGAL_COMMENT:		return ("MUSIC_ILLEGAL_COMMENT");
+			case AddmusicErrorcode::MUSIC_CHANNELDIRECTIVE_ERROR:		return ("MUSIC_CHANNELDIRECTIVE_ERROR");
+			case AddmusicErrorcode::MUSIC_LDIRECTIVE_ERROR:		return ("MUSIC_LDIRECTIVE_ERROR");
+			case AddmusicErrorcode::MUSIC_GLOBALVOLUME_ERROR:		return ("MUSIC_GLOBALVOLUME_ERROR");
+			case AddmusicErrorcode::MUSIC_VOLUME_ERROR:		return ("MUSIC_VOLUME_ERROR");
 			default: return "?";
 		}
 	}
@@ -90,11 +122,12 @@ class AddmusicException : public std::exception
 	const char *what() const noexcept
 	{
 		std::stringstream rtext;
-		rtext << "[" << getCodeAsText(_code) << "] " << _msg << std::endl;
+		rtext << "[" << getCodeAsText(_code) << "] " << _fullmsg << std::endl;
 		return rtext.str().c_str();
 	}
 
 	private:
+	std::string _fullmsg;
 	std::string _msg;
 	AddmusicErrorcode _code;
 };

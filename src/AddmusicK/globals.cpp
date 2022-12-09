@@ -13,176 +13,60 @@
 #include <asar-dll-bindings/c/asardll.h>
 
 #include "globals.h"
+#include "AddmusicException.hpp"
 
+using namespace AddMusic;
 namespace fs = std::filesystem;
 
 //ROM rom;
-std::vector<uint8_t> rom;
+// std::vector<uint8_t> rom;
 
-Music musics[256];
-//Sample samples[256];
-std::vector<Sample> samples;
-SoundEffect soundEffectsDF9[256];
-SoundEffect soundEffectsDFC[256];
-SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
-//std::vector<SampleGroup> sampleGroups;
-std::vector<std::unique_ptr<BankDefine>> bankDefines;
-std::map<std::filesystem::path, int> sampleToIndex;
+// Music musics[256];
+// //Sample samples[256];
+// std::vector<Sample> samples;
+// SoundEffect soundEffectsDF9[256];
+// SoundEffect soundEffectsDFC[256];
+// SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
+// //std::vector<SampleGroup> sampleGroups;
+// std::vector<std::unique_ptr<BankDefine>> bankDefines;
+// std::map<std::filesystem::path, int> sampleToIndex;
 
-bool convert = true;
-bool checkEcho = true;
-bool forceSPCGeneration = false;
-int bankStart = 0x200000;
-bool verbose = false;
-bool aggressive = false;
-bool dupCheck = true;
-bool validateHex = true;
-bool doNotPatch = false;
-int errorCount = 0;
-bool optimizeSampleUsage = true;
-bool usingSA1 = false;
-bool allowSA1 = true;
-bool forceNoContinuePrompt = false;
-bool sfxDump = false;
-bool visualizeSongs = false;
-bool redirectStandardStreams = false;
-bool noSFX = false;
+// bool convert = true;
+// bool checkEcho = true;
+// bool forceSPCGeneration = false;
+// int bankStart = 0x200000;
+// bool verbose = false;
+// bool aggressive = false;
+// bool dupCheck = true;
+// bool validateHex = true;
+// bool doNotPatch = false;
+// int errorCount = 0;
+// bool optimizeSampleUsage = true;
+// bool usingSA1 = false;
+// bool allowSA1 = true;
+// bool forceNoContinuePrompt = false;
+// bool sfxDump = false;
+// bool visualizeSongs = false;
+// bool redirectStandardStreams = false;
+// bool noSFX = false;
 
-int programPos;
-int programUploadPos;
-int mainLoopPos;
-int reuploadPos;
-int programSize;
-int highestGlobalSong;
-int totalSampleCount;
-int songCount = 0;
-int songSampleListSize;
-// bool useAsarDLL;
-
-void quit(int code)
-{
-	if (forceNoContinuePrompt == false)
-	{
-		puts("Press ENTER to continue...\n");
-		getc(stdin);
-	}
-	exit(code);
-}
-
-int execute(const File &command, bool prepend)
-{
-     std::string tempstr = command.cStr();
-     if (prepend)
-     {
-#ifndef _WIN32
-	  tempstr.insert(0, "./");
-#endif
-     }
-     return system(tempstr.c_str());
-}
-
-int scanInt(const std::string &str, const std::string &value)		// Scans an integer value that comes after the specified string within another string.  Must be in $XXXX format (or $XXXXXX, etc.).
-{
-	int i, ret;
-	if ((i = str.find(value)) == -1)
-		printError(std::string("Error: Could not find \"") + value + "\"", true);
-
-	std::sscanf(str.c_str() + i + value.length(), "$%X", &ret);	// Woo C functions in C++ code!
-	return ret;
-}
-
-void writeTextFile(const File &fileName, const std::string &string)
-{
-	std::ofstream ofs;
-	ofs.open(fileName.cStr(), std::ios::binary);
-
-	std::string n = string;
-
-#ifdef _WIN32
-	unsigned int i = 0;
-	while (i < n.length())
-	{
-		if (n[i] == '\n')
-		{
-			n = n.insert(i, "\r");
-			i++;
-		}
-		i++;
-	}
-#endif
-	ofs.write(n.c_str(), n.size());
-
-	ofs.close();
-}
-
-void insertValue(int value, int length, const std::string &find, std::string &str)
-{
-	int pos = str.find(find);
-	if (pos == -1)	{ std::cerr << "Error: \"" << find << "\" could not be found." << std::endl; quit(1); }		// // //
-	pos += find.length();
-
-	std::stringstream ss;
-	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(length) << value << std::dec;
-	std::string tempStr = ss.str();
-	str.replace(pos+1, length, tempStr);
-}
-
-//int getSampleIndex(const std::string &name)
-//{
-//	for (int i = 0; i < 256; i++)
-//		if (samples[i].exists)
-//			if (name == samples[i].name)
-//				return i;
-//
-//	return -1;
-//}
-
-//void loadSample(const std::string &name, Sample *srcn)
-//{
-//	std::vector<uint8_t> temp;
-//
-//
-//	//unsigned char *temp;
-//	openFile(std::string("samples/") + name, temp);
-//
-//	srcn->name = name; //= (char *)calloc(strlen(name) + 1, 1);
-//	//if (srcn->name == NULL) printError(OutOfMemory, true);
-//	//strncpy(srcn->name, name, strlen(name));
-//
-//	if ((temp.size()) % 9 == 0)
-//	{
-//		//srcn->data = temp;
-//		srcn->data = temp;
-//		srcn->size = temp.size();
-//		//srcn->data = srcn;
-//		for (int k = 0; (unsigned)k < temp.size(); k+=9)
-//		{
-//			if ((srcn->data[k] & 0x02) != 0x02)
-//				srcn->loopPoint = k;
-//			else
-//				break;
-//		}
-//	}
-//	else
-//	{
-//		srcn->size = temp.size() - 2;
-//		srcn->loopPoint = temp[1] << 8 | temp[0];
-//		srcn->data = temp;
-//		srcn->data.erase(srcn->data.begin(), srcn->data.begin() + 2);
-//		//srcn->data = alloc(dataSize - 2);
-//		//memcpy(srcn->data, temp + 2, dataSize - 2);
-//		//
-//	}
-//
-//	srcn->exists = true;
-//}
+// int programPos;
+// int programUploadPos;
+// int mainLoopPos;
+// int reuploadPos;
+// int programSize;
+// int highestGlobalSong;
+// int totalSampleCount;
+// int songCount = 0;
+// int songSampleListSize;
+// // bool useAsarDLL;
 
 int findFreeSpace(unsigned int size, int start, std::vector<uint8_t> &ROM)
 {
 	if (size == 0)
-		printError("Internal error: Requested free ROM space cannot be 0 bytes.", true);
+		throw AddmusicException("Internal error: Requested free ROM space cannot be 0 bytes.", AddmusicErrorcode::FINDFREESPACE_ERROR);
 	if (size > 0x7FF8)
-		printError("Internal error: Requested free ROM space cannot exceed 0x7FF8 bytes.", true);
+		throw AddmusicException("Internal error: Requested free ROM space cannot exceed 0x7FF8 bytes.", AddmusicErrorcode::FINDFREESPACE_ERROR);
 
 	size_t pos = 0;
 	size_t runningSpace = 0;
@@ -448,10 +332,7 @@ void addSampleBank(const File &fileName, Music *music)
 	else if (fileExists(absoluteDir))
 		actualPath = absoluteDir;
 	else
-		printError("Could not find sample bank " + (std::string)fileName, true, music->name);
-
-
-
+		throw AddmusicException("Could not find sample bank " + (std::string)fileName + music->name, AddmusicErrorcode::ADDSAMPLE_ERROR);
 
 	openFile(actualPath, bankFile);
 
@@ -594,17 +475,6 @@ std::string getArgument(const std::string &str, char endChar, unsigned int &pos,
 	}
 
 	return temp;
-}
-
-int strToInt(const std::string &str)
-{
-	std::stringstream a;
-	a << str;
-	int j;
-	a >> j;
-	if (a.fail())
-		throw std::invalid_argument("Could not parse string");
-	return j;
 }
 
 #define skipSpaces				\

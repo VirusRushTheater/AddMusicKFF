@@ -71,12 +71,11 @@ int scanInt(const std::string &str, const std::string &value)		// Scans an integ
 {
 	int i, ret;
 	// if ((i = str.find(value)) == -1)
-	// 	printError(std::string("Error: Could not find \"") + value + "\"");
+	// 	printError(std::string("Error: Could not find \"") + value + "\"", true);
 
 	std::sscanf(str.c_str() + i + value.length(), "$%X", &ret);	// Woo C functions in C++ code!
 	return ret;
 }
-
 void writeTextFile(const fs::path &fileName, const std::string &string)
 {
 	std::ofstream ofs;
@@ -104,11 +103,25 @@ void writeTextFile(const fs::path &fileName, const std::string &string)
 void insertValue(int value, int length, const std::string &find, std::string &str)
 {
 	int pos = str.find(find);
+	if (pos == -1)
+		return;
 	// if (pos == -1)	{ std::cerr << "Error: \"" << find << "\" could not be found." << std::endl; quit(1); }		// // //
+	
 	pos += find.length();
 
 	std::stringstream ss;
 	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(length) << value << std::dec;
 	std::string tempStr = ss.str();
 	str.replace(pos+1, length, tempStr);
+}
+
+int strToInt(const std::string &str)
+{
+	std::stringstream a;
+	a << str;
+	int j;
+	a >> j;
+	if (a.fail())
+		throw std::invalid_argument("Could not parse string");
+	return j;
 }

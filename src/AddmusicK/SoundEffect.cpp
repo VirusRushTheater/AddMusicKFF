@@ -1,8 +1,10 @@
-#include "SoundEffect.h"
-#include <cmath>
+// #include <cmath>
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
+
+#include "AddmusicException.hpp"
+#include "SoundEffect.h"
 
 using namespace AddMusic;
 
@@ -105,7 +107,8 @@ int SoundEffect::getNoteLength(int i)
 	{
 		pos++;
 		i = getInt();
-		if (i == -1) printError("Error parsing note length.", false, name, line);
+		if (i == -1)
+			printError("Error parsing note length.", false, name, line);
 		return i;
 	}
 
@@ -122,12 +125,13 @@ int SoundEffect::getNoteLength(int i)
 	}
 
 	if (triplet)
-		i = (int)floor(((double)i * 2.0 / 3.0) + 0.5);
+		i = (int) floor(((double)i * 2.0 / 3.0) + 0.5);
 	return i;
 }
 
 void SoundEffect::compile()
 {
+	
 	text += "                   ";
 	int version = 0;			// Unused for sound effects for now.
 	preprocess(text, name, version);
@@ -149,6 +153,7 @@ void SoundEffect::compile()
 	bool updateVolume = false;
 	bool inComment = false;
 
+	
 	while (pos < text.size())
 	{
 		if (text[pos] == '\n')

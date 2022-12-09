@@ -14,12 +14,14 @@ class SoundEffect
 	int getInt();
 	int getPitch(int i, int octave);
 	int getNoteLength(int i);
+	
 public:
+	std::vector<uint8_t> data;
+
 	std::string &getEffectiveName();		// Returns name or pointName.
 	int bank;
 	int index;
 	std::string name;
-	std::vector<uint8_t> data;
 	std::string text;
 	bool add0;
 	std::string pointName;

@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <fstream>
 
 #define hex2 std::setw(2) << std::setfill('0') << std::uppercase << std::hex
 #define hex4 std::setw(4) << std::setfill('0') << std::uppercase << std::hex
@@ -34,8 +35,15 @@ void openTextFile(const std::filesystem::path &fileName, std::string &s);
  * 
  * @return time_t 	Timestamp of the file.
  */
-time_t getTimeStamp(const File &file);
+time_t getTimeStamp(const std::filesystem::path &file);
 
+/**
+ * @brief Run some system command.
+ * 
+ * @param command 	Command name
+ * @param prepend 	?
+ * @return int 		Output code of that command.
+ */
 int execute(const std::filesystem::path &command, bool prepend);
 
 /**
@@ -73,7 +81,7 @@ void writeFile(const std::filesystem::path &fileName, const std::vector<T> &vect
 }
 
 /**
- * @brief ?
+ * @brief Replaces 
  * 
  * @param value 
  * @param length 
@@ -81,5 +89,9 @@ void writeFile(const std::filesystem::path &fileName, const std::vector<T> &vect
  * @param str 
  */
 void insertValue(int value, int length, const std::string &find, std::string &str);
+
+void quit(int code);
+
+int strToInt(const std::string &str);
 
 }

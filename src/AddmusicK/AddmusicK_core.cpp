@@ -2,6 +2,10 @@
 #include <regex>
 
 #include "AddmusicK.hpp"
+
+// Objects
+#include "Music.h"
+
 #include "AM405Remover.h"
 #include "Utility.h"
 #include "globals.h"
@@ -100,7 +104,7 @@ void AddMusicK::tryToCleanAMMData()
 			throw AddmusicException("AddmusicM ROMs can only be cleaned if they "
 				"have a header. This does not\napply to any other aspect of the program.", AddmusicErrorcode::NO_AMM_HEADER);
 
-		if (fileExists("INIT.asm") == false)
+		if (fs::exists("INIT.asm") == false)
 			throw AddmusicException("AddmusicM was detected. In order to remove it "
 				"from this ROM, you must put AddmusicM's INIT.asm as well as xkasAnti "
 				"and a clean ROM (named clean.smc) in the same folder as this program. "
@@ -269,43 +273,6 @@ void AddMusicK::tryToCleanSampleToolData()
 
 	log.info((std::stringstream{} << "Erased 0x" << hex6 << sizeOfErasedData << 
 		" bytes, of which 0x" << sampleDataSize << " were sample data.").str());
-}
-
-int AddMusicK::clearRATS(int offset)
-{
-	int size = ((rom[offset + 5] << 8) | rom[offset + 4]) + 8;
-	int r = size;
-	while (size >= 0)
-		rom[offset + size--] = 0;
-
-	return r+1;
-}
-
-int AddMusicK::PCToSNES(int addr)
-{
-	if (addr < 0 || addr >= 0x400000)
-		return -1;
-
-	addr = ((addr << 1) & 0x7F0000) | (addr & 0x7FFF) | 0x8000;
-
-	if (!usingSA1 && (addr & 0xF00000) == 0x700000)
-		addr |= 0x800000;
-
-	if (usingSA1 && addr >= 0x400000)
-		addr += 0x400000;
-	return addr;
-}
-
-int AddMusicK::SNESToPC(int addr)
-{
-	if (addr < 0 || addr > 0xFFFFFF ||		// not 24bit
-		(addr & 0xFE0000) == 0x7E0000 ||	// wram
-		(addr & 0x408000) == 0x000000)		// hardware regs
-		return -1;
-	if (usingSA1 && addr >= 0x808000)
-		addr -= 0x400000;
-	addr = ((addr & 0x7F0000) >> 1 | (addr & 0x7FFF));
-	return addr;
 }
 
 void AddMusicK::loadConfigFiles()
@@ -682,23 +649,6 @@ void AddMusicK::loadSFXList()
 	}
 
 	log.debug((std::stringstream{} << "Read in all " << SFXCount << " songs.").str());
-}
-
-bool AddMusicK::findRATS(int offset)
-{
-	if (rom[offset] != 0x53) {
-		return false;
-	}
-	if (rom[offset+1] != 0x54) {
-		return false;
-	}
-	if (rom[offset+2] != 0x41) {
-		return false;
-	}
-	if (rom[offset+3] != 0x52) {
-		return false;
-	}
-	return true;
 }
 
 void AddMusicK::assembleSNESDriver()
