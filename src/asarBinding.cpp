@@ -11,8 +11,7 @@
 
 using namespace AddMusic;
 
-AsarBinding::AsarBinding(const std::string& patchcontent, const fs::path& environment_dir) :
-	is_using_tmpfile(true)
+AsarBinding::AsarBinding(const std::string& patchcontent, const fs::path& environment_dir)
 {
 	// Creates a temporary file in the environment_dir of your choice.
 	_patchfilename = environment_dir / fs::path(std::tmpnam(nullptr)).filename() + ".asm";
@@ -20,13 +19,6 @@ AsarBinding::AsarBinding(const std::string& patchcontent, const fs::path& enviro
 	std::ofstream tfile {_patchfilename, std::ios::trunc};
 	tfile << patchcontent;
 	tfile.close();
-}
-
-AsarBinding(const fs::path& file) :
-	_patchfilename(file),
-	is_using_tmpfile(false)
-{
-	// TODO
 }
 
 AsarBinding::~AsarBinding()

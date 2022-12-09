@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
  */
 class AsarException : public std::runtime_error
 {
-	using std::runtime_error::runtime_error;
+	using std::runtime_error :: std::runtime_error;
 };
 
 /**
@@ -38,13 +38,16 @@ public:
 	 * If the file has includes, they will be resolved by using the "environment_dir"
 	 * parameter.
 	 */
-	AsarBinding(const std::string& patchcontent, const fs::path& environment_dir);
+	AsarBinding(const std::string& patchcontent, const fs::path& environment_dir) :
+		is_using_tmpfile(true);
 
 	/**
 	 * Conventional way to invoke AsarBinding, with a file already located in
 	 * your filesystem, whose includes will be resolved accordingly.
 	 */
-	AsarBinding(const fs::path& file);
+	AsarBinding(const fs::path& file) :
+		_patchfilename(file),
+		is_using_tmpfile(false);
 
 	/**
 	 * @brief Destructor. Deletes any temporary file(s) created.

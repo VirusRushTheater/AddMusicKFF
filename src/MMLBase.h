@@ -1,7 +1,7 @@
 #pragma once
 
+#include "logging.hpp"
 #include "defines.h"
-#include "AddmusicException.hpp"
 
 #include <string>
 #include <memory>
@@ -69,17 +69,17 @@ protected:
 	 *     return this->fileError(msg, AddmusicErrorcode::PARSING_ERROR, fatality);
 	 * };
 	 */
-	// inline AddmusicException fileError(const std::string msg, AddmusicErrorcode error_code, bool fatality = true)
-	// {
-	// 	return AddmusicException(msg, error_code, fatality, filename, line);
-	// }
+	inline AddmusicException fileError(const std::string msg, AddmusicErrorcode error_code, bool fatality = true)
+	{
+		return AddmusicException(msg, error_code, fatality, filename, line);
+	}
 
 	bool is_open {false};		// File has been opened
 
 	// PARSER
 	std::string text;			// File contents
-	unsigned int pos {0};			// Parser position
-	int line {1};					// Parser line
+	unsigned int pos;			// Parser position
+	int line;					// Parser line
 	fs::path filename;			// File path
 
 	int addmusicversion {0};	// AddMusic version of this file (retrieved at preprocessing)
@@ -89,8 +89,9 @@ protected:
 	bool triplet;				// Parsing triplet?
 	bool inDefineBlock;			// 
 
-	// FRIEND CLASS FOR PRECISE ERROR REPORTING
-	friend class AddmusicException;
+	// Logger instance. Uses some custom logger in development I'll eventually
+	// expand for use in GUIs.
+	virusrt::Logger& log {virusrt::Logger::getLogger("AddMusicK")};
 
 private:
 
