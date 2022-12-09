@@ -1,97 +1,77 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
+#include <fstream>
+#include <iterator>
 #include <string>
 #include <filesystem>
-#include <fstream>
 
-#define hex2 std::setw(2) << std::setfill('0') << std::uppercase << std::hex
-#define hex4 std::setw(4) << std::setfill('0') << std::uppercase << std::hex
-#define hex6 std::setw(6) << std::setfill('0') << std::uppercase << std::hex
+#define BASE64_ENCODE_OUT_SIZE(s) ((unsigned int)((((s) + 2) / 3) * 4 + 1))
+#define BASE64_DECODE_OUT_SIZE(s) ((unsigned int)(((s) / 4) * 3))
+
+namespace fs = std::filesystem;
 
 namespace AddMusic
 {
 
 /**
- * @brief Opens a file and fills a vector with its contents.
- * 
- * @param fileName 	File name
- * @param v 		Vector to be filled
- */
-void openFile(const std::filesystem::path &fileName, std::vector<uint8_t> &v);
-
-/**
- * @brief Opens a file and fills a string with its contents.
- * 
- * @param fileName 	File name
- * @param s 		String to be filled
- */
-void openTextFile(const std::filesystem::path &fileName, std::string &s);
-
-/**
- * @brief Get a file's time stamp.
- * 
- * @param file 		File name
- * 
- * @return time_t 	Timestamp of the file.
- */
-time_t getTimeStamp(const std::filesystem::path &file);
-
-/**
- * @brief Run some system command.
- * 
- * @param command 	Command name
- * @param prepend 	?
- * @return int 		Output code of that command.
- */
-int execute(const std::filesystem::path &command, bool prepend);
-
-/**
- * @brief Scans an integer value that comes after the specified string within
- * another string.  Must be in $XXXX format (or $XXXXXX, etc.).
- * 
- * @param str 		String to be scanned
- * @param value 	
- * @return int 
- */
-int scanInt(const std::string &str, const std::string &value);
-
-/**
- * @brief Dumps a file with the contents of a certain string.
- * 
- * @param fileName 	Name of the file to be written.
- * @param string 	Contents of such file.
- */
-void writeTextFile(const std::filesystem::path &fileName, const std::string &string);
-
-/**
- * @brief Dumps a binary file with the contents of a certain vector.
- * 
- * @tparam T 		Vector type
- * @param fileName 	Name of the new file
- * @param vector 	Vector to be dumped
+ * @brief Reads a binary file and stores its contents in a vector.
  */
 template <typename T>
-void writeFile(const std::filesystem::path &fileName, const std::vector<T> &vector)
+inline void readBinaryFile(const fs::path &fileName, std::vector<T> &v)
 {
-	std::ofstream ofs;
-	ofs.open(fileName, std::ios::binary);
-	ofs.write((const char *)vector.data(), vector.size() * sizeof(T));
+	std::ifstream is (fileName, std::ios::binary);
+	v.assign(std::istream_iterator<T>(is), std::istream_iterator<T>());
+	is.close();
+}
+
+/**
+ * @brief Reads a text file and stores its contents in a string.
+ */
+inline void readTextFile(const fs::path &fileName, std::string &str)
+{
+	std::ifstream is (fileName);
+	str.assign(std::istream_iterator<char>(is), std::istream_iterator<char>());
+	is.close();
+}
+
+/**
+ * @brief Writes the contents of a vector in a binary file. 
+ */
+template <typename T>
+inline void writeBinaryFile(const fs::path &fileName, std::vector<T> &v)
+{
+	std::ofstream ofs (fileName, std::ios::binary);
+	std::copy(v.begin(), v.end(), std::ostream_iterator<T>(ofs));
 	ofs.close();
 }
 
 /**
- * @brief Replaces 
- * 
- * @param value 
- * @param length 
- * @param find 
- * @param str 
+ * @brief Writes a string into a text file. 
  */
-void insertValue(int value, int length, const std::string &find, std::string &str);
+inline void writeTextFile(const fs::path &fileName, const std::string &str)
+{
+	std::ofstream ofs (fileName);
+	std::copy(str.begin(), str.end(), std::ostream_iterator<char>(ofs));
+	ofs.close();
+}
 
-void quit(int code);
+/**
+ * @brief Function that encodes a byte stream into a null-terminated, base64
+ * string.
+ * Returns the size of the resulting string, not counting the trailing zero.
+ * 
+ * Comes from the public domain repository https://github.com/zhicheng/base64
+ */
+size_t base64_encode(const uint8_t *in, size_t inlen, char *out);
 
-int strToInt(const std::string &str);
+/**
+ * @brief Function that decodes a base-64 string into a byte stream.
+ * Returns the size of the resulting byte stream.
+ * 
+ * Comes from the public domain repository https://github.com/zhicheng/base64
+ */
+size_t base64_decode(const char *in, size_t inlen, uint8_t *out);
 
 }

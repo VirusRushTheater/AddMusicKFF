@@ -1,127 +1,166 @@
-#include <vector>
+#include <cstdio>
 #include <fstream>
-#include <sstream>
-#include <cstdlib>
-#include <iomanip>
-#include <iostream>
-#include <filesystem>
-#include <sys/stat.h>
-
+#include <exception>
 #include "Utility.h"
+#include "base64.h"
 
 using namespace AddMusic;
-namespace fs = std::filesystem;
 
-void openFile(const fs::path &fileName, std::vector<uint8_t> &v)
+#define BASE64_PAD '='
+#define BASE64DE_FIRST '+'
+#define BASE64DE_LAST 'z'
+
+/* BASE 64 encode table */
+static const char base64en[] = {
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+	'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+	'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+	'w', 'x', 'y', 'z', '0', '1', '2', '3',
+	'4', '5', '6', '7', '8', '9', '+', '/',
+};
+
+/* ASCII order for BASE 64 decode, 255 in unused character */
+static const unsigned char base64de[] = {
+	/* nul, soh, stx, etx, eot, enq, ack, bel, */
+	   255, 255, 255, 255, 255, 255, 255, 255,
+
+	/*  bs,  ht,  nl,  vt,  np,  cr,  so,  si, */
+	   255, 255, 255, 255, 255, 255, 255, 255,
+
+	/* dle, dc1, dc2, dc3, dc4, nak, syn, etb, */
+	   255, 255, 255, 255, 255, 255, 255, 255,
+
+	/* can,  em, sub, esc,  fs,  gs,  rs,  us, */
+	   255, 255, 255, 255, 255, 255, 255, 255,
+
+	/*  sp, '!', '"', '#', '$', '%', '&', ''', */
+	   255, 255, 255, 255, 255, 255, 255, 255,
+
+	/* '(', ')', '*', '+', ',', '-', '.', '/', */
+	   255, 255, 255,  62, 255, 255, 255,  63,
+
+	/* '0', '1', '2', '3', '4', '5', '6', '7', */
+	    52,  53,  54,  55,  56,  57,  58,  59,
+
+	/* '8', '9', ':', ';', '<', '=', '>', '?', */
+	    60,  61, 255, 255, 255, 255, 255, 255,
+
+	/* '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', */
+	   255,   0,   1,  2,   3,   4,   5,    6,
+
+	/* 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', */
+	     7,   8,   9,  10,  11,  12,  13,  14,
+
+	/* 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', */
+	    15,  16,  17,  18,  19,  20,  21,  22,
+
+	/* 'X', 'Y', 'Z', '[', '\', ']', '^', '_', */
+	    23,  24,  25, 255, 255, 255, 255, 255,
+
+	/* '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', */
+	   255,  26,  27,  28,  29,  30,  31,  32,
+
+	/* 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', */
+	    33,  34,  35,  36,  37,  38,  39,  40,
+
+	/* 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', */
+	    41,  42,  43,  44,  45,  46,  47,  48,
+
+	/* 'x', 'y', 'z', '{', '|', '}', '~', del, */
+	    49,  50,  51, 255, 255, 255, 255, 255
+};
+
+size_t base64_encode(const uint8_t *in, size_t inlen, char *out)
 {
-	std::ifstream is (fileName, std::ios::binary);
+	int s;
+	unsigned int i;
+	unsigned int j;
+	unsigned char c;
+	unsigned char l;
 
-	is.seekg(0, std::ios::end);
-	unsigned int length = (unsigned int)is.tellg();
-	is.seekg(0, std::ios::beg);
-	v.clear();
-	v.reserve(length);
+	s = 0;
+	l = 0;
+	for (i = j = 0; i < inlen; i++) {
+		c = in[i];
 
-	while (length > 0)
-	{
-		char temp;
-		is.read(&temp, 1);
-		v.push_back(temp);
-		length--;
+		switch (s) {
+		case 0:
+			s = 1;
+			out[j++] = base64en[(c >> 2) & 0x3F];
+			break;
+		case 1:
+			s = 2;
+			out[j++] = base64en[((l & 0x3) << 4) | ((c >> 4) & 0xF)];
+			break;
+		case 2:
+			s = 0;
+			out[j++] = base64en[((l & 0xF) << 2) | ((c >> 6) & 0x3)];
+			out[j++] = base64en[c & 0x3F];
+			break;
+		}
+		l = c;
 	}
 
-	is.close();
+	switch (s) {
+	case 1:
+		out[j++] = base64en[(l & 0x3) << 4];
+		out[j++] = BASE64_PAD;
+		out[j++] = BASE64_PAD;
+		break;
+	case 2:
+		out[j++] = base64en[(l & 0xF) << 2];
+		out[j++] = BASE64_PAD;
+		break;
+	}
+
+	out[j] = 0;
+
+	return j;
 }
 
-void openTextFile(const fs::path &fileName, std::string &s)
+size_t base64_decode(const char *in, size_t inlen, uint8_t *out)
 {
-	std::ifstream is(fileName);
+	unsigned int i;
+	unsigned int j;
+	unsigned char c;
 
-	s.assign( (std::istreambuf_iterator<char>(is)), (std::istreambuf_iterator<char>()) );
-}
-
-time_t getTimeStamp(const fs::path &file)
-{
-	struct stat s;
-	if (stat(file.c_str(), &s) == -1)
-	{
+	if (inlen & 0x3) {
 		return 0;
 	}
-	return s.st_mtime;
-}
 
-void quit(int code)
-{
-	exit(code);
-}
-
-int execute(const fs::path &command, bool prepend)
-{
-     std::string tempstr = command;
-     if (prepend)
-     {
-#ifndef _WIN32
-	  tempstr.insert(0, "./");
-#endif
-     }
-     return system(tempstr.c_str());
-}
-
-int scanInt(const std::string &str, const std::string &value)		// Scans an integer value that comes after the specified string within another string.  Must be in $XXXX format (or $XXXXXX, etc.).
-{
-	int i, ret;
-	// if ((i = str.find(value)) == -1)
-	// 	printError(std::string("Error: Could not find \"") + value + "\"", true);
-
-	std::sscanf(str.c_str() + i + value.length(), "$%X", &ret);	// Woo C functions in C++ code!
-	return ret;
-}
-void writeTextFile(const fs::path &fileName, const std::string &string)
-{
-	std::ofstream ofs;
-	ofs.open(fileName, std::ios::binary);
-
-	std::string n = string;
-
-#ifdef _WIN32
-	unsigned int i = 0;
-	while (i < n.length())
-	{
-		if (n[i] == '\n')
-		{
-			n = n.insert(i, "\r");
-			i++;
+	for (i = j = 0; i < inlen; i++) {
+		if (in[i] == BASE64_PAD) {
+			break;
 		}
-		i++;
+		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
+			return 0;
+		}
+
+		c = base64de[(unsigned char)in[i]];
+		if (c == 255) {
+			return 0;
+		}
+
+		switch (i & 0x3) {
+		case 0:
+			out[j] = (c << 2) & 0xFF;
+			break;
+		case 1:
+			out[j++] |= (c >> 4) & 0x3;
+			out[j] = (c & 0xF) << 4; 
+			break;
+		case 2:
+			out[j++] |= (c >> 2) & 0xF;
+			out[j] = (c & 0x3) << 6;
+			break;
+		case 3:
+			out[j++] |= c;
+			break;
+		}
 	}
-#endif
-	ofs.write(n.c_str(), n.size());
 
-	ofs.close();
-}
-
-void insertValue(int value, int length, const std::string &find, std::string &str)
-{
-	int pos = str.find(find);
-	if (pos == -1)
-		return;
-	// if (pos == -1)	{ std::cerr << "Error: \"" << find << "\" could not be found." << std::endl; quit(1); }		// // //
-	
-	pos += find.length();
-
-	std::stringstream ss;
-	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(length) << value << std::dec;
-	std::string tempStr = ss.str();
-	str.replace(pos+1, length, tempStr);
-}
-
-int strToInt(const std::string &str)
-{
-	std::stringstream a;
-	a << str;
-	int j;
-	a >> j;
-	if (a.fail())
-		throw std::invalid_argument("Could not parse string");
 	return j;
 }

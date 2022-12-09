@@ -1,308 +1,249 @@
-// #include <cmath>
+#include <cmath>
+#include <regex>
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 #include <filesystem>
 
 #include "AddmusicException.hpp"
 #include "SoundEffect.h"
+#include "asarBinding.h"
 
 using namespace AddMusic;
 
-static unsigned int pos;
-static int line;
-static bool triplet;
-static int defaultNoteValue;
-static bool inDefineBlock;
-
 namespace fs = std::filesystem;
 
-#define skipSpaces		\
-while (isspace(text[pos]))	\
-{				\
-	if (text[pos] == '\n')	\
-		line++;		\
-	pos++;			\
-}				\
-
-#define error(str) {				\
-	printError(str, false, name, line);	\
-	continue; }				\
-
-#define error2(str) {				\
-	printError(str, false, name, line);	\
-	return; }				\
-
-
-#define append(value) soundEffects[bank][index].data.push_back(value)
-
-std::string &SoundEffect::getEffectiveName()
+void SoundEffect::parse()
 {
-	if (name == "")
-		return pointName;
-	else
-		return name;
-}
-
-int SoundEffect::getHex()
-{
-	int i = 0;
-	int d = 0;
-	int j;
-
-	while (pos < text.length())
-	{
-		if      ('0' <= text[pos] && text[pos] <= '9') j = text[pos] - 0x30;
-		else if ('A' <= text[pos] && text[pos] <= 'F') j = text[pos] - 0x37;
-		else if ('a' <= text[pos] && text[pos] <= 'f') j = text[pos] - 0x57;
-		else break;
-		pos++;
-		d++;
-		i = (i*16) + j;
-	}
-	if (d == 0) return -1;
-
-	return i;
-}
-
-int SoundEffect::getInt()
-{
-	if (pos >= text.length()) return -1;
-	//if (text[pos] == '$') { pos++; return getHex(); }	// Allow for things such as t$20 instead of t32.
-
-	int i = 0;
-	int d = 0;
-
-	while (text[pos] >= '0' && text[pos] <= '9')
-	{
-		d++;
-		i = (i * 10) + text[pos] - '0';
-		pos++;
-		if (pos >= text.length()) break;
-	}
-
-	if (d == 0) return -1; else return i;
-}
-
-int SoundEffect::getPitch(int letter, int octave)
-{
-	static const int pitches[] = {9, 11, 0, 2, 4, 5, 7};
-
-	letter = pitches[letter - 0x61] + (octave - 1) * 12 + 0x80;
-
-	pos++;
-	if (text[pos] == '+') {letter++; pos++;}
-	else if (text[pos] == '-') {letter--; pos++;}
-	if (letter < 0x80)
-		return -1;
-	if (letter >= 0xC6)
-		return -2;
-
-	return letter;
-}
-
-int SoundEffect::getNoteLength(int i)
-{
-	i = getInt();
-	if (i == -1 && text[pos] == '=')
-	{
-		pos++;
-		i = getInt();
-		if (i == -1)
-			printError("Error parsing note length.", false, name, line);
-		return i;
-	}
-
-	if (i < 1 || i > 192) i = defaultNoteValue;
-	i = 192 / i;
-
-	int frac = i;
-
-	while (text[pos] == '.')
-	{
-		frac = frac / 2;
-		i += frac;
-		pos++;
-	}
-
-	if (triplet)
-		i = (int) floor(((double)i * 2.0 / 3.0) + 0.5);
-	return i;
-}
-
-void SoundEffect::compile()
-{
-	
 	text += "                   ";
 	int version = 0;			// Unused for sound effects for now.
-	preprocess(text, name, version);
+	preprocess();
+
+	// Initializing static variables
 	pos = 0;
 	line = 0;
 	triplet = false;
-	defaultNoteValue = 8;
+	defaultNoteLength = 8;
 	inDefineBlock = false;
 
-
-	unsigned int instr = -1;
-	int lastNote = -1;
+	unsigned int instr = -1;			// Current instrument
+	unsigned char lastNote = -1;		// 
 	bool firstNote = true;
 	bool pitchSlide = false;
 	int octave = 4;
-	int lastNoteValue = -1;
+	unsigned char lastNoteValue = -1;
 	int volume[2] = {0x7F, 0x7F};
+	unsigned char i8, j8;
 	int i, j;
-	bool updateVolume = false;
-	bool inComment = false;
+	bool updateVolume = false;			// Adjust the volume of the next note.
+	bool inComment = false;				// Ignore the line, it is commented (comment with a colon ;).
 
-	
+	// Main parsing routine
 	while (pos < text.size())
 	{
+		// End a comment after a line break
 		if (text[pos] == '\n')
 			inComment = false;
+		
+		// Ignore the following parsing if a comment is detected.
 		else if (inComment == true)
 			pos++;
-
 		if (inComment)
 			continue;
 
+		// Parsing
 		switch (text[pos])
 		{
+
+		// Preprocessor directives.
 		case '#':
+			// #asm -> parseASM
 			if (text.substr(pos+1, 3) == "asm")
 				parseASM();
+			
+			// #jsr -> parseJSR
 			else if (text.substr(pos+1, 3) == "jsr")
 				parseJSR();
+
+			// #define -> parseDefine
 			else if (text.substr(pos+1, 6) == "define")
 				parseDefine();
+			
+			// #undef -> parseUndef
 			else if (text.substr(pos+1, 5) == "undef")
 				parseUndef();
+			
+			// #ifdef -> parseIfdef
 			else if (text.substr(pos+1, 5) == "ifdef")
 				parseIfdef();
+			
+			// #ifndef -> parseIfndef
 			else if (text.substr(pos+1, 6) == "ifndef")
 				parseIfndef();
+			
+			// #endif -> parseEndif
 			else if (text.substr(pos+1, 5) == "endif")
 				parseEndif();
 
+			// Another directive is not allowed.
 			else
 			{
 				pos++;
-				error("Channel declarations are not allowed in sound effects.");
+				throw AddmusicException("Channel declarations are not allowed in sound effects.", this);
 			}
 			continue;
+		
+		// Exclamation mark counts as an EOL, I guess?
+		// Command has been deprecated on Music.cpp I see.
 		case '!':
 			pos = ~0;
 			continue;
+		
+		// v{number} -> Volume command. Number is between 0 and 127.
 		case 'v':
 			pos++;
-			i = getInt();
-			if (i == -1)  error("Error parsing volume command.")
-			if (i > 0x7F) error("Volume too high.  Only values from 0 - 127 are allowed.")
+			i = parseInt();
+			if (i == -1) 
+				throw AddmusicException("Error parsing volume command.", this);
+			if (i > 0x7F)
+				throw AddmusicException("Volume too high.  Only values from 0 - 127 are allowed.", this);
 
 			volume[0] = i;
 			volume[1] = i;
-			skipSpaces;
+			skipSpaces();
 
 			if (text[pos] == ',')
 			{
 				pos++;
-				skipSpaces;
-				i = getInt();
-				if (i == -1) error("Error parsing volume command.")
-				if (i > 0x7F) error("Illegal value for volume command.  Only values between 0 and 127 are allowed.")
+				skipSpaces();
+				i = parseInt();
+				if (i == -1)
+					throw AddmusicException("Error parsing volume command.", this);
+				if (i > 0x7F)
+				throw AddmusicException("Illegal value for volume command.  Only values between 0 and 127 are allowed.", this);
 				volume[1] = i;
 			}
 
 			updateVolume = true;
 			break;
+		
+		// i{number} -> Adjust the length of following notes.
 		case 'l':
 			pos++;
-			i = getInt();
-			if (i == -1) { printError("Error parsing 'l' directive.", false, name, line); continue; }
-			if (i > 192) { printError("Illegal value for 'l' directive.", false, name, line); continue; }
-			defaultNoteValue = i;
+			i = parseInt();
+			if (i == -1) { throw AddmusicException("Error parsing 'l' directive.", false, this); continue; }
+			if (i > 192) { throw AddmusicException("Illegal value for 'l' directive.", false, this); continue; }
+			defaultNoteLength = i;
 			break;
 
+		// @{number} -> Adjust the patch number.
 		case '@':
 			pos++;
-			i = getInt();
-			if (i <  0x00) error("Error parsing instrument ('@') command.");
-			if (i > 0x7F) error("Illegal value for instrument ('@') command.")
+			i = parseInt();
+			if (i <  0x00)
+				throw AddmusicException("Error parsing instrument ('@') command.", this);
+			if (i > 0x7F)
+				throw AddmusicException("Illegal value for instrument ('@') command.", this);
 
 			j = -1;
 
-			skipSpaces;
+			skipSpaces();
 
 			if (text[pos] == ',')
 			{
 				pos++;
-				skipSpaces;
-				j = getInt();
-				if (j < 0) error("Error parsing noise instrument ('@,') command.")
-				if (j > 0x1F) error("Illegal value for noise instrument ('@,') command.  Only values between 0 and 31")
+				skipSpaces();
+				j = parseInt();
+				if (j < 0)
+					throw AddmusicException("Error parsing noise instrument ('@,') command.", this);
+				if (j > 0x1F)
+					throw AddmusicException("Illegal value for noise instrument ('@,') command.  Only values between 0 and 31", this);
 			}
 
-
 			append(0xDA);
-			if (j != -1) append(0x80 | j);
+			if (j != -1)
+				append(0x80 | j);
 			append(i);
 			instr = i;
 			break;
 
+		// o{number} -> Changes the octave of the following notes.
 		case 'o':
 			pos++;
-			i = getInt();
-			if (i == -1) error("Error parsing octave directive.")
-			if (i < 0 || i > 6) error("Illegal value for octave command.")
+			i = parseInt();
+			if (i == -1)
+				throw AddmusicException("Error parsing octave directive.", this);
+			if (i < 0 || i > 6)
+				throw AddmusicException("Illegal value for octave command.", this);
 
 			octave = i;
 			break;
 
+		// ${number} -> Hex command. It's inserted directly into the SFX binary.
 		case '$':
 			pos++;
-			i = getHex();
-			if (i == -1) error("Error parsing hex command.")
-			if (i > 0xFF) error("Illegal hex value.")
+			i = parseHex();
+			if (i == -1)
+				throw AddmusicException("Error parsing hex command.", this);
+			if (i > 0xFF)
+				throw AddmusicException("Illegal hex value.", this);
 
 			append(i);
 
 			break;
 
+		// > -> Increases the octave in one step for the following notes.
 		case '>':
 			pos++;
-			if (++octave > 6) error("Illegal octave reached via '>' directive.")
+			if (++octave > 6)
+				throw AddmusicException("Illegal octave reached via '>' directive.", this);
 			break;
 
+		// > -> Decreases the octave in one step for the following notes.
 		case '<':
 			pos++;
-			if (--octave < 1) error("Illegal octave reached via '<' directive.")
+			if (--octave < 1)
+				throw AddmusicException("Illegal octave reached via '<' directive.", this);
 			break;
 
+		// { -> Enables a triplet block
 		case '{':
-			if (triplet) error("Triplet enable directive specified in a triplet block.");
+			if (triplet)
+				throw AddmusicException("Triplet enable directive specified in a triplet block.", this);
 			triplet = true;
 			break;
 
+		// { -> Disables a triplet block
 		case '}':
-			if (!triplet) error("Triplet disable directive specified outside a triplet block.");
+			if (!triplet)
+				throw AddmusicException("Triplet disable directive specified outside a triplet block.", this);
 			triplet = false;
 			break;
 
+		// Actual notes:
+		// [a-g] -> white notes
+		// r -> rest
+		// ^ -> tied note
+		// Most of the data insertion happens here.
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'r': case '^':
-			j = text[pos];
+			j = text[pos];	// Character
 
 			if (j == 'r')
 				i = 0xC7, pos++;
 			else if (j == '^')
 				i = 0xC6, pos++;
 			else
-				i = getPitch(j, octave);
+				i = parsePitch(j, octave);
 
-			if (i < 0) i = 0xC7;
+			if (i < 0)
+				i = 0xC7;
 
+			j = parseNoteLength(defaultNoteLength);
 
-			j = getNoteLength(defaultNoteValue);
+			if (i == lastNoteValue && !updateVolume)
+				i = 0;
 
-			if (i == lastNoteValue && !updateVolume) i = 0;
-
+			// You can make a pitch bend with the & character.
 			if (i != 0xC6 && i != 0xC7 && (text[pos] == '&' || pitchSlide))
 			{
 				pitchSlide = true;
@@ -425,28 +366,32 @@ void SoundEffect::compile()
 
 		default:
 			if (!isspace(text[pos]))
-				printWarning(std::string("Warning: Unexpected symbol '") + text[pos] + std::string("'found."), name, line);
+				throw AddmusicException(std::string("Warning: Unexpected symbol '") + text[pos] + std::string("'found."), false, this);
+
 			pos++;
 			break;
 
 		}
 
-
-
 	}
-	if (soundEffects[bank][index].add0) append(0x00);
-	compileASM();
 
+	// TODO: Transform this global directive into something local.
+	/*
+	if (soundEffects[bank][index].add0)
+		append(0x00);
+	*/
 
+	// compileASM();
 }
 
 void SoundEffect::parseASM()
 {
+
 	pos+=4;
 	if (isspace(text[pos]) == false)
-		error2("Error parsing asm directive.")
+		throw AddmusicException("Error parsing asm directive.", this);
 
-	skipSpaces;
+	skipSpaces();
 
 	std::string tempname;
 
@@ -458,28 +403,26 @@ void SoundEffect::parseASM()
 		tempname += text[pos++];
 	}
 
-	skipSpaces;
+	skipSpaces();
 
 	if (text[pos] != '{')
-		error2("Error parsing asm directive.")
+		throw AddmusicException("Error parsing asm directive.", this);
 
 	int startPos = ++pos;
 
 	while (text[pos] != '}')
 	{
 		if (pos >= text.length())
-			error2("Error parsing asm directive.")
+			throw AddmusicException("Error parsing asm directive.", this);
 
 		pos++;
 	}
 
 	int endPos = pos;
-
 	pos++;
 
 	asmStrings.push_back(text.substr(startPos, endPos - startPos));
 	asmNames.push_back(tempname);
-
 }
 
 void SoundEffect::compileASM()
@@ -493,17 +436,35 @@ void SoundEffect::compileASM()
 		codePositions.push_back(code.size());
 
 		std::stringstream asmCode;
-		fs::remove("temp.bin");
-		fs::remove("temp.asm");
-		asmCode << "arch spc700-raw\n\norg $000000\nincsrc \"" << "asm/main.asm" << "\"\nbase $" << hex4 << posInARAM + code.size() + data.size() << "\n\norg $008000\n\n" << asmStrings[i];
-		writeTextFile("temp.asm", asmCode.str());
+		asmCode << 
+			"arch spc700-raw\n\n"
 
-		if (!asarCompileToBIN("temp.asm", "temp.bin"))
-			error2("asar reported an error.  Refer to temp.log for details.");
+			"org $000000\n" 
+			"incsrc \"asm/main.asm\"\n"
+			"base $" << hex4 << posInARAM + code.size() + data.size() << "\n\n"
+			
+			"org $008000\n\n" <<
 
-		std::vector<uint8_t> temp;
+			asmStrings[i];
+		
+		AsarBinding asar {asmCode.str(), "."};
+		try
+		{
+			asar.compileToBin();
+		}
+		catch(const AsarException& e)
+		{
+			throw AddmusicException(std::string("Asar error: ") + e.what());
+		}
+		
+		// writeTextFile("temp.asm", asmCode.str());
 
-		openFile("temp.bin", temp);
+		// if (!asarCompileToBIN("temp.asm", "temp.bin"))
+		// 	throw fileError("asar reported an error.  Refer to temp.log for details.", AddmusicErrorcode::COMPILEASM_ERROR, false);
+
+		std::vector<uint8_t> temp {asar.getCompiledBin()};
+
+		// openFile("temp.bin", temp);
 
 		temp.erase(temp.begin(), temp.begin() + 0x08000);
 
@@ -524,7 +485,7 @@ void SoundEffect::compileASM()
 		}
 
 		if (k == -1)
-			error2("Could not match asm and jsr names.");
+			throw AddmusicException("Could not match asm and jsr names.", false, this);
 
 		data[jmpPoses[k]] = (posInARAM + data.size() + codePositions[k]) & 0xFF;
 		data[jmpPoses[k]+1] = (posInARAM + data.size() + codePositions[k]) >> 8;
@@ -535,9 +496,9 @@ void SoundEffect::parseJSR()
 {
 	pos+=4;
 	if (isspace(text[pos]) == false)
-		error2("Error parsing jsr command.")
+		throw AddmusicException("Error parsing jsr command.", false, this);
 
-	skipSpaces;
+	skipSpaces();
 
 	std::string tempname;
 
@@ -559,7 +520,7 @@ void SoundEffect::parseJSR()
 void SoundEffect::parseDefine()
 {
 	pos += 7;
-	skipSpaces;
+	skipSpaces();
 	std::string defineName;
 	while (!isspace(text[pos]) && pos < text.length())
 	{
@@ -568,7 +529,7 @@ void SoundEffect::parseDefine()
 
 	for (unsigned int z = 0; z < defineStrings.size(); z++)
 		if (defineStrings[z] == defineName)
-			error2("A string cannot be defined more than once.");
+			throw AddmusicException("A string cannot be defined more than once.", false, this);
 
 	defineStrings.push_back(defineName);
 }
@@ -576,7 +537,7 @@ void SoundEffect::parseDefine()
 void SoundEffect::parseUndef()
 {
 	pos += 6;
-	skipSpaces;
+	skipSpaces();
 	std::string defineName;
 	while (!isspace(text[pos]) && pos < text.length())
 	{
@@ -587,8 +548,7 @@ void SoundEffect::parseUndef()
 		if (defineStrings[z] == defineName)
 			goto found;
 
-
-	error2("The specified string was never defined.");
+	throw AddmusicException("The specified string was never defined.", false, this);
 
 found:
 	defineStrings[z].clear();
@@ -598,7 +558,7 @@ void SoundEffect::parseIfdef()
 {
 	pos+=6;
 	inDefineBlock = true;
-	skipSpaces;
+	skipSpaces();
 	std::string defineName;
 	while (!isspace(text[pos]) && pos < text.length())
 	{
@@ -616,7 +576,7 @@ void SoundEffect::parseIfdef()
 	temp = text.find("#endif", pos);
 
 	if (temp == -1)
-		error2("#ifdef was missing a matching #endif.");
+		throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
 
 	pos = temp;
 found:
@@ -627,7 +587,7 @@ void SoundEffect::parseIfndef()
 {
 	pos+=7;
 	inDefineBlock = true;
-	skipSpaces;
+	skipSpaces();
 	std::string defineName;
 	while (!isspace(text[pos]) && pos < text.length())
 	{
@@ -639,25 +599,22 @@ void SoundEffect::parseIfndef()
 	for (unsigned int z = 0; z < defineStrings.size(); z++)
 		if (defineStrings[z] == defineName)
 			goto found;
-
 	return;
 
 found:
 	int temp = text.find("#endif", pos);
 
 	if (temp == -1)
-		error2("#ifdef was missing a matching #endif.");
+		throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
 
 	pos = temp;
-
-
 }
 
 void SoundEffect::parseEndif()
 {
 	pos += 6;
 	if (inDefineBlock == false)
-		error2("#endif was found without a matching #ifdef or #ifndef")
+		throw AddmusicException("#endif was found without a matching #ifdef or #ifndef", false, this);
 	else
 		inDefineBlock = false;
 }

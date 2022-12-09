@@ -1,12 +1,14 @@
 #pragma once
 
 // Grab yer ducktape, folks!
+/*
 #ifdef _WIN32
 #define strnicmp _strnicmp
 #else
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 #endif
+*/
 
 #define AMKVERSION 		1
 #define AMKMINOR 		0
