@@ -6,6 +6,8 @@
 #include <iterator>
 #include <string>
 #include <filesystem>
+#include <regex>
+#include <cstdlib>
 
 #define BASE64_ENCODE_OUT_SIZE(s) ((unsigned int)((((s) + 2) / 3) * 4 + 1))
 #define BASE64_DECODE_OUT_SIZE(s) ((unsigned int)(((s) / 4) * 3))
@@ -56,6 +58,36 @@ inline void writeTextFile(const fs::path &fileName, const std::string &str)
 	std::copy(str.begin(), str.end(), std::ostream_iterator<char>(ofs));
 	ofs.close();
 }
+
+/**
+ * @brief Search a $XXXX (hexadecimal) formatted number after a "needle" string.
+ * The needle can also be a regular expression pattern.
+ */
+inline int scanInt(const std::string &str, const std::string &needle)
+{
+	std::regex pattern (needle + R"(\s*\$([A-Fa-f0-9]{1,4}))");
+	std::smatch matches;
+
+	int n = 0;
+
+	// We could use a not-null end_ptr on strtoul but it would only be useful on
+	// undefined behavior.
+	if (std::regex_match(str, matches, pattern))
+		return std::strtoul(matches[1].str().c_str(), NULL, 16);
+	else
+		throw AddmusicException(std::string("Error: Could not find \"") + needle + "\"", true);
+}
+
+/**
+ * @brief Recursively copies a folder and its contents. Will overwrite files
+ * and directory contents, but won't delete any new files in dst.
+ */
+void copyDir(const fs::path& src, const fs::path& dst);
+
+/**
+ * @brief Recursively deletes a folder and its contents. 
+ */
+void deleteDir(const fs::path& dir_path);
 
 /**
  * @brief Function that encodes a byte stream into a null-terminated, base64

@@ -59,6 +59,11 @@ public:
 	bool compileToBin();
 
 	/**
+	 * @brief Compiles the file and stores the binary immediatly.
+	 */
+	bool compileToFile(const fs::path& destfile);
+
+	/**
 	 * @brief Patches a certain ROM with the assembly data this object was
 	 * built with. By default it will overwrite the ROM file, but if `overwrite`
 	 * is set as false, it will generate a new, patched, ROM file with an unique
@@ -73,6 +78,16 @@ public:
 	 * vector if nothing has been generated yet.
 	 */
 	std::vector<uint8_t> getCompiledBin() const;
+
+	/**
+	 * @brief Get the result of the compiled program's size.
+	 */
+	size_t getProgramSize() const;
+
+	/**
+	 * @brief Tells whether the last Asar process had errors. 
+	 */
+	bool hasErrors() const;
 
 	/**
 	 * @brief Get the errors thrown by the last time Asar was run.

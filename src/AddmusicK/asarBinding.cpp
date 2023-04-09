@@ -26,7 +26,7 @@ AsarBinding(const fs::path& file) :
 	_patchfilename(file),
 	is_using_tmpfile(false)
 {
-	// TODO
+	// Do nothing. The input file is already there.
 }
 
 AsarBinding::~AsarBinding()
@@ -67,6 +67,15 @@ bool AsarBinding::compileToBin()
 	
 	_compiledbin.assign(binOutput.get(), binOutput.get() + binlen);
 	return true;
+}
+
+bool AsarBinding::compileToFile(const fs::path& destfile)
+{
+	bool compilation_result = compileToBin();
+	if (compilation_result)
+		writeBinaryFile(destfile, _compiledbin);
+	else
+		return false;
 }
 
 // bool asarCompileToBIN(const File &patchName, const File &binOutputFile, bool dieOnError);
@@ -140,4 +149,14 @@ std::string AsarBinding::getStdout() const
 	for (const std::string& msg : asar_stdout)
 		retval += msg + std::endl;
 	return retval;
+}
+
+bool AsarBinding::hasErrors() const
+{
+	return (asar_stderr.size() > 0);
+}
+
+size_t AsarBinding::getProgramSize() const
+{
+	return _compiledbin.size();
 }

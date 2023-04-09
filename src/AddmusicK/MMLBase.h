@@ -78,9 +78,10 @@ protected:
 
 	// PARSER
 	std::string text;			// File contents
-	unsigned int pos {0};			// Parser position
-	int line {1};					// Parser line
+	unsigned int pos 	{0};	// Parser position
+	int line 			{1};	// Parser line
 	fs::path filename;			// File path
+	std::string name;			// Name, as assigned by the legacy lists.
 
 	int addmusicversion {0};	// AddMusic version of this file (retrieved at preprocessing)
 

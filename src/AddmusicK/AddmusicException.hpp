@@ -6,44 +6,11 @@
 #include <string>
 #include <filesystem>
 
+#include "MMLBase.h"
+
 namespace AddMusic {
 
 class MMLBase;
-
-// /**
-//  * @brief Type of errors that can be thrown by AddmusicException.
-//  */
-// enum class AddmusicErrorcode
-// {
-// 	SUCCESS = 0,				// No problem
-// 	UNKNOWN,					// Unknown error
-
-// 	PARSING_ERROR,				// Error when parsing
-// 	PARSEASM_ERROR,				// Error when parsing ASM
-// 	COMPILEASM_ERROR,			// Error when compiling ASM
-// 	PREPROCESSING_ERROR,		// Error when preprocessing
-// 	GETQUOTED_ERROR,			// Error on the getQuotedString function
-// };
-
-// /**
-//  * @brief Handmade method to turn an AddmusicException to a string.
-//  */
-// constexpr const char* addmusicErrorcodeToString(AddmusicErrorcode e) throw ()
-// {
-//     switch (e)
-//     {
-//         case AddmusicErrorcode::SUCCESS: 				return "SUCCESS";
-//         case AddmusicErrorcode::UNKNOWN: 				return "UNKNOWN";
-
-//         case AddmusicErrorcode::PARSING_ERROR: 			return "PARSING_ERROR";
-//         case AddmusicErrorcode::PARSEASM_ERROR: 		return "PARSEASM_ERROR";
-//         case AddmusicErrorcode::COMPILEASM_ERROR: 		return "COMPILEASM_ERROR";
-//         case AddmusicErrorcode::PREPROCESSING_ERROR: 	return "PREPROCESSING_ERROR";
-//         case AddmusicErrorcode::GETQUOTED_ERROR: 		return "GETQUOTED_ERROR";
-
-//         default: throw std::invalid_argument("Unimplemented item");
-//     }
-// }
 
 /**
  * @brief Exception throwable by a component of the AddMusic program or library,

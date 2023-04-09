@@ -16,6 +16,8 @@ namespace AddMusic
  */
 class SoundEffect : public MMLBase
 {
+	friend class SPCEnvironment;
+
 public:
 	SoundEffect(void)
 	{
@@ -56,6 +58,9 @@ private:
 	bool add0;								// Add a zero at the end of the binary data.
 	bool exists;							// Initialized?
 	int posInARAM;							// Position in ARAM
+
+	int bank;
+	int index;
 
 	// Parser sub-methods
 	void parseASM();						// Generates the strings which will compiled afterwards

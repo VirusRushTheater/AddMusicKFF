@@ -17,7 +17,7 @@ void MMLBase::preprocess()
 	
 	unsigned int i = 0;					// String cursor
 	int level = 0;		
-	std::string newstr;					// Temporary string for quoted variables
+	std::string newstr;					// Temporary string to hold the preprocessed "text"
 	bool okayToAdd = true;			
 
 	std::string& str = text;			// Alias of "file content" to handle the previous implementation of "preprocess"
