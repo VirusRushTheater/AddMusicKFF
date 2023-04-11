@@ -29,6 +29,8 @@ struct SpaceInfo
 
 class Music : public MMLBase
 {
+	friend class SPCEnvironment;
+
 public:
 	Music();
 	Music(fs::path path);
@@ -37,6 +39,8 @@ public:
 	void compile();
 	void init();
 	bool doReplacement();
+
+	void parse();
 
 private:
 	// =======================================================================
@@ -303,6 +307,16 @@ private:
 	void addSampleGroup(const fs::path &groupName, Music *music);
 	void addSampleBank(const fs::path &fileName, Music *music);
 	int getSample(const fs::path &name, Music *music);
+
+	inline void append (uint8_t value)
+	{
+		data[channel].push_back(value);
+	}
+
+	inline void append (std::initializer_list<uint8_t> values)
+	{
+		data[channel].insert(data[channel].end(), values);
+	}
 };
 
 }
