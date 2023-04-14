@@ -14,24 +14,145 @@ using namespace AddMusic;
 constexpr const char DEFAULT_SRC_FOLDER[] {"asm"};
 constexpr const char DEFAULT_BUILD_FOLDER[] {"build"};
 
-SPCEnvironment::SPCEnvironment(const fs::path& work_dir) :
-	verbose(true),
-	
+// Default file names
+constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
+constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
+constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
+
+SPCEnvironment::SPCEnvironment(const fs::path& rom_path, const fs::path& work_dir) :
+	rom_path(rom_path),
 	work_dir(work_dir),
 	src_dir(work_dir / DEFAULT_SRC_FOLDER),	
 	build_dir(work_dir / DEFAULT_BUILD_FOLDER)
 {
 	if (!fs::exists(src_dir))
 		throw fs::filesystem_error("ASM source directory not found", src_dir, std::error_code());
+	
+	if (!fs::exists(rom_path))
+		throw fs::filesystem_error("ROM file not found", rom_path, std::error_code());
+
+	// Reads the ROM content here.
+	readBinaryFile(rom_path, rom);
 
 	// Copies the Source directory into the build directory.
 	copyDir(src_dir, build_dir);
 }
 
-void SPCEnvironment::loadSampleList(const fs::path& samplelist_file)
+SPCEnvironment::SPCEnvironment(const fs::path& rom_path, const fs::path& work_dir, const SPCEnvironmentOptions& opts) :
+	SPCEnvironment(rom_path, work_dir)
+{
+	options = opts;
+}
+
+void SPCEnvironment::loadMusicList()
+{
+	std::string musicFile;
+	readTextFile(work_dir / DEFAULT_SONGLIST_FILENAME, musicFile);
+
+	if (musicFile[musicFile.length()-1] != '\n')
+		musicFile += '\n';
+
+	unsigned int i = 0;
+
+	bool inGlobals = false;
+	bool inLocals = false;
+	bool gettingName = false;
+	int index = -1;
+	int shallowSongCount = 0;
+
+	std::string tempName;
+
+	while (i < musicFile.length())
+	{
+		if (isspace(musicFile[i]) && !gettingName)
+		{
+			i++;
+			continue;
+		}
+
+		if (strncmp(musicFile.c_str() + i, "Globals:", 8) == 0)
+		{
+			inGlobals = true;
+			inLocals = false;
+			i+=8;
+			continue;
+		}
+
+		if (strncmp(musicFile.c_str() + i, "Locals:", 7) == 0)
+		{
+			inGlobals = false;
+			inLocals = true;
+			i+=7;
+			continue;
+		}
+
+		if (!inGlobals && !inLocals)
+			throw AddmusicException("Error: Could not find \"Globals:\" label in list.txt");
+
+		if (index < 0)
+		{
+			if      ('0' <= musicFile[i] && musicFile[i] <= '9') index = musicFile[i++] - '0';
+			else if ('A' <= musicFile[i] && musicFile[i] <= 'F') index = musicFile[i++] - 'A' + 10;
+			else if ('a' <= musicFile[i] && musicFile[i] <= 'f') index = musicFile[i++] - 'a' + 10;
+			else throw AddmusicException("Invalid number in list.txt.");
+
+			index <<= 4;
+
+
+			if      ('0' <= musicFile[i] && musicFile[i] <= '9') index |= musicFile[i++] - '0';
+			else if ('A' <= musicFile[i] && musicFile[i] <= 'F') index |= musicFile[i++] - 'A' + 10;
+			else if ('a' <= musicFile[i] && musicFile[i] <= 'f') index |= musicFile[i++] - 'a' + 10;
+			else if (isspace(musicFile[i])) index >>= 4;
+			else throw AddmusicException("Invalid number in list.txt.");
+
+			if (!isspace(musicFile[i]))
+				throw AddmusicException("Invalid number in list.txt.");
+			if (inGlobals)
+				highestGlobalSong = std::max(highestGlobalSong, index);
+			if (inLocals)
+				if (index <= highestGlobalSong)
+					throw AddmusicException("Error: Local song numbers must be greater than the largest global song number.");
+		}
+		else
+		{
+			if (musicFile[i] == '\n' || musicFile[i] == '\r')
+			{
+				musics[index].name = tempName;
+				if (inLocals && options.justSPCsPlease == false)
+				{
+					readTextFile(work_dir / "music" / tempName, musics[index].text);
+				}
+				musics[index].exists = true;
+				index = -1;
+				i++;
+				shallowSongCount++;
+				gettingName = false;
+				tempName.clear();
+				continue;
+
+			}
+			gettingName = true;
+			tempName += musicFile[i++];
+		}
+	}
+
+	if (verbose)
+		printf("Read in all %d songs.\n", shallowSongCount);
+
+	for (int i = 255; i >= 0; i--)
+	{
+		if (musics[i].exists)
+		{
+			songCount = i+1;
+			break;
+		}
+	}
+}
+
+void SPCEnvironment::loadSampleList()
 {
 	std::string str;
-	readTextFile(samplelist_file, str);
+	readTextFile(work_dir / DEFAULT_SAMPLELIST_FILENAME, str);
 
 	std::string groupName;
 	std::string tempName;
@@ -153,10 +274,10 @@ void SPCEnvironment::loadSampleList(const fs::path& samplelist_file)
 	}
 }
 
-void SPCEnvironment::loadSFXList(const fs::path& sfxlist_file)
+void SPCEnvironment::loadSFXList()
 {
 	std::string str;
-	readTextFile(sfxlist_file, str);
+	readTextFile(work_dir / DEFAULT_SFXLIST_FILENAME, str);
 
 	if (str[str.length()-1] != '\n')
 		str += '\n';
@@ -1294,7 +1415,7 @@ void SPCEnvironment::assembleSNESDriver2()
 	}
 }
 
-void generateMSC()
+void SPCEnvironment::generateMSC()
 {
 	std::string mscname = ((std::string)ROMName).substr(0, (unsigned int)((std::string)ROMName).find_last_of('.'));
 
@@ -1314,3 +1435,4 @@ void generateMSC()
 	}
 	writeTextFile(mscname, text.str());
 }
+
