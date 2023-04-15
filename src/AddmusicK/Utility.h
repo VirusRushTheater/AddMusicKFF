@@ -9,6 +9,8 @@
 #include <regex>
 #include <cstdlib>
 
+#include "AddmusicException.h"
+
 #define BASE64_ENCODE_OUT_SIZE(s) ((unsigned int)((((s) + 2) / 3) * 4 + 1))
 #define BASE64_DECODE_OUT_SIZE(s) ((unsigned int)(((s) / 4) * 3))
 

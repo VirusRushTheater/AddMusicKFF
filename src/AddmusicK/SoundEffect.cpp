@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <filesystem>
 
-#include "AddmusicException.hpp"
+#include "AddmusicException.h"
 #include "SoundEffect.h"
 #include "asarBinding.h"
 
@@ -546,12 +546,12 @@ void SoundEffect::parseUndef()
 	unsigned int z = -1;
 	for (z = 0; z < defineStrings.size(); z++)
 		if (defineStrings[z] == defineName)
-			goto found;
+		{
+			defineStrings[z].clear();
+			return;
+		}
 
 	throw AddmusicException("The specified string was never defined.", false, this);
-
-found:
-	defineStrings[z].clear();
 }
 
 void SoundEffect::parseIfdef()
@@ -571,7 +571,7 @@ void SoundEffect::parseIfdef()
 
 	for (unsigned int z = 0; z < defineStrings.size(); z++)
 		if (defineStrings[z] == defineName)
-			goto found;
+			return;
 
 	temp = text.find("#endif", pos);
 
@@ -579,8 +579,6 @@ void SoundEffect::parseIfdef()
 		throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
 
 	pos = temp;
-found:
-	return;
 }
 
 void SoundEffect::parseIfndef()
@@ -598,16 +596,16 @@ void SoundEffect::parseIfndef()
 
 	for (unsigned int z = 0; z < defineStrings.size(); z++)
 		if (defineStrings[z] == defineName)
-			goto found;
+		{
+			int temp = text.find("#endif", pos);
+			if (temp == -1)
+				throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
+
+			pos = temp;
+			return;
+		}
 	return;
 
-found:
-	int temp = text.find("#endif", pos);
-
-	if (temp == -1)
-		throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
-
-	pos = temp;
 }
 
 void SoundEffect::parseEndif()

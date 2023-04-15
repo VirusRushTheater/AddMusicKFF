@@ -1,23 +1,10 @@
 set(ADDMUSICK_SOURCES
-	AddmusicK_core.cpp
-	lodepng.cpp
-	Music.cpp
-	SoundEffect.cpp
-	Utility.cpp
-	logging.cpp
-	AddmusicK_CLI.cpp
+	asarBinding.cpp
 )
 
 set(ADDMUSICK_HEADERS
-	AddmusicK.hpp
-	AddmusicK_core.hpp
-	logging.hpp
-	BankDefine.h
-	lodepng.h
-	Music.h
-	SampleGroup.h
-	Sample.h
-	SoundEffect.h
+	AddmusicException.h
+	asarBinding.h
 	Utility.h
 )
 
@@ -28,27 +15,12 @@ get_target_property(ASAR_INCLUDE_DIR ${ASAR_LIB_TARGET} INCLUDE_DIRECTORIES)
 # instead of <interface-lib.h> for code readability.
 include_directories(${ASAR_INCLUDE_DIR}/..)
 
-if (ADDMUSICK_BUILD_EXECUTABLE)
-	message(STATUS "AddMusicK set to be built as an executable.")
-	add_executable(AddmusicK
-		${ADDMUSICK_HEADERS}
-		${ADDMUSICK_SOURCES}
-	)
+# AddmusicK will act as a library. CLI and GUI will be built elsewhere.
+add_library(AddmusicK STATIC
+	${ADDMUSICK_SOURCES}
+	${ADDMUSICK_HEADERS}
+)
 
-	# Required AM405Remover (previously built as a static library)
-	# and asar as a library.
-	target_link_libraries(AddmusicK PUBLIC
-		AM405Remover
-
-		${ASAR_LIB_TARGET}
-		cxxopts		# Command line libraries
-	)
-
-	target_include_directories(AddmusicK PUBLIC
-		${ASAR_INCLUDE_DIR}/..
-	)
-
-elseif (ADDMUSICK_BUILD_LIBRARY)
-	message(STATUS "AddMusicK set to be built as a library.")
-	add_library(AddmusicK)
-endif ()
+# Solution to have any application that uses this library to find the include
+# files in this folder.
+target_include_directories(AddmusicK PUBLIC "./")

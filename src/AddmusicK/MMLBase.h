@@ -1,7 +1,8 @@
 #pragma once
 
 #include "defines.h"
-#include "AddmusicException.hpp"
+#include "AddmusicException.h"
+#include "SPCEnvironment.h"
 
 #include <string>
 #include <memory>
@@ -29,8 +30,6 @@ protected:
 	/**
 	 * Preprocess macros and directives. It also processes the AddMusic file
 	 * version of this file.
-	 * 
-	 * TODO: List of directives, for Doxygen.
 	 */
 	void preprocess();
 	
@@ -57,22 +56,6 @@ protected:
 			pos++;
 		}
 	}
-
-	/**
-	 * @brief Exception shortcut which includes filename and line number.
-	 * 
-	 * Usually it's used with lambdas within the methods to omit error_code.
-	 * One of such lambdas can be written like this:
-	 * 
-	 * auto preprocessError = [this](const std::string msg, bool fatality = true)
-	 * {
-	 *     return this->fileError(msg, AddmusicErrorcode::PARSING_ERROR, fatality);
-	 * };
-	 */
-	// inline AddmusicException fileError(const std::string msg, AddmusicErrorcode error_code, bool fatality = true)
-	// {
-	// 	return AddmusicException(msg, error_code, fatality, filename, line);
-	// }
 
 	bool is_open {false};		// File has been opened
 

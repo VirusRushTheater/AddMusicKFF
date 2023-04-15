@@ -43,17 +43,12 @@ public:
 	/**
 	 * @brief Instance SPCEnvironment with the default options.
 	 */
-	SPCEnvironment(const fs::path& rom_path, const fs::path& work_dir);
+	SPCEnvironment(const fs::path& work_dir, const fs::path& src_dir);
 
 	/**
 	 * @brief Instance SPCEnvironment with different options.
 	 */
-	SPCEnvironment(const fs::path& rom_path, const fs::path& work_dir, const SPCEnvironmentOptions& opts);
-	
-	/**
-	 * @brief Prepares the ROM file before hacking music in.
-	 */
-	void prepareROM();
+	SPCEnvironment(const fs::path& work_dir, const fs::path& src_dir, const SPCEnvironmentOptions& opts);
 
 	/**
 	 * @brief Loads the "Addmusic_list.txt" file.

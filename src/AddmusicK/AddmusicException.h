@@ -6,7 +6,7 @@
 #include <string>
 #include <filesystem>
 
-#include "MMLBase.h"
+// #include "MMLBase.h"
 
 namespace AddMusic {
 
@@ -25,6 +25,7 @@ class AddmusicException : public std::exception
 	/**
 	 * Constructor with just an error message and fatality.
 	 */
+	
 	AddmusicException(
 		const std::string& message,
 		bool is_fatal = true,
@@ -35,8 +36,8 @@ class AddmusicException : public std::exception
 		_mmlref(mmlfile_ref)
 	{
 		error_count++;
-		if (mmlfile_ref != nullptr)
-			_locref = std::string(" [@") + mmlfile_ref->filename.filename().string() + " L" + std::to_string(mmlfile_ref->line) + "]";
+		// if (mmlfile_ref != nullptr)
+		// 	_locref = std::string(" [@") + mmlfile_ref->filename.filename().string() + " L" + std::to_string(mmlfile_ref->line) + "]";
 		_completemsg = (_errormsg + _locref);
 		std::exception();
 	}

@@ -37,9 +37,7 @@ public:
 	Music(const std::string& musicdata);
 
 	void compile();
-	void init();
 	bool doReplacement();
-
 	void parse();
 
 private:
@@ -116,8 +114,8 @@ private:
 
 	int resizedChannel;
 
-	double channelLengths[8] 		{};					// How many ticks are in each channel.
-	double loopLengths[0x10000] 	{};					// How many ticks are in each loop.
+	double channelLengths[8] 		{0};				// How many ticks are in each channel.
+	double loopLengths[0x10000] 	{0};				// How many ticks are in each loop.
 	double normalLoopLength 		{0};				// How many ticks were in the most previously declared normal loop.
 	double superLoopLength 			{0};				// How many ticks were in the most previously declared super loop.
 	std::vector<std::pair<double, int>> tempoChanges;	// Where any changes in tempo occur. A negative tempo marks the beginning of the main loop, if an intro exists.
@@ -145,20 +143,20 @@ private:
 	int i 							{0};
 	int j 							{0};
 
-	bool noMusic[8][2]				{};
-	bool passedIntro[8]				{};
-	bool passedNote[8]				{};
-	unsigned short phrasePointers[8][2] {};
+	bool noMusic[8][2]				{0};
+	bool passedIntro[8]				{0};
+	bool passedNote[8]				{0};
+	unsigned short phrasePointers[8][2] {0};
 
-	int q[9]						{};
-	int instrument[9]				{};
-	bool updateQ[9]					{};
-	bool usingFA[9]					{};
-	bool usingFC[9]					{};
-	int lastFAGainValue[9]			{};
+	int q[9]						{0};
+	int instrument[9]				{0};
+	bool updateQ[9]					{0};
+	bool usingFA[9]					{0};
+	bool usingFC[9]					{0};
+	int lastFAGainValue[9]			{0};
 	//int lastFADelayValue[8];
-	int lastFCGainValue[9]			{};
-	int lastFCDelayValue[9]			{};
+	int lastFCGainValue[9]			{0};
+	int lastFCDelayValue[9]			{0};
 
 	bool hasIntro					{false};
 	bool doesntLoop					{false};
@@ -169,8 +167,8 @@ private:
 	int currentHex 					{0};
 	int hexLeft 					{0};
 
-	int transposeMap[256]			{};
-	bool usedSamples[256]			{};		// Holds a record of which samples have been used for this song.
+	int transposeMap[256]			{0};
+	bool usedSamples[256]			{0};		// Holds a record of which samples have been used for this song.
 
 	bool ignoreTuning[9];	// Used for AM4 compatibility.  Until an instrument is explicitly declared on a channel, it must not use tuning.
 

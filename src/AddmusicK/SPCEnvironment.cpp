@@ -1,7 +1,7 @@
 #include <cstring>
 #include <algorithm>
 
-#include "AddmusicException.hpp"
+#include "AddmusicException.h"
 #include "asarBinding.h"
 #include "SPCEnvironment.h"
 #include "Utility.h"
@@ -11,7 +11,6 @@
 using namespace AddMusic;
 
 // Will be evaluated relatively to work_dir to find source codes.
-constexpr const char DEFAULT_SRC_FOLDER[] {"asm"};
 constexpr const char DEFAULT_BUILD_FOLDER[] {"build"};
 
 // Default file names
@@ -19,26 +18,23 @@ constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
 constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
 constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
 
-SPCEnvironment::SPCEnvironment(const fs::path& rom_path, const fs::path& work_dir) :
-	rom_path(rom_path),
+SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& src_dir) :
 	work_dir(work_dir),
-	src_dir(work_dir / DEFAULT_SRC_FOLDER),	
-	build_dir(work_dir / DEFAULT_BUILD_FOLDER)
+	src_dir(src_dir),	
+	build_dir(src_dir / DEFAULT_BUILD_FOLDER)
 {
+	if (!fs::exists(work_dir))
+		throw fs::filesystem_error("The directory with music has not been found", work_dir, std::error_code());
 	if (!fs::exists(src_dir))
-		throw fs::filesystem_error("ASM source directory not found", src_dir, std::error_code());
+		throw fs::filesystem_error("SPC driver source directory not found", src_dir, std::error_code());
 	
-	if (!fs::exists(rom_path))
-		throw fs::filesystem_error("ROM file not found", rom_path, std::error_code());
-
-	// Reads the ROM content here.
-	readBinaryFile(rom_path, rom);
-
-	// Copies the Source directory into the build directory.
-	copyDir(src_dir, build_dir);
+	// Clean and create an empty "build" directory ([src/build])
+	if (fs::exists(build_dir))
+		deleteDir(build_dir);
+	fs::create_directory(build_dir);
 }
 
-SPCEnvironment::SPCEnvironment(const fs::path& rom_path, const fs::path& work_dir, const SPCEnvironmentOptions& opts) :
+SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& src_dir, const SPCEnvironmentOptions& opts) :
 	SPCEnvironment(rom_path, work_dir)
 {
 	options = opts;
