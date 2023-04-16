@@ -1,7 +1,6 @@
 [submodule "third-party/asar"]
 	path = third-party/asar
 	url = https://github.com/RPGHacker/asar.git
-	branch = 1.81
 [submodule "third-party/loguru"]
 	path = third-party/loguru
 	url = https://github.com/emilk/loguru.git

@@ -1,0 +1,22 @@
+{
+	"files.associations": {
+		"array": "cpp",
+		"bitset": "cpp",
+		"string_view": "cpp",
+		"initializer_list": "cpp",
+		"regex": "cpp",
+		"utility": "cpp"
+	},
+	"search.exclude": {
+		"third-party/**": true
+	},
+	"git.ignoredRepositories": [
+		"asar",
+		"cxxopts",
+		"Catch2",
+		"lodepng",
+		"yaml-cpp",
+		"libarchive",
+		"plog"
+	]
+}

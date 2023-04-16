@@ -1,0 +1,38 @@
+{
+    "tasks": [
+        {
+            "label": "Rebuild everything (debug)",
+            "type": "shell",
+            "command": "rm -rf * && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build .",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Configure (debug)",
+            "type": "shell",
+            "command": "rm -rf * && cmake -DCMAKE_BUILD_TYPE=Debug ..",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Build (debug)",
+            "type": "shell",
+            "command": "cmake --build .",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new"
+            }
+        }
+    ],
+    "options": {
+        "cwd": "${workspaceFolder}/build"
+    },
+    "version": "2.0.0"
+}
