@@ -29,6 +29,17 @@
                 "reveal": "silent",
                 "panel": "new"
             }
+        },
+        {
+            "type": "cmake",
+            "label": "Build Tests",
+            "command": "build",
+            "targets": [
+                "all"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake template build task"
         }
     ],
     "options": {

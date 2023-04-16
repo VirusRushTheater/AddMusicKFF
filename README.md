@@ -35,7 +35,10 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
 
-And compile it. This will copy the executable and the Asar library that will be used together with it into the `deploy` folder.
+And compile it.
 ```
 cmake --build .
 ```
+
+The results will be in a `deploy` folder inside your `build` folder, where the
+program, together with the SPC drivers will be copied.

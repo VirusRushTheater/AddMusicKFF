@@ -8,11 +8,13 @@
 #include "Utility.h"
 
 // ASAR dependencies
-#include <asar-dll-bindings/c/asardll.h>
+// #include <asar-dll-bindings/c/asardll.h>
+#include <asar/interface-lib.h>
 
 using namespace AddMusic;
 
 AsarBinding::AsarBinding(const std::string& patchcontent, const fs::path& environment_dir) :
+	_patchcontent(patchcontent),
 	is_using_tmpfile(true)
 {
 	// Creates a temporary file in the environment_dir of your choice.
@@ -27,7 +29,7 @@ AsarBinding::AsarBinding(const fs::path& file) :
 	_patchfilename(file),
 	is_using_tmpfile(false)
 {
-	// Do nothing. The input file is already there.
+	readTextFile(_patchfilename, _patchcontent);
 }
 
 AsarBinding::~AsarBinding()
@@ -47,10 +49,11 @@ bool AsarBinding::compileToBin()
 	asar_stderr.clear();
 	_compiledbin.clear();
 
-	auto binOutput {std::make_unique< uint8_t[] >(buflen)};		// C++ fashion array allocation. Deletion is automatic, don't worry.
-	// uint8_t *binOutput = (uint8_t *)malloc(buflen);
-	
-	asar_patch(_patchfilename.string().c_str(), (char *)binOutput.get(), buflen, &binlen);
+	// auto binOutput {std::make_unique< uint8_t[] >(buflen)};		// C++ fashion array allocation. Deletion is automatic, don't worry.
+	uint8_t* binOutput = new uint8_t[buflen]();
+
+	std::string abspatch_path = std::filesystem::absolute(_patchfilename).string();
+	asar_patch(abspatch_path.c_str(), (char *)binOutput, buflen, &binlen);
 
 	asar_getprints(&count);
 	for (currentCount = 0; currentCount != count; currentCount++)
@@ -62,11 +65,13 @@ bool AsarBinding::compileToBin()
 
 	if (asar_stderr.size() > 0)
 	{
-		throw AsarException(std::string("ASM compiling with Asar returned errors.") + getStderr());
+		// throw AsarException(std::string("ASM compiling with Asar returned errors.") + getStderr());
 		return false;
 	}
 	
-	_compiledbin.assign(binOutput.get(), binOutput.get() + binlen);
+	_compiledbin.assign(binOutput, binOutput + binlen);
+	delete[] (binOutput);
+	
 	return true;
 }
 
@@ -109,7 +114,7 @@ bool AsarBinding::patchToRom(fs::path rompath, bool overwrite)
 
 	if (asar_stderr.size() > 0)
 	{
-		throw AsarException(std::string("ROM patching with Asar returned errors.") + getStderr());
+		// throw AsarException(std::string("ROM patching with Asar returned errors.") + getStderr());
 		return false;
 	}
 	
@@ -156,6 +161,14 @@ std::string AsarBinding::getStdout() const
 	for (const std::string& msg : asar_stdout)
 		retval += msg + "\n";
 	return retval;
+}
+
+void AsarBinding::printErrors() const
+{
+	if (!hasErrors())
+		return;
+	for (const std::string& msg : asar_stdout)
+		std::cerr << msg << std::endl;
 }
 
 bool AsarBinding::hasErrors() const

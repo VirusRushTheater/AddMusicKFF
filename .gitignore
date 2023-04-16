@@ -2,7 +2,7 @@
 *.exe
 *.spc
 .DS_Store
-# .vscode		# I like my scripts too much.
+.vscode
 
 # Exclude every leftover from Cmake.
 build/

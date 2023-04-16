@@ -90,6 +90,12 @@ public:
 	bool hasErrors() const;
 
 	/**
+	 * @brief Prints all errors to stderr. If the last process didn't throw errors,
+	 * this method does not do anything.
+	 */
+	void printErrors() const;
+
+	/**
 	 * @brief Get the errors thrown by the last time Asar was run.
 	 */
 	std::string getStderr() const;
@@ -100,9 +106,11 @@ public:
 	std::string getStdout() const;
 
 private:
+
 	bool is_using_tmpfile;	// Does it use a temporary file? (will be deleted afterwards)
 
 	std::filesystem::path _patchfilename;	// Path to the patch, can be supplied or auto-generated.
+	std::string _patchcontent;				// Content of the patch.
 	std::vector<uint8_t> _compiledbin;		// Contents of the result of the compilation.
 
 	std::vector<std::string> asar_stdout;	// Whatever returned Asar as result of a normal execution.
