@@ -6,8 +6,17 @@ project(AddMusicK
 	LANGUAGES	C CXX
 )
 
-# Whatever results from compilation, will be copied here.
-set(PROJECT_DEPLOY_DIR				${PROJECT_SOURCE_DIR}/deploy)
+# The compiled program and driver source files will be end up being copied to this folder
+set(PROJECT_DEPLOY_DIR				${CMAKE_BINARY_DIR}/deploy)
+
+# Stuff that will be copied verbatim.
+set(SNES_DRIVER_SRC					${CMAKE_SOURCE_DIR}/src/snes-driver)
+set(ADDMUSICMREMOVER_FILE			${CMAKE_SOURCE_DIR}/src/addmusicMRemover.pl)
+
+# Set the output directories for libraries and executables
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_DEPLOY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_DEPLOY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_DEPLOY_DIR})
 
 # Defining AddMusicK compiling options
 option(ADDMUSICK_COMPILE_AMKGUI
@@ -15,9 +24,12 @@ option(ADDMUSICK_COMPILE_AMKGUI
 OFF)
 option(ADDMUSICK_COMPILE_AM4BATCH
 	"Compile AM4Batch"
-ON)
+OFF)
 option(ADDMUSICK_COMPILE_AMMBATCH
 	"Compile AMMBatch"
+OFF)
+option(ADDMUSICK_COMPILE_TESTS
+	"Compile tests"
 ON)
 
 if (ADDMUSICK_COMPILE_AMKGUI)
@@ -34,7 +46,17 @@ set(ASAR_LIB_TARGET			asar)
 # Branch the build to these directories
 add_subdirectory(third-party)
 add_subdirectory(src)
-add_subdirectory(tests)
+
+# Compile tests
+if (ADDMUSICK_COMPILE_TESTS)
+	add_subdirectory(tests)
+endif()
+
+# Copy the SNES driver source to the deploy folder
+file(COPY ${SNES_DRIVER_SRC} DESTINATION ${PROJECT_DEPLOY_DIR})
+file(COPY ${ADDMUSICMREMOVER_FILE} DESTINATION ${PROJECT_DEPLOY_DIR})
+
+message(STATUS "AddMusicK and the compiling environment will be stored in " ${PROJECT_DEPLOY_DIR})
 
 # Copy the AddMusicK executable to the deploy folder
 # set_target_properties(AddmusicK
@@ -49,3 +71,8 @@ add_subdirectory(tests)
 # 	PROPERTIES
 # 	LIBRARY_OUTPUT_DIRECTORY 	${PROJECT_DEPLOY_DIR}
 # )
+
+# After you run this CMake script, you should have a readily available
+# "deploy" folder with all the programs and components necessary to run
+# AddMusicK.
+
