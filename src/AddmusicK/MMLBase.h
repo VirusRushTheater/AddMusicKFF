@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defines.h"
-#include "AddmusicException.h"
+#include "AddmusicLogging.h"
 #include "SPCEnvironment.h"
 
 #include <string>

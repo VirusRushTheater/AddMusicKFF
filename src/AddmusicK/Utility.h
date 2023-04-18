@@ -9,7 +9,7 @@
 #include <regex>
 #include <cstdlib>
 
-#include "AddmusicException.h"
+#include "AddmusicLogging.h"
 
 #define BASE64_ENCODE_OUT_SIZE(s) ((unsigned int)((((s) + 2) / 3) * 4 + 1))
 #define BASE64_DECODE_OUT_SIZE(s) ((unsigned int)(((s) / 4) * 3))
@@ -77,7 +77,10 @@ inline int scanInt(const std::string &str, const std::string &needle)
 	if (std::regex_match(str, matches, pattern))
 		return std::strtoul(matches[1].str().c_str(), NULL, 16);
 	else
-		throw AddmusicException(std::string("Error: Could not find \"") + needle + "\"", true);
+	{
+		throw AddmusicException(std::string("Error: Could not find \"") + needle + "\"");
+		return 0;
+	}
 }
 
 /**

@@ -4,7 +4,7 @@
 #include <exception>
 #include <cmath>
 
-#include "AddmusicException.h"
+#include "AddmusicLogging.h"
 #include "MMLBase.h"
 
 using namespace AddMusic;

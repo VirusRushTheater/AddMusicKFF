@@ -4,10 +4,10 @@
 #include <memory>
 #include <filesystem>
 
-#include "BankDefine.h"
-#include "SoundEffect.h"
-#include "Sample.h"
-#include "Music.h"
+// #include "BankDefine.h"
+// #include "SoundEffect.h"
+// #include "Sample.h"
+// #include "Music.h"
 
 namespace fs = std::filesystem;
 
@@ -34,10 +34,12 @@ struct SPCEnvironmentOptions
  * were previously defined on the program's argument list; and the environment
  * in which the songs are compiled.
  * 
- * The idea is to store the general sample list and global songs that will be
- * present concurrently to each local song; as well as define the program flow
- * independently from the CLI, in order to make this work on console as well
- * as a graphic environment or as a part of another hacking tool as an API.
+ * The idea is to have the driver source files (driver_srcdir) separated from
+ * the user's music files to avoid confusion and polluting any of these folders
+ * with procedurally generated files.
+ * 
+ * TODO: Will eventually make some way to pack the driver source in compile time
+ * and extract it afterwards. 
  */
 class SPCEnvironment
 {
@@ -52,7 +54,15 @@ public:
 	 */
 	SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir, const SPCEnvironmentOptions& opts);
 
+	/**
+	 * Loads a sample list file.
+	 */
+	void loadSampleList(const fs::path& samplelistfile);
 
+	/**
+	 * Loads a music list file.
+	 */
+	void loadMusicList(const fs::path& musiclistfile);
 private:
 
 	/**
@@ -74,16 +84,6 @@ private:
 	bool noSFX;
 	size_t programSize;
 
-	// int highestGlobalSong;
-	// int songSampleListSize;
-
-	// int songCount {0};
-	// bool checkEcho {true};
-
-	
-	// bool usingSA1;
-	
-	// bool sfxDump;
 };
 
 }

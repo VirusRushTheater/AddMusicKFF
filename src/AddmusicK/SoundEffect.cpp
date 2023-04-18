@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <filesystem>
 
-#include "AddmusicException.h"
+#include "AddmusicLogging.h"
 #include "SoundEffect.h"
 #include "asarBinding.h"
 

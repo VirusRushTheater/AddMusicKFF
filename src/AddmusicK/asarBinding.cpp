@@ -4,6 +4,7 @@
 #include <memory>
 #include <numeric>
 
+#include "AddmusicLogging.h"
 #include "asarBinding.h"
 #include "Utility.h"
 
@@ -65,7 +66,7 @@ bool AsarBinding::compileToBin()
 
 	if (asar_stderr.size() > 0)
 	{
-		// throw AsarException(std::string("ASM compiling with Asar returned errors.") + getStderr());
+		Logging::warning(std::string("ASM compiling with Asar returned errors.") + getStderr());
 		return false;
 	}
 	
@@ -114,7 +115,7 @@ bool AsarBinding::patchToRom(fs::path rompath, bool overwrite)
 
 	if (asar_stderr.size() > 0)
 	{
-		// throw AsarException(std::string("ROM patching with Asar returned errors.") + getStderr());
+		Logging::warning(std::string("ROM patching with Asar returned errors.") + getStderr());
 		return false;
 	}
 	

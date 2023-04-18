@@ -1,11 +1,15 @@
 set(ADDMUSICK_SOURCES
 	asarBinding.cpp
+	Utility.cpp
+	SPCEnvironment.cpp
 )
 
 set(ADDMUSICK_HEADERS
-	AddmusicException.h
+	AddmusicLogging.h
 	asarBinding.h
+	defines.h
 	Utility.h
+	SPCEnvironment.h
 )
 
 # Include Asar dependencies as explained in its git repository

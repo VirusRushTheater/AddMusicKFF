@@ -1,5 +1,5 @@
 #include "ROMEnvironment.h"
-#include "AddmusicException.h"
+#include "AddmusicLogging.h"
 #include "Utility.h"
 
 #include <iostream>
