@@ -34,16 +34,15 @@ class Music : public MMLBase
 public:
 	Music();
 	Music(fs::path path);
-	Music(const std::string& musicdata);
 
-	void compile();
-	bool doReplacement();
-	void parse();
+	void compile(SPCEnvironment* spc_);
 
 private:
 	// =======================================================================
 	// PRIVATE ATTRIBUTES
 	// =======================================================================
+
+	unsigned int errorCount 		{0};
 
 	// Music::Music initializing attributes.
 	bool knowsLength 				{false};
@@ -69,10 +68,16 @@ private:
 
 	std::string name;
 	std::string pathlessSongName;
+	fs::path basepath;
+
 	std::vector<uint8_t> data[9];
 	std::vector<unsigned short> loopLocations[9];	// With remote loops, we can have remote loops in standard loops, so we need that ninth channel.
 	
-	
+	// SPC header info
+	std::string title;
+	std::string author;
+	std::string game;
+	std::string comment;
 	
 	unsigned short loopPointers[0x10000];
 	std::string text;
@@ -95,11 +100,6 @@ private:
 	int echoBufferAllocVCMDChannel;						// Defined on markEchoBufferAllocVCMD
 
 	std::string statStr;								// Printable stats.
-
-	std::string title;
-	std::string author;
-	std::string game;
-	std::string comment;
 
 	int minSize;										// Defined while parsing pad definition
 	
@@ -217,6 +217,7 @@ private:
 	// PRIVATE METHODS
 	// =======================================================================
 
+	bool doReplacement();
 	int divideByTempoRatio(int, bool fractionIsError);	// Divides a value by tempoRatio. Errors out if it can't be done without a decimal (if the parameter is set).
 
 	int multiplyByTempoRatio(int); 		// Multiplies a value by tempoRatio. Errors out if it goes higher than 255.
@@ -314,6 +315,12 @@ private:
 	inline void append (std::initializer_list<uint8_t> values)
 	{
 		data[channel].insert(data[channel].end(), values);
+	}
+
+	inline void musicError(const std::string& msg)
+	{
+		Logging::error(msg, this);
+		errorCount ++;
 	}
 };
 

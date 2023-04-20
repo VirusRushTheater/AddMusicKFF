@@ -15,7 +15,7 @@ namespace AddMusic
 {
 
 /**
- * @brief Base class for any file that might need to be preprocessed, such as
+ * Base class for any file that might need to be preprocessed, such as
  * SoundEffects or Music files.
  */
 class MMLBase
@@ -24,7 +24,7 @@ public:
 	/**
 	 * Purely virtual method to compile a source file.
 	 */
-	virtual void parse() = 0;
+	virtual void compile(SPCEnvironment* spc_) = 0;
 
 protected:
 	/**
@@ -34,7 +34,7 @@ protected:
 	void preprocess();
 	
 	/**
-	 * @brief Gets a piece of string between a pair of quotes starting from startPos.
+	 * Gets a piece of string between a pair of quotes starting from startPos.
 	 * Also returns the raw length of the quoted string in a variable passed by reference.
 	 */
 	std::string getQuotedString(const std::string &string, int startPos, int &rawLength);
@@ -57,7 +57,8 @@ protected:
 		}
 	}
 
-	bool is_open {false};		// File has been opened
+	bool is_open {false};			// File has been opened
+	SPCEnvironment* spc {nullptr};	// What used to be the global variables.
 
 	// PARSER
 	std::string text;			// File contents

@@ -4,7 +4,7 @@
 #include <memory>
 #include <filesystem>
 
-// #include "BankDefine.h"
+#include "BankDefine.h"
 // #include "SoundEffect.h"
 // #include "Sample.h"
 // #include "Music.h"
@@ -23,6 +23,10 @@ struct SPCEnvironmentOptions
 	bool aggressive {false};
 	bool allowSA1 {true};
 	bool verbose {true};
+
+	bool optimizeSampleUsage {true};
+	bool validateHex {true};
+	bool convert {true};
 	
 	bool sfxDump {false};
 };
@@ -43,6 +47,8 @@ struct SPCEnvironmentOptions
  */
 class SPCEnvironment
 {
+	friend class Music;
+
 public:
 	/**
 	 * @brief Instance SPCEnvironment with the default options.
@@ -63,6 +69,8 @@ public:
 	 * Loads a music list file.
 	 */
 	void loadMusicList(const fs::path& musiclistfile);
+
+	SPCEnvironmentOptions options;							// User-defined options.
 private:
 
 	/**
@@ -70,8 +78,6 @@ private:
 	 * Equivalent to assembleSPCDriver()
 	 */
 	bool _assembleSPCDriver1stPass();
-
-	SPCEnvironmentOptions options;							// User-defined options.
 
 	fs::path driver_srcdir;									// Root directory from which driver ASM files will be found.
 	fs::path driver_builddir;								// Directory in which generated driver files will be put.
@@ -84,6 +90,8 @@ private:
 	bool noSFX;
 	size_t programSize;
 
+	// Rest of variables that used to be globals
+	std::vector<std::unique_ptr<BankDefine>> bankDefines;
 };
 
 }

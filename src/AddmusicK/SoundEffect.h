@@ -28,8 +28,7 @@ public:
 
 	std::string &getEffectiveName();		// Returns name or pointName.
 
-	void parse();
-	void compile();
+	void compile(SPCEnvironment* spc_);
 
 protected:
 	inline void append(unsigned char value)

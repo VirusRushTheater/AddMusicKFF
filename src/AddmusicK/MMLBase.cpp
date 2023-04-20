@@ -109,7 +109,7 @@ void MMLBase::preprocess()
 				skipSpaces();
 				std::string temp2 = getArgument(' ', true);
 				if (temp2.length() == 0)
-					throw AddmusicException("#define was missing its argument.", this);
+					Logging::error("#define was missing its argument.", this);
 
 				skipSpaces();
 				std::string temp3 = getArgument(' ', true);
@@ -124,7 +124,7 @@ void MMLBase::preprocess()
 					}
 					catch (...)
 					{
-						throw AddmusicException("Could not parse integer for #define.", this);
+						Logging::error("Could not parse integer for #define.", this);
 					}
 					defines[temp2] = j;
 				}
@@ -139,7 +139,7 @@ void MMLBase::preprocess()
 				skipSpaces();
 				std::string temp2 = getArgument(' ', true);
 				if (temp2.length() == 0)
-					throw AddmusicException("#undef was missing its argument.", this);
+					Logging::error("#undef was missing its argument.", this);
 				defines.erase(temp2);
 			}
 
@@ -151,7 +151,7 @@ void MMLBase::preprocess()
 				skipSpaces();
 				std::string temp2 = getArgument(' ', true);
 				if (temp2.length() == 0)
-					throw AddmusicException("#ifdef was missing its argument.", this);
+					Logging::error("#ifdef was missing its argument.", this);
 
 				okayStatus.push(okayToAdd);
 
@@ -174,7 +174,7 @@ void MMLBase::preprocess()
 				okayStatus.push(okayToAdd);
 
 				if (temp2.length() == 0)
-					throw AddmusicException("#ifndef was missing its argument.", this);
+					Logging::error("#ifndef was missing its argument.", this);
 				if (defines.find(temp2) != defines.end())
 					okayToAdd = false;
 				else
@@ -192,20 +192,20 @@ void MMLBase::preprocess()
 				skipSpaces();
 				std::string temp2 = getArgument(' ', true);
 				if (temp2.length() == 0)
-					throw AddmusicException("#if was missing its first argument.", this);
+					Logging::error("#if was missing its first argument.", this);
 
 				if (defines.find(temp2) == defines.end())
-					throw AddmusicException("First argument for #if was never defined.", this);
+					Logging::error("First argument for #if was never defined.", this);
 
 				skipSpaces();
 				std::string temp3 = getArgument(' ', true);
 				if (temp3.length() == 0)
-					throw AddmusicException("#if was missing its comparison operator.", this);
+					Logging::error("#if was missing its comparison operator.", this);
 
 				skipSpaces();
 				std::string temp4 = getArgument(' ', true);
 				if (temp4.length() == 0)
-					throw AddmusicException("#if was missing its second argument.", this);
+					Logging::error("#if was missing its second argument.", this);
 
 				okayStatus.push(okayToAdd);
 
@@ -216,7 +216,7 @@ void MMLBase::preprocess()
 				}
 				catch (...)
 				{
-					throw AddmusicException("Could not parse integer for #if.", this);
+					Logging::error("Could not parse integer for #if.", this);
 				}
 
 				if (temp3 == "==")
@@ -232,7 +232,7 @@ void MMLBase::preprocess()
 				else if (temp3 == "<=")
 					okayToAdd = (defines[temp2] <= j);
 				else
-					throw AddmusicException("Unknown operator for #if.", this);
+					Logging::error("Unknown operator for #if.", this);
 
 				level++;
 			}
@@ -247,7 +247,7 @@ void MMLBase::preprocess()
 					okayStatus.pop();
 				}
 				else
-					throw AddmusicException("There was an #endif without a matching #ifdef, #ifndef, or #if.", this);
+					Logging::error("There was an #endif without a matching #ifdef, #ifndef, or #if.", this);
 			}
 
 			// #amk{temp}
@@ -259,7 +259,7 @@ void MMLBase::preprocess()
 					std::string temp = getArgument(' ', true);
 					if (temp.length() == 0)
 					{
-						throw AddmusicException("#amk must have an integer argument specifying the version.", false, this);
+						Logging::warning("#amk must have an integer argument specifying the version.", this);
 					}
 					else
 					{
@@ -270,13 +270,13 @@ void MMLBase::preprocess()
 						}
 						catch (...)
 						{
-							throw AddmusicException("Could not parse integer for #amk.", this);
+							Logging::error("Could not parse integer for #amk.", this);
 						}
 
 						addmusicversion = j;
 						if (addmusicversion == 3)
 						{
-							throw AddmusicException("Codec's AddmusicK Beta has not been implemented yet.", this);
+							Logging::error("Codec's AddmusicK Beta has not been implemented yet.", this);
 						}
 					}
 				}
@@ -308,6 +308,27 @@ void MMLBase::preprocess()
 		}
 	}
 
+	if (level != 0)
+		Logging::error("There was an #ifdef, #ifndef, or #if without a matching #endif.", this);
+
+	i = 0;
+	/*
+	if (version != -2)			// For now, skip comment erasing for #amm songs.  #amk songs will follow suit in a later version.
+	{
+
+		while (i < newstr.length())
+		{
+			if (newstr[i] == ';')
+			{
+				while (i < newstr.length() && newstr[i] != '\n')
+					newstr = newstr.erase(i, 1);
+				continue;
+			}
+			i++;
+		}
+	}
+	*/
+
 	// Finishes the deal
 	str = newstr;
 }
@@ -321,7 +342,7 @@ std::string MMLBase::getQuotedString(const std::string &string, int startPos, in
 	{
 		// EOF
 		if (startPos > string.length())
-			throw AddmusicException("Unexpected end of file found.", false, this);
+			Logging::warning("Unexpected end of file found.", this);
 
 		// Ignore quotes if they are escaped.
 		if (string[startPos] == '\\')
@@ -333,7 +354,7 @@ std::string MMLBase::getQuotedString(const std::string &string, int startPos, in
 			}
 			else
 			{
-				throw AddmusicException(R"(Error: The only escape sequence allowed is "\"".)", false, this);
+				Logging::warning(R"(Error: The only escape sequence allowed is "\"".)", this);
 				return retval;
 			}
 		}
@@ -411,7 +432,7 @@ int MMLBase::parseNoteLength(int i)
 		pos++;
 		i = parseInt();
 		if (i == -1)
-			throw AddmusicException("Error parsing note length.", false, this);
+			Logging::warning("Error parsing note length.", this);
 		return i;
 	}
 

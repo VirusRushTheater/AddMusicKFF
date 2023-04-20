@@ -1,7 +1,9 @@
 set(ADDMUSICK_SOURCES
 	asarBinding.cpp
 	Utility.cpp
+
 	SPCEnvironment.cpp
+	MMLBase.cpp
 )
 
 set(ADDMUSICK_HEADERS
@@ -9,7 +11,9 @@ set(ADDMUSICK_HEADERS
 	asarBinding.h
 	defines.h
 	Utility.h
+
 	SPCEnvironment.h
+	MMLBase.h
 )
 
 # Include Asar dependencies as explained in its git repository

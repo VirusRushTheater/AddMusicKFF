@@ -13,8 +13,10 @@ using namespace AddMusic;
 
 namespace fs = std::filesystem;
 
-void SoundEffect::parse()
+void SoundEffect::compile(SPCEnvironment* spc_)
 {
+	spc = spc_;
+
 	text += "                   ";
 	int version = 0;			// Unused for sound effects for now.
 	preprocess();
@@ -131,8 +133,8 @@ void SoundEffect::parse()
 		case 'l':
 			pos++;
 			i = parseInt();
-			if (i == -1) { throw AddmusicException("Error parsing 'l' directive.", false, this); continue; }
-			if (i > 192) { throw AddmusicException("Illegal value for 'l' directive.", false, this); continue; }
+			if (i == -1) { Logging::warning("Error parsing 'l' directive.", this); continue; }
+			if (i > 192) { Logging::warning("Illegal value for 'l' directive.", this); continue; }
 			defaultNoteLength = i;
 			break;
 
@@ -366,7 +368,7 @@ void SoundEffect::parse()
 
 		default:
 			if (!isspace(text[pos]))
-				throw AddmusicException(std::string("Warning: Unexpected symbol '") + text[pos] + std::string("'found."), false, this);
+				Logging::warning(std::string("Warning: Unexpected symbol '") + text[pos] + std::string("'found."), this);
 
 			pos++;
 			break;
@@ -485,7 +487,7 @@ void SoundEffect::compileASM()
 		}
 
 		if (k == -1)
-			throw AddmusicException("Could not match asm and jsr names.", false, this);
+			Logging::warning("Could not match asm and jsr names.", this);
 
 		data[jmpPoses[k]] = (posInARAM + data.size() + codePositions[k]) & 0xFF;
 		data[jmpPoses[k]+1] = (posInARAM + data.size() + codePositions[k]) >> 8;
@@ -496,7 +498,7 @@ void SoundEffect::parseJSR()
 {
 	pos+=4;
 	if (isspace(text[pos]) == false)
-		throw AddmusicException("Error parsing jsr command.", false, this);
+		Logging::warning("Error parsing jsr command.", this);
 
 	skipSpaces();
 
@@ -529,7 +531,7 @@ void SoundEffect::parseDefine()
 
 	for (unsigned int z = 0; z < defineStrings.size(); z++)
 		if (defineStrings[z] == defineName)
-			throw AddmusicException("A string cannot be defined more than once.", false, this);
+			Logging::warning("A string cannot be defined more than once.", this);
 
 	defineStrings.push_back(defineName);
 }
@@ -551,7 +553,7 @@ void SoundEffect::parseUndef()
 			return;
 		}
 
-	throw AddmusicException("The specified string was never defined.", false, this);
+	Logging::warning("The specified string was never defined.", this);
 }
 
 void SoundEffect::parseIfdef()
@@ -576,7 +578,7 @@ void SoundEffect::parseIfdef()
 	temp = text.find("#endif", pos);
 
 	if (temp == -1)
-		throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
+		Logging::warning("#ifdef was missing a matching #endif.", this);
 
 	pos = temp;
 }
@@ -599,7 +601,7 @@ void SoundEffect::parseIfndef()
 		{
 			int temp = text.find("#endif", pos);
 			if (temp == -1)
-				throw AddmusicException("#ifdef was missing a matching #endif.", false, this);
+				Logging::warning("#ifdef was missing a matching #endif.", this);
 
 			pos = temp;
 			return;
@@ -612,7 +614,7 @@ void SoundEffect::parseEndif()
 {
 	pos += 6;
 	if (inDefineBlock == false)
-		throw AddmusicException("#endif was found without a matching #ifdef or #ifndef", false, this);
+		Logging::warning("#endif was found without a matching #ifdef or #ifndef", this);
 	else
 		inDefineBlock = false;
 }
