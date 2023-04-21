@@ -8,6 +8,7 @@
 #include "AddmusicLogging.h"
 #include "SoundEffect.h"
 #include "asarBinding.h"
+#include "SPCEnvironment.h"
 
 using namespace AddMusic;
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "defines.h"
-#include "AddmusicLogging.h"
-#include "SPCEnvironment.h"
-
 #include <string>
 #include <memory>
 #include <fstream>
 #include <filesystem>
+
+#include "defines.h"
+// 
+#include "AddmusicLogging.h"
 
 namespace fs = std::filesystem;
 
@@ -82,9 +82,7 @@ protected:
 	bool inDefineBlock;			// 
 
 	// FRIEND CLASS FOR PRECISE ERROR REPORTING
-	friend class AddmusicException;
-
-private:
+	// friend class AddmusicLogging;
 
 };
 

@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "AddmusicLogging.h"
+#include "SPCEnvironment.h"
 #include "MMLBase.h"
 #include "Utility.h"
 

@@ -1,5 +1,4 @@
-#ifndef _BANKDEFINE_H
-#define _BANKDEFINE_H
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -12,5 +11,3 @@ public:
 	std::vector<std::unique_ptr<const std::string>> samples;
 	std::vector<bool> importants;
 };
-
-#endif

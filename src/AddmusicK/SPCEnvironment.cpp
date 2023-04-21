@@ -68,6 +68,8 @@ bool SPCEnvironment::_assembleSNESDriver()
 	std::string patch;
 	readTextFile(driver_builddir / "asm" / "SNES" / "patch.asm", patch);
 	programUploadPos = scanInt(patch, "!DefARAMRet = ");
+
+	return true;
 }
 
 // Equivalent to assembleSPCDriver()

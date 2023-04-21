@@ -21,15 +21,7 @@ class SoundEffect : public MMLBase
 	friend class SPCEnvironment;
 
 public:
-	SoundEffect(void)
-	{
-		add0 = true;
-		pointsTo = 0;
-		exists = false;
-	}
-
 	std::string &getEffectiveName();		// Returns name or pointName.
-
 	void compile(SPCEnvironment* spc_);
 
 protected:
@@ -55,9 +47,9 @@ private:
 	std::vector<int> jmpPoses;
 
 	// Variables used on the Rom Hack routines.
-	int pointsTo;							// DF9 Pointer storage
-	bool add0;								// Add a zero at the end of the binary data.
-	bool exists;							// Initialized?
+	int pointsTo {0};							// DF9 Pointer storage
+	bool add0 {true};								// Add a zero at the end of the binary data.
+	bool exists {false};							// Initialized?
 	int posInARAM;							// Position in ARAM
 
 	int bank;

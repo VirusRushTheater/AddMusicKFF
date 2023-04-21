@@ -1,9 +1,10 @@
+#include <cmath>
+#include <cstring>
+
 #include "Music.h"
 #include "Utility.h"
 #include "defines.h"
-
-#include <cmath>
-#include <cstring>
+#include "SPCEnvironment.h"
 
 using namespace AddMusic;
 

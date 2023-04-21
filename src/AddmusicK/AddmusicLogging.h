@@ -7,10 +7,7 @@
 #include <filesystem>
 #include <iostream>
 
-// #include "MMLBase.h"
-
 namespace AddMusic {
-
 class MMLBase;
 
 /**

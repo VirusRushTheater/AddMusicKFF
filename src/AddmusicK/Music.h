@@ -13,6 +13,7 @@ namespace AddMusic
 {
 
 namespace fs = std::filesystem;
+
 class SPCEnvironment;
 
 struct SpaceInfo
@@ -35,7 +36,6 @@ class Music : public MMLBase
 
 public:
 	Music();
-	Music(fs::path path);
 
 	void compile(SPCEnvironment* spc_);
 
