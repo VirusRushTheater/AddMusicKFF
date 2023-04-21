@@ -14,6 +14,8 @@ namespace fs = std::filesystem;
 namespace AddMusic
 {
 
+class SPCEnvironment;
+
 /**
  * Base class for any file that might need to be preprocessed, such as
  * SoundEffects or Music files.
@@ -21,6 +23,11 @@ namespace AddMusic
 class MMLBase
 {
 public:
+	/**
+	 * Loads a source file into memory for compiling. 
+	 */
+	void loadFile(fs::path file_path);
+
 	/**
 	 * Purely virtual method to compile a source file.
 	 */

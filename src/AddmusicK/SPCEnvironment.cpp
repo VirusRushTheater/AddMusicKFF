@@ -63,8 +63,15 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_
 	options = opts;
 }
 
+bool SPCEnvironment::_assembleSNESDriver()
+{
+	std::string patch;
+	readTextFile(driver_builddir / "asm" / "SNES" / "patch.asm", patch);
+	programUploadPos = scanInt(patch, "!DefARAMRet = ");
+}
+
 // Equivalent to assembleSPCDriver()
-bool SPCEnvironment::_assembleSPCDriver1stPass()
+bool SPCEnvironment::_assembleSPCDriver()
 {
 	std::string patch;
 	readTextFile(driver_builddir / "asm" / "main.asm", patch);

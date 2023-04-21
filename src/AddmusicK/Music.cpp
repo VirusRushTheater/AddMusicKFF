@@ -622,7 +622,7 @@ void Music::parseSampleLoadCommand()
 
 		s_fs = basepath / s;
 
-		int gs = getSample(s_fs, this);
+		int gs = getSample(s_fs);
 		for (j = 0; j < mySamples.size(); j++)
 		{
 			if (mySamples[j] == gs)
@@ -2238,7 +2238,7 @@ void Music::parseInstrumentDefinitions()
 			pos++;
 			i = -1;
 			brrName_fs = basepath / brrName;
-			int gs = getSample(brrName, this);
+			int gs = getSample(brrName);
 			for (j = 0; j < mySamples.size(); j++)
 			{
 				if (mySamples[j] == gs)
@@ -2368,9 +2368,9 @@ void Music::parseSampleDefinitions()
 				Logging::error("The filename for the sample was missing its extension; is it a .brr or .bnk?", this);
 				extension = tempstr.substr(tmppos);
 			if (extension == ".bnk")
-				addSampleBank(tempstr, this);
+				addSampleBank(tempstr);
 			else if (extension == ".brr")
-				addSample(tempstr, this, true);
+				addSample(tempstr, true);
 			else
 				Logging::error("The filename for the sample was invalid.  Only \".brr\" and \".bnk\" are allowed.", this);
 
@@ -2387,7 +2387,7 @@ void Music::parseSampleDefinitions()
 				pos++;
 			}
 
-			addSampleGroup(tempstr, this);
+			addSampleGroup(tempstr);
 		}
 		else if (text[pos] == '}')
 			break;
@@ -2721,16 +2721,16 @@ void Music::pointersFirstPass()
 
 	if (spc->options.optimizeSampleUsage)
 	{
-		int emptySampleIndex = getSample("EMPTY.brr", this);
+		int emptySampleIndex = getSample("EMPTY.brr");
 		if (emptySampleIndex == -1)
 		{
-			addSample("EMPTY.brr", this, true);
-			emptySampleIndex = getSample("EMPTY.brr", this);
+			addSample("EMPTY.brr", true);
+			emptySampleIndex = getSample("EMPTY.brr");
 		}
 
 
 		for (i = 0; i < mySamples.size(); i++)
-		if (usedSamples[i] == false && samples[mySamples[i]].important == false)
+		if (usedSamples[i] == false && spc->samples[mySamples[i]].important == false)
 			mySamples[i] = emptySampleIndex;
 	}
 
@@ -2916,16 +2916,16 @@ void Music::pointersFirstPass()
 	int spaceUsedBySamples = 0;
 	for (i = 0; i < mySamples.size(); i++)
 	{
-		spaceUsedBySamples += 4 + samples[mySamples[i]].data.size();	// The 4 accounts for the space used by the SRCN table.
+		spaceUsedBySamples += 4 + spc->samples[mySamples[i]].data.size();	// The 4 accounts for the space used by the SRCN table.
 	}
 
-	if (verbose)
+	if (spc->options.verbose)
 		std::cout << name << " total size: 0x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << totalSize << " bytes" << std::dec << std::endl;
 	else
 		printChannelDataNonVerbose(totalSize);
 	//for (int z = 0; z <= 8; z++)
 	//{
-	if (verbose)
+	if (spc->options.verbose)
 	{
 		printf("\t#0: 0x%03X #1: 0x%03X #2: 0x%03X #3: 0x%03X Ptrs+Instrs: 0x%03X\n\t#4: 0x%03X #5: 0x%03X #6: 0x%03X #7: 0x%03X Loop:        0x%03X \n", (unsigned int)data[0].size(), (unsigned int)data[1].size(), (unsigned int)data[2].size(), (unsigned int)data[3].size(), spaceForPointersAndInstrs, (unsigned int)data[4].size(), (unsigned int)data[5].size(), (unsigned int)data[6].size(), (unsigned int)data[7].size(), (unsigned int)data[8].size());
 
@@ -2951,7 +2951,7 @@ void Music::pointersFirstPass()
 	statStrStream << "ECHO SIZE:				0x" << hex4 << (echoBufferSize << 11) << "\n";
 	statStrStream << "SONG TOTAL DATA SIZE:			0x" << hex4 << data[0].size() + data[1].size() + data[2].size() + data[3].size() + data[4].size() + data[5].size() + data[6].size() + data[7].size() + data[8].size() + spaceForPointersAndInstrs << "\n";
 	if (index > highestGlobalSong)
-		statStrStream << "FREE ARAM (APPROXIMATE):		0x" << hex4 << 0x10000 - (echoBufferSize << 11) - spaceUsedBySamples - totalSize - programUploadPos << "\n\n";
+		statStrStream << "FREE ARAM (APPROXIMATE):		0x" << hex4 << 0x10000 - (echoBufferSize << 11) - spaceUsedBySamples - totalSize - spc->programUploadPos << "\n\n";
 	else
 		statStrStream << "FREE ARAM (APPROXIMATE):		UNKNOWN\n\n";
 	statStrStream << "CHANNEL 0 TICKS:			0x" << hex4 << channelLengths[0] << "\n";
@@ -3339,4 +3339,235 @@ int Music::multiplyByTempoRatio(int value)
 		musicError("Using the tempo ratio on this value would cause it to overflow.");
 
 	return temp;
+}
+
+
+void Music::addSample(const fs::path &fileName, bool important)
+{
+	std::vector<uint8_t> temp;
+	std::string actualPath = "";
+
+	std::string relativeDir = this->name;
+	std::string absoluteDir = "samples/" + (std::string)fileName;
+	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
+	relativeDir = "music/" + relativeDir;
+	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
+	relativeDir += "/" + (std::string)fileName;
+
+	if (fs::exists(relativeDir))
+		actualPath = relativeDir;
+	else if (fs::exists(absoluteDir))
+		actualPath = absoluteDir;
+	else
+		Logging::error("Could not find sample " + (std::string)fileName, this);
+
+	readBinaryFile(actualPath, temp);
+	addSample(temp, actualPath, important, false);
+}
+
+void Music::addSample(const std::vector<uint8_t> &sample, const std::string &name, bool important, bool noLoopHeader, int loopPoint, bool isBNK)
+{
+	Sample newSample;
+	newSample.important = important;
+	newSample.isBNK = isBNK;
+
+	if (sample.size() != 0)
+	{
+		if (!noLoopHeader)
+		{
+			if ((sample.size() - 2) % 9 != 0)
+			{
+				std::stringstream errstream;
+
+				errstream << "The sample \"" + name + "\" was of an invalid length (the filesize - 2 should be a multiple of 9).  Did you forget the loop header?" << std::endl;
+				Logging::error(errstream.str());
+			}
+
+			newSample.loopPoint = (sample[1] << 8) | (sample[0]);
+			newSample.data.assign(sample.begin() + 2, sample.end());
+		}
+		else
+		{
+			newSample.data.assign(sample.begin(), sample.end());
+			newSample.loopPoint = loopPoint;
+		}
+	}
+	newSample.exists = true;
+	newSample.name = name;
+
+	if (spc->options.dupCheck)
+	{
+		for (int i = 0; i < spc->samples.size(); i++)
+		{
+			if (spc->samples[i].name == newSample.name)
+			{
+				this->mySamples.push_back(i);
+				return;						// Don't add two of the same sample.
+			}
+		}
+
+		for (int i = 0; i < spc->samples.size(); i++)
+		{
+			if (spc->samples[i].data == newSample.data)
+			{
+				//Don't add samples from BNK files to the sampleToIndex map, because they're not valid filenames.
+				if (!(newSample.isBNK)) {
+					spc->sampleToIndex[name] = i;
+				}
+				this->mySamples.push_back(i);
+				return;
+			}
+		}
+		//BNK files don't qualify for the next check. 
+		if (!(newSample.isBNK)) {
+			fs::path p1 = "./"+newSample.name;
+			//If the sample in question was taken from a sample group, then use the sample group's important flag instead.
+			for (int i = 0; i < spc->bankDefines.size(); i++)
+			{
+				for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
+				{
+					fs::path p2 = "./samples/"+*(spc->bankDefines[i]->samples[j]);
+					if (fs::equivalent(p1, p2))
+					{
+						//Copy the important flag from the sample group definition.
+						newSample.important = spc->bankDefines[i]->importants[j];
+						break;
+					}
+				}
+			}
+		}
+	}
+	//Don't add samples from BNK files to the sampleToIndex map, because they're not valid filenames.
+	if (!(newSample.isBNK)) {
+		spc->sampleToIndex[newSample.name] = spc->samples.size();
+	}
+	this->mySamples.push_back(spc->samples.size());
+	spc->samples.push_back(newSample);					// This is a sample we haven't encountered before.  Add it.
+}
+
+void Music::addSampleGroup(const fs::path &groupName)
+{
+
+	for (int i = 0; i < spc->bankDefines.size(); i++)
+	{
+		if ((std::string)groupName == spc->bankDefines[i]->name)
+		{
+			for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
+			{
+				std::string temp;
+				//temp += "samples/";
+				temp += *(spc->bankDefines[i]->samples[j]);
+				addSample(temp, spc->bankDefines[i]->importants[j]);
+			}
+			return;
+		}
+	}
+	std::cerr << this->name << ":\n";		// // //
+	Logging::error(std::string("The specified sample group, \"") + groupName.string() + "\", could not be found.");
+}
+
+int bankSampleCount = 0;			// Used to give unique names to sample bank brrs.
+
+void Music::addSampleBank(const fs::path &fileName)
+{
+	std::vector<uint8_t> bankFile;
+	std::string actualPath = "";
+
+	std::string relativeDir = this->name;
+	std::string absoluteDir = "samples/" + (std::string)fileName;
+	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
+	relativeDir = "music/" + relativeDir;
+	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
+	relativeDir += "/" + (std::string)fileName;
+
+	if (fs::exists(relativeDir))
+		actualPath = relativeDir;
+	else if (fs::exists(absoluteDir))
+		actualPath = absoluteDir;
+	else
+		Logging::error("Could not find sample bank " + (std::string)fileName, this);
+
+	readBinaryFile(actualPath, bankFile);
+
+	if (bankFile.size() != 0x8000)
+		Logging::error("The specified bank file was an illegal size.", this);
+	bankFile.erase(bankFile.begin(), bankFile.begin() + 12);
+	//Sample bankSamples[0x40];
+	Sample tempSample;
+	int currentSample = 0;
+	for (currentSample = 0; currentSample < 0x40; currentSample++)
+	{
+		unsigned short startPosition = bankFile[currentSample * 4 + 0] | (bankFile[currentSample * 4 + 1] << 8);
+		tempSample.loopPoint = (bankFile[currentSample * 4 + 2] | bankFile[currentSample * 4 + 3] << 8) - startPosition;
+		tempSample.data.clear();
+
+		if (startPosition == 0 && tempSample.loopPoint == 0)
+		{
+			addSample("EMPTY.brr", true);
+			continue;
+		}
+
+		startPosition -= 0x8000;
+
+		int pos = startPosition;
+
+		while (pos < bankFile.size())
+		{
+			for (int i = 0; i < 9; i++)
+			{
+				tempSample.data.push_back(bankFile[pos]);
+				pos++;
+			}
+
+			if ((tempSample.data[tempSample.data.size() - 9] & 1) == 1)
+			{
+				break;
+			}
+		}
+
+		char temp[20];
+		sprintf(temp, "__SRCNBANKBRR%04X", bankSampleCount++);
+		tempSample.name = temp;
+		addSample(tempSample.data, tempSample.name, true, true, tempSample.loopPoint, true);
+	}
+}
+
+int Music::getSample(const fs::path &name)
+{
+	std::string actualPath = "";
+
+	std::string relativeDir = this->name;
+	std::string absoluteDir = "samples/" + (std::string)name;
+	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
+	relativeDir = "music/" + relativeDir;
+	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
+	relativeDir += "/" + (std::string)name;
+
+	if (fs::exists(relativeDir))
+		actualPath = relativeDir;
+	else if (fs::exists(absoluteDir))
+		actualPath = absoluteDir;
+	else
+		Logging::error("Could not find sample " + (std::string)name, this);
+
+
+
+	fs::path ftemp = actualPath;
+	std::map<fs::path, int>::const_iterator it = spc->sampleToIndex.begin();
+
+	fs::path p1 = actualPath;
+
+	while (it != spc->sampleToIndex.end())
+	{
+		fs::path p2 = (std::string)it->first;
+		if (fs::equivalent(p1, p2))
+			return it->second;
+
+		//if ((std::string)it->first == (std::string)ftemp)
+		//	return it->second;
+		it++;
+	}
+
+
+	return -1;
 }

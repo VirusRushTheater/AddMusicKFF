@@ -7,11 +7,13 @@
 #include <initializer_list>
 
 #include "MMLBase.h"
+#include "Sample.h"
 
 namespace AddMusic
 {
 
 namespace fs = std::filesystem;
+class SPCEnvironment;
 
 struct SpaceInfo
 {
@@ -47,7 +49,6 @@ private:
 	// Music::Music initializing attributes.
 	bool knowsLength 				{false};
 	bool playOnce 					{false};
-	bool hasIntro 					{false};
 	int totalSize 					{0};
 	int spaceForPointersAndInstrs 	{0};
 	bool exists 					{false};
@@ -139,7 +140,7 @@ private:
 	
 	bool inDefineBlock 				{false};
 
-	unsigned int prevLoop 			{-1};
+	int prevLoop 					{-1};
 	int i 							{0};
 	int j 							{0};
 
@@ -301,11 +302,11 @@ private:
 	void markEchoBufferAllocVCMD();						// Called when the Hot Patch VCMD is manually defined. Required because of a bit that handles a special case when the echo buffer size is zero.
 
 	// Ported from globals.cpp
-	void addSample(const fs::path &fileName, Music *music, bool important);
-	void addSample(const std::vector<uint8_t> &sample, const std::string &name, Music *music, bool important, bool noLoopHeader, int loopPoint, bool isBNK);
-	void addSampleGroup(const fs::path &groupName, Music *music);
-	void addSampleBank(const fs::path &fileName, Music *music);
-	int getSample(const fs::path &name, Music *music);
+	void addSample(const fs::path &fileName, bool important);
+	void addSample(const std::vector<uint8_t> &sample, const std::string &name, bool important, bool noLoopHeader, int loopPoint = 0, bool isBNK = false);
+	void addSampleGroup(const fs::path &groupName);
+	void addSampleBank(const fs::path &fileName);
+	int getSample(const fs::path &name);
 
 	inline void append (uint8_t value)
 	{

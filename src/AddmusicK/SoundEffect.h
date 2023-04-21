@@ -10,6 +10,8 @@
 namespace AddMusic
 {
 
+class SPCEnvironment;
+
 /**
  * @brief Representation of an AddMusic sound effect.
  * 

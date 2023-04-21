@@ -6,8 +6,14 @@
 
 #include "AddmusicLogging.h"
 #include "MMLBase.h"
+#include "Utility.h"
 
 using namespace AddMusic;
+
+void MMLBase::loadFile(fs::path file_path)
+{
+	readTextFile(file_path, text);
+}
 
 void MMLBase::preprocess()
 {

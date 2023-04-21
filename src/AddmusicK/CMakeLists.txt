@@ -4,16 +4,22 @@ set(ADDMUSICK_SOURCES
 
 	SPCEnvironment.cpp
 	MMLBase.cpp
+	Music.cpp
+	SoundEffect.cpp
 )
 
 set(ADDMUSICK_HEADERS
 	AddmusicLogging.h
 	asarBinding.h
 	defines.h
+	BankDefine.h
+	Sample.h
 	Utility.h
 
 	SPCEnvironment.h
 	MMLBase.h
+	Music.h
+	SoundEffect.h
 )
 
 # Include Asar dependencies as explained in its git repository
