@@ -10,7 +10,8 @@ project(AddMusicK
 set(PROJECT_DEPLOY_DIR				${CMAKE_BINARY_DIR}/deploy)
 
 # Stuff that will be copied verbatim.
-set(SNES_DRIVER_SRC					${CMAKE_SOURCE_DIR}/src/snes-driver)
+set(SNES_DRIVER_SRC					${CMAKE_SOURCE_DIR}/src/package/asm)
+set(AMK_BOILERPLATE_SRC				${CMAKE_SOURCE_DIR}/src/package/boilerplate)
 set(ADDMUSICMREMOVER_FILE			${CMAKE_SOURCE_DIR}/src/addmusicMRemover.pl)
 
 # Set the output directories for libraries and executables
@@ -54,6 +55,7 @@ endif()
 
 # Copy the SNES driver source to the deploy folder
 file(COPY ${SNES_DRIVER_SRC} DESTINATION ${PROJECT_DEPLOY_DIR})
+file(COPY ${AMK_BOILERPLATE_SRC} DESTINATION ${PROJECT_DEPLOY_DIR})
 file(COPY ${ADDMUSICMREMOVER_FILE} DESTINATION ${PROJECT_DEPLOY_DIR})
 
 message(STATUS "AddMusicK and the compiling environment will be stored in " ${PROJECT_DEPLOY_DIR})

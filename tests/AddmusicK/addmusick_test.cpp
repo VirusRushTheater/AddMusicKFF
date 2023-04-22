@@ -13,8 +13,8 @@
 using namespace AddMusic;
 namespace fs = std::filesystem;
 
-const fs::path WORK_DIR {"../snes-driver"};     // It still is deployed in the same folder as the SNES driver...
-const fs::path DRIVER_DIR {"../snes-driver"};
+const fs::path WORK_DIR {"../boilerplate"};
+const fs::path DRIVER_DIR {"../asm"};
 
 TEST_CASE("asarBinding compilation to memory", "[addmusick][asarbinding][compilation]")
 {

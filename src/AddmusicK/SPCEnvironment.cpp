@@ -255,8 +255,6 @@ void SPCEnvironment::loadMusicList(const fs::path& musiclistfile)
 
 	std::string tempName;
 
-	// TODO: To be uncommented once I find out how to make samples and SFX work.
-	/*
 	while (i < musicFile.length())
 	{
 		if (isspace(musicFile[i]) && !gettingName)
@@ -313,9 +311,9 @@ void SPCEnvironment::loadMusicList(const fs::path& musiclistfile)
 			if (musicFile[i] == '\n' || musicFile[i] == '\r')
 			{
 				musics[index].name = tempName;
-				if (inLocals && justSPCsPlease == false)
+				if (inLocals && options.justSPCsPlease == false)
 				{
-					openTextFile((std::string("music/") + tempName), musics[index].text);
+					readTextFile(work_dir / "music" / tempName, musics[index].text);
 				}
 				musics[index].exists = true;
 				index = -1;
@@ -341,5 +339,143 @@ void SPCEnvironment::loadMusicList(const fs::path& musiclistfile)
 			break;
 		}
 	}
-	*/
+}
+
+void SPCEnvironment::loadSFXList(const fs::path& sfxlistfile)
+{	std::string str;
+	readTextFile(sfxlistfile, str);
+
+	if (str[str.length()-1] != '\n')
+		str += '\n';
+
+	unsigned int i = 0;
+
+	bool in1DF9 = false;
+	bool in1DFC = false;
+	bool gettingName = false;
+	int index = -1;
+	bool isPointer = false;
+	bool doNotAdd0 = false;
+
+	std::string tempName;
+
+	int SFXCount = 0;
+
+	while (i < str.length())
+	{
+		if (isspace(str[i]) && !gettingName)
+		{
+			i++;
+			continue;
+		}
+
+		if (strncmp(str.c_str() + i, "SFX1DF9:", 8) == 0)
+		{
+			in1DF9 = true;
+			in1DFC = false;
+			i+=8;
+			continue;
+		}
+
+		if (strncmp(str.c_str() + i, "SFX1DFC:", 8) == 0)
+		{
+			in1DF9 = false;
+			in1DFC = true;
+			i+=8;
+			continue;
+		}
+
+		if (!in1DF9 && !in1DFC)
+			Logging::error("Error: Could not find \"SFX1DF9:\" label in sound effects.txt");
+
+		if (index < 0)
+		{
+			if      ('0' <= str[i] && str[i] <= '9') index = str[i++] - '0';
+			else if ('A' <= str[i] && str[i] <= 'F') index = str[i++] - 'A' + 10;
+			else if ('a' <= str[i] && str[i] <= 'f') index = str[i++] - 'a' + 10;
+			else Logging::error("Invalid number in sound effects.txt.");
+
+			index <<= 4;
+
+
+			if      ('0' <= str[i] && str[i] <= '9') index |= str[i++] - '0';
+			else if ('A' <= str[i] && str[i] <= 'F') index |= str[i++] - 'A' + 10;
+			else if ('a' <= str[i] && str[i] <= 'f') index |= str[i++] - 'a' + 10;
+			else if (isspace(str[i])) index >>= 4;
+			else Logging::error("Invalid number in sound effects.txt.");
+
+
+			if (!isspace(str[i]))
+				Logging::error("Invalid number in sound effects.txt.");
+		}
+		else
+		{
+			if (str[i] == '*' && tempName.length() == 0)
+			{
+				isPointer = true;
+				i++;
+			}
+			else if (str[i] == '?' && tempName.length() == 0)
+			{
+				doNotAdd0 = true;
+				i++;
+			}
+			else if (str[i] == '\n' || str[i] == '\r')
+			{
+
+					if (in1DF9)
+					{
+						if (!isPointer)
+							soundEffects[0][index].name = tempName;
+						else
+							soundEffects[0][index].pointName = tempName;
+
+						soundEffects[0][index].exists = true;
+
+						if (doNotAdd0)
+							soundEffects[0][index].add0 = false;
+						else
+							soundEffects[0][index].add0 = true;
+
+						if (!isPointer)
+							readTextFile(work_dir / "1DF9/" / tempName, soundEffects[0][index].text);
+					}
+					else
+					{
+						if (!isPointer)
+							soundEffects[1][index].name = tempName;
+						else
+							soundEffects[1][index].pointName = tempName;
+
+						soundEffects[1][index].exists = true;
+
+						if (doNotAdd0)
+							soundEffects[1][index].add0 = false;
+						else
+							soundEffects[1][index].add0 = true;
+
+						if (!isPointer)
+							readTextFile(work_dir / "1DFC/" / tempName, soundEffects[1][index].text);
+					}
+
+					index = -1;
+					i++;
+					SFXCount++;
+					gettingName = false;
+					tempName.clear();
+					isPointer = false;
+					doNotAdd0 = false;
+					continue;
+
+			}
+			else
+			{
+				gettingName = true;
+				tempName += str[i++];
+
+			}
+		}
+	}
+
+	Logging::debug(std::string("Read in all ") + std::to_string(SFXCount) + " sound effects.");
 }

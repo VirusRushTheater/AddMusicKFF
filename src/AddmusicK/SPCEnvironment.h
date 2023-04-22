@@ -72,6 +72,11 @@ public:
 	 */
 	void loadMusicList(const fs::path& musiclistfile);
 
+	/**
+	 * Loads a SFX list file. 
+	 */
+	void loadSFXList(const fs::path& sfxlistfile);
+
 	SPCEnvironmentOptions options;							// User-defined options.
 private:
 
@@ -106,6 +111,18 @@ private:
 	std::vector<Sample> samples;
 	std::map<fs::path, int> sampleToIndex;
 	std::vector<std::unique_ptr<BankDefine>> bankDefines;
+
+	// Music system.
+	// Will also refactor this with a more sophisticated method.
+	int highestGlobalSong {0};
+	int songCount {0};
+	Music musics[256];
+
+	// SFX system
+	// Will also refactor this with a more sophisticated method.
+	SoundEffect soundEffectsDF9[256];
+	SoundEffect soundEffectsDFC[256];
+	SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
 };
 
 }
