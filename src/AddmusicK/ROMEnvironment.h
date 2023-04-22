@@ -32,10 +32,6 @@ public:
 	 */
 	int findFreeSpace(unsigned int size, int start, std::vector<uint8_t> &ROM);
 
-	int SNESToPC(int addr);
-
-	int PCToSNES(int addr);
-
 	int clearRATS(int PCaddr);
 	bool findRATS(int addr);
 

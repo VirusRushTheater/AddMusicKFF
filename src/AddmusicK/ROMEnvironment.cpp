@@ -278,33 +278,6 @@ int ROMEnvironment::findFreeSpace(unsigned int size, int start, std::vector<uint
 	return pos;
 }
 
-int ROMEnvironment::SNESToPC(int addr)					// Thanks to alcaro.
-{
-	if (addr < 0 || addr > 0xFFFFFF ||		// not 24bit
-		(addr & 0xFE0000) == 0x7E0000 ||	// wram
-		(addr & 0x408000) == 0x000000)		// hardware regs
-		return -1;
-	if (usingSA1 && addr >= 0x808000)
-		addr -= 0x400000;
-	addr = ((addr & 0x7F0000) >> 1 | (addr & 0x7FFF));
-	return addr;
-}
-
-int ROMEnvironment::PCToSNES(int addr)
-{
-	if (addr < 0 || addr >= 0x400000)
-		return -1;
-
-	addr = ((addr << 1) & 0x7F0000) | (addr & 0x7FFF) | 0x8000;
-
-	if (!usingSA1 && (addr & 0xF00000) == 0x700000)
-		addr |= 0x800000;
-
-	if (usingSA1 && addr >= 0x400000)
-		addr += 0x400000;
-	return addr;
-}
-
 bool ROMEnvironment::findRATS(int offset)
 {
 	if (rom[offset] != 0x53) {

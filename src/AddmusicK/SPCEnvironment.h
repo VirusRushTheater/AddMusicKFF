@@ -20,7 +20,6 @@ namespace AddMusic
  */
 struct SPCEnvironmentOptions
 {
-	bool justSPCsPlease {false};
 	bool aggressive {false};
 	bool allowSA1 {true};
 	bool verbose {true};
@@ -29,6 +28,7 @@ struct SPCEnvironmentOptions
 	bool validateHex {true};
 	bool convert {true};
 	bool dupCheck {true};
+	bool checkEcho {true};
 	
 	bool sfxDump {false};
 };
@@ -40,16 +40,13 @@ struct SPCEnvironmentOptions
  * were previously defined on the program's argument list; and the environment
  * in which the songs are compiled.
  * 
- * The idea is to have the driver source files (driver_srcdir) separated from
- * the user's music files to avoid confusion and polluting any of these folders
- * with procedurally generated files.
- * 
- * TODO: Will eventually make some way to pack the driver source in compile time
- * and extract it afterwards. 
+ * If you're scouring through the code, it's recommended you start with this
+ * class.
  */
 class SPCEnvironment
 {
 	friend class Music;
+	friend class ROMEnvironment;
 
 public:
 	/**
@@ -61,6 +58,11 @@ public:
 	 * @brief Instance SPCEnvironment with different options.
 	 */
 	SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir, const SPCEnvironmentOptions& opts);
+
+	/**
+	 * @brief Equivalent of running AddMusicK with the "justSPCsPlease" option. Does not need a SMW ROM to run.
+	 */
+	bool generateSPCFiles(const std::vector<fs::path>& textFilesToCompile);
 
 	/**
 	 * Loads a sample list file.
@@ -77,6 +79,10 @@ public:
 	 */
 	void loadSFXList(const fs::path& sfxlistfile);
 
+	int SNESToPC(int addr);
+
+	int PCToSNES(int addr);
+
 	SPCEnvironmentOptions options;							// User-defined options.
 private:
 
@@ -92,12 +98,25 @@ private:
 	 */
 	bool _assembleSPCDriver();
 
+	bool _compileSFX();
+
+	bool _compileGlobalData();
+
+	bool _compileMusic();
+
+	bool _fixMusicPointers();
+
+	bool _generateSPCs();
+
 	fs::path driver_srcdir;									// Root directory from which driver ASM files will be found.
 	fs::path driver_builddir;								// Directory in which generated driver files will be put.
 	fs::path work_dir;										// Root directory from which user-editable files will be found.
 
-
 	int programUploadPos;
+
+	// Use the SA1 expansion chip. Will be true unless either the ROM says the opposite
+	// or you don't want it.
+	bool usingSA1 {true};
 
 	// Information you get on the first pass of main.asm
 	int programPos;
@@ -123,6 +142,11 @@ private:
 	SoundEffect soundEffectsDF9[256];
 	SoundEffect soundEffectsDFC[256];
 	SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
+
+	// Stored this variable to mimic some behavior before I refactor more things.
+	bool justSPCsPlease {true};
+
+	int songSampleListSize;
 };
 
 }

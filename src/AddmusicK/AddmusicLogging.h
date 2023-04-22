@@ -133,12 +133,20 @@ public:
 	// Different messaging levels. Designed for parser outputs to be referenced
 	// only by passing the "this" keyword, and the logger will print the file
 	// name and line.
-	static void debug(std::string msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::DEBUG); }
-	static void verbose(std::string msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::DEBUG); }
-	static void info(std::string msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::INFO); }
-	static void warning(std::string msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::WARNING); }
-	static void error(std::string msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::ERROR); }
-	static void critical(std::string msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::CRITICAL); }
+	static void debug(const std::string& msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::DEBUG); }
+	static void verbose(const std::string& msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::DEBUG); }
+	static void info(const std::string& msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::INFO); }
+	static void warning(const std::string& msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::WARNING); }
+	static void error(const std::string& msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::ERROR); }
+	static void critical(const std::string& msg, MMLBase* mmlfile_ref = nullptr) { _printmessage(msg, mmlfile_ref, Levels::CRITICAL); }
+
+	// Messaging using stringstreams if you love the << operators.
+	static void debug(const std::stringstream& msgstream, MMLBase* mmlfile_ref = nullptr) { _printmessage(msgstream.str(), mmlfile_ref, Levels::DEBUG); }
+	static void verbose(const std::stringstream& msgstream, MMLBase* mmlfile_ref = nullptr) { _printmessage(msgstream.str(), mmlfile_ref, Levels::DEBUG); }
+	static void info(const std::stringstream& msgstream, MMLBase* mmlfile_ref = nullptr) { _printmessage(msgstream.str(), mmlfile_ref, Levels::INFO); }
+	static void warning(const std::stringstream& msgstream, MMLBase* mmlfile_ref = nullptr) { _printmessage(msgstream.str(), mmlfile_ref, Levels::WARNING); }
+	static void error(const std::stringstream& msgstream, MMLBase* mmlfile_ref = nullptr) { _printmessage(msgstream.str(), mmlfile_ref, Levels::ERROR); }
+	static void critical(const std::stringstream& msgstream, MMLBase* mmlfile_ref = nullptr) { _printmessage(msgstream.str(), mmlfile_ref, Levels::CRITICAL); }
 
 private:
     Logging() {} // Private constructor
@@ -151,7 +159,7 @@ private:
 	 * Internal method that formats and prints the message or throw exceptions,
 	 * if these apply.
 	 */
-	static void _printmessage(std::string msg, MMLBase* mmlfile_ref, Levels lv)
+	static void _printmessage(const std::string& msg, MMLBase* mmlfile_ref, Levels lv)
 	{
 		std::string level_str;
 		Levels _exc_level = getInstance()._exception_level;
