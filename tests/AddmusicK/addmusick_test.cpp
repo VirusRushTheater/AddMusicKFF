@@ -43,3 +43,9 @@ TEST_CASE("SPCEnvironment creation of a build environment", "[spcenvironment][in
     SPCEnvironment spc (WORK_DIR, DRIVER_DIR);
     REQUIRE(fs::exists(DRIVER_DIR / "build"));
 }
+
+TEST_CASE("SPCEnvironment creation of a set of SPC files", "[spcenvironment][spc][generation]")
+{
+    SPCEnvironment spc (WORK_DIR, DRIVER_DIR);
+    
+}

@@ -8,6 +8,7 @@ project(AddMusicK
 
 # The compiled program and driver source files will be end up being copied to this folder
 set(PROJECT_DEPLOY_DIR				${CMAKE_BINARY_DIR}/deploy)
+set(PROJECT_BUILD_SCRIPTS_DIR		${CMAKE_SOURCE_DIR}/build_scripts)
 
 # Stuff that will be copied verbatim.
 set(SNES_DRIVER_SRC					${CMAKE_SOURCE_DIR}/src/package/asm)
@@ -50,6 +51,19 @@ add_subdirectory(src)
 
 # Compile tests
 if (ADDMUSICK_COMPILE_TESTS)
+	# Detect Python, so we can test Addmusic environments with random sets
+	# of songs.
+	find_program(PYTHON_EXECUTABLE python)
+
+	if(NOT PYTHON_EXECUTABLE)
+		message(FATAL_ERROR "Python is needed to build tests. Set ADDMUSICK_COMPILE_TESTS to OFF if you don't want to build them.")
+	endif()
+
+	execute_process(
+		COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_BUILD_SCRIPTS_DIR}/amk_test_toolkit.py"
+		WORKING_DIRECTORY "${PROJECT_BUILD_SCRIPTS_DIR}"
+	)
+
 	add_subdirectory(tests)
 endif()
 

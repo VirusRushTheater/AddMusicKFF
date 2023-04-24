@@ -204,6 +204,68 @@ void ROMEnvironment::tryToCleanAMMData()
 	}
 }
 
+
+bool SPCEnvironment::_generateSampleList()
+{
+	// Used to be part of AddmusicK.cpp:compileMusic()
+	std::stringstream songSampleList;
+	std::string s;
+
+	songSampleListSize = 8;
+
+	songSampleList << "db $53, $54, $41, $52\t\t\t\t; Needed to stop Asar from treating this like an xkas patch.\n";
+	songSampleList << "dw SGEnd-SampleGroupPtrs-$01\ndw SGEnd-SampleGroupPtrs-$01^$FFFF\nSampleGroupPtrs:\n\n";
+
+	for (int i = 0; i < songCount; i++)
+	{
+		if (i % 16 == 0)
+			songSampleList << "\ndw ";
+		if (musics[i].exists == false)
+			songSampleList << "$" << hex4 << 0;
+		else
+			songSampleList << "SGPointer" << hex2 << i;
+		songSampleListSize += 2;
+
+		if (i != songCount - 1 && (i & 0xF) != 0xF)
+			songSampleList << ", ";
+		//s = songSampleList.str();
+	}
+
+	songSampleList << "\n\n";
+
+	for (int i = 0; i < songCount; i++)
+	{
+		if (!musics[i].exists) continue;
+
+		songSampleListSize++;
+
+		songSampleList << "\n" << "SGPointer" << hex2 << i << ":\n";
+
+		if (i > highestGlobalSong)
+		{
+			songSampleList << "db $" << hex2 << musics[i].mySamples.size() << "\ndw";
+			for (unsigned int j = 0; j < musics[i].mySamples.size(); j++)
+			{
+				songSampleListSize+=2;
+				songSampleList << " $" << hex4 << (int)(musics[i].mySamples[j]);
+				if (j != musics[i].mySamples.size() - 1)
+					songSampleList << ",";
+			}
+		}
+
+	}
+	songSampleList << "\nSGEnd:";
+	s = songSampleList.str();
+	std::stringstream tempstream;
+
+	tempstream << "org $" << hex6 << PCToSNES(findFreeSpace(songSampleListSize, bankStart, rom)) << "\n\n" << std::endl;
+
+	s.insert(0, tempstream.str());
+
+	writeTextFile(driver_builddir / "SNES" / "SongSampleList.asm", s);
+	return true;
+}
+
 int ROMEnvironment::findFreeSpace(unsigned int size, int start, std::vector<uint8_t> &ROM)
 {
 	if (size == 0)
