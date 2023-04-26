@@ -60,6 +60,11 @@ public:
 	SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir, const SPCEnvironmentOptions& opts);
 
 	/**
+	 * @brief Destructor.
+	 */
+	~SPCEnvironment();
+
+	/**
 	 * @brief Equivalent of running AddMusicK with the "justSPCsPlease" option. Does not need a SMW ROM to run.
 	 */
 	bool generateSPCFiles(const std::vector<fs::path>& textFilesToCompile);
@@ -135,13 +140,13 @@ private:
 	// Will also refactor this with a more sophisticated method.
 	int highestGlobalSong {0};
 	int songCount {0};
-	Music musics[256];
+	Music* musics;		// Refactored it to be allocated in the heap.
 
 	// SFX system
 	// Will also refactor this with a more sophisticated method.
-	SoundEffect soundEffectsDF9[256];
-	SoundEffect soundEffectsDFC[256];
-	SoundEffect *soundEffects[2] = {soundEffectsDF9, soundEffectsDFC};
+	SoundEffect* soundEffectsDF9;
+	SoundEffect* soundEffectsDFC;
+	SoundEffect *soundEffects[2];
 
 	// Stored this variable to mimic some behavior before I refactor more things.
 	bool justSPCsPlease {true};

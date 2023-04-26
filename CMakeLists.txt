@@ -51,18 +51,29 @@ add_subdirectory(src)
 
 # Compile tests
 if (ADDMUSICK_COMPILE_TESTS)
-	# Detect Python, so we can test Addmusic environments with random sets
-	# of songs.
-	find_program(PYTHON_EXECUTABLE python)
+	# Generates a test environment with random songs from SMWCentral to test
+	# AddmusicK in the deploy folder.
+	# Will take about one minute to generate.
+	set(RANDOM_SONG_AMOUNT		5)
+	set(AMK_TEST_ENV_FOLDER		random_env)
 
-	if(NOT PYTHON_EXECUTABLE)
-		message(FATAL_ERROR "Python is needed to build tests. Set ADDMUSICK_COMPILE_TESTS to OFF if you don't want to build them.")
+	if (NOT EXISTS ${PROJECT_DEPLOY_DIR}/${AMK_TEST_ENV_FOLDER})
+		# Detect Python, so we can test Addmusic environments with random sets
+		# of songs.
+		find_program(PYTHON_EXECUTABLE python)
+
+		if(NOT PYTHON_EXECUTABLE)
+			message(FATAL_ERROR "Python is needed to build tests. Set ADDMUSICK_COMPILE_TESTS to OFF if you don't want to build them.")
+		endif()
+
+		message(STATUS "Will now generate a test environment with ${RANDOM_SONG_AMOUNT} random SMWCentral songs at deploy/${AMK_TEST_ENV_FOLDER}.")
+		execute_process(
+			COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_BUILD_SCRIPTS_DIR}/amk_test_toolkit.py" --boilerplate "${AMK_BOILERPLATE_SRC}" --saveto "${PROJECT_DEPLOY_DIR}/${AMK_TEST_ENV_FOLDER}" -n ${RANDOM_SONG_AMOUNT}
+			WORKING_DIRECTORY "${PROJECT_BUILD_SCRIPTS_DIR}"
+		)
+	else()
+		message(STATUS "A test environment at deploy/${AMK_TEST_ENV_FOLDER} has already been generated. Skipping generation.")
 	endif()
-
-	execute_process(
-		COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_BUILD_SCRIPTS_DIR}/amk_test_toolkit.py"
-		WORKING_DIRECTORY "${PROJECT_BUILD_SCRIPTS_DIR}"
-	)
 
 	add_subdirectory(tests)
 endif()

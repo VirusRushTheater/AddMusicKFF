@@ -36,7 +36,7 @@ inline void readBinaryFile(const fs::path &fileName, std::vector<T> &v)
 inline void readTextFile(const fs::path &fileName, std::string &str)
 {
 	std::ifstream is (fileName);
-	str.assign(std::istream_iterator<char>(is), std::istream_iterator<char>());
+	str.assign(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>());
 	is.close();
 }
 
@@ -67,14 +67,15 @@ inline void writeTextFile(const fs::path &fileName, const std::string &str)
  */
 inline int scanInt(const std::string &str, const std::string &needle)
 {
-	std::regex pattern (needle + R"(\s*\$([A-Fa-f0-9]{1,4}))");
+	std::string needle_concat = needle + R"(\s*\$([A-Fa-f0-9]{1,4}))";
+	std::regex pattern (needle_concat);
 	std::smatch matches;
 
 	int n = 0;
 
 	// We could use a not-null end_ptr on strtoul but it would only be useful on
 	// undefined behavior.
-	if (std::regex_match(str, matches, pattern))
+	if (std::regex_search(str, matches, pattern))
 		return std::strtoul(matches[1].str().c_str(), NULL, 16);
 	else
 	{

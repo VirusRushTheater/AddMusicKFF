@@ -14,9 +14,9 @@ using namespace AddMusic;
 constexpr const char DEFAULT_BUILD_FOLDER[] {"build"};
 
 // Default file names
-constexpr const char* DEFAULT_SONGLIST_FILENAME {"Addmusic_list.txt"};
-constexpr const char* DEFAULT_SAMPLELIST_FILENAME {"Addmusic_sample groups.txt"};
-constexpr const char* DEFAULT_SFXLIST_FILENAME {"Addmusic_sound effects.txt"};
+constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
+constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
+constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
 
 SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir) :
 	work_dir(work_dir),
@@ -52,11 +52,19 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_
 	
 	// fs::rename throws exceptions when the temporary directory is not located
 	// in the same filesystem as the driver.
+	
 	if (fs::exists(driver_builddir))
 		deleteDir(driver_builddir);
 	fs::path tempdir = fs::temp_directory_path();
 	copyDir(driver_srcdir, driver_builddir);
 	
+	// Dynamic allocation of some arrays.
+	musics = new Music[256];
+	soundEffectsDF9 = new SoundEffect[256];
+	soundEffectsDFC = new SoundEffect[256];
+	soundEffects[0] = soundEffectsDF9;
+	soundEffects[1] = soundEffectsDFC;
+
 	Logging::debug(std::string("Driver will be compiled in ") + fs::absolute(driver_builddir).string());
 }
 
@@ -64,6 +72,13 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_
 	SPCEnvironment(work_dir, driver_srcdir)
 {
 	options = opts;
+}
+
+SPCEnvironment::~SPCEnvironment()
+{
+	delete[] (musics);
+	delete[] (soundEffectsDF9);
+	delete[] (soundEffectsDFC);
 }
 
 bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCompile)

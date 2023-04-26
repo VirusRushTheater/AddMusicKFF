@@ -129,7 +129,8 @@ if __name__ == "__main__":
     log.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stderr)
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('-- %(name)s - %(message)s')
     handler.setFormatter(formatter)
     log.addHandler(handler)
 

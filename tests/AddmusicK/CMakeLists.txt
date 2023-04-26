@@ -1,14 +1,14 @@
 # find_package(Catch2 REQUIRED)
 
-add_executable(tests
+add_executable(test_units
 	addmusick_test.cpp
 )
 
-target_include_directories(tests PUBLIC
+target_include_directories(test_units PUBLIC
     ./
 )
 
-target_link_libraries(tests PUBLIC
+target_link_libraries(test_units PUBLIC
     AddmusicK
     Catch2::Catch2
     ${ASAR_LIB_TARGET}

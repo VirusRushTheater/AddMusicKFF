@@ -2,7 +2,7 @@
 *.exe
 *.spc
 .DS_Store
-.vscode
+**/.vscode
 
 # Exclude every leftover from Cmake.
 build/

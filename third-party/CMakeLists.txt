@@ -12,4 +12,6 @@ add_subdirectory(Catch2)
 
 # Asar uses an address sanitizer, which makes the linker complain a lot when
 # you compile AddMusic with debugging symbols.
-target_link_libraries(${ASAR_LIB_TARGET} asan)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	target_link_libraries(${ASAR_LIB_TARGET} asan)
+endif()
