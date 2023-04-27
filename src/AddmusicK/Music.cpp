@@ -18,18 +18,127 @@ constexpr int hexLengths[] 			{ 2, 2, 3, 4, 4, 1,
 2, 3, 2, 3, 2, 4, 2, 2, 3, 4, 2, 4, 4, 3, 2, 4,
 1, 4, 4, 3, 2, 9, 3, 4, 2, 3, 3, 2, 5, 1, 1 };
 
-Music::Music()
+void Music::_init()
 {
 	for (int z = 0; z < 19; z++)
 		transposeMap[z] = tmpTrans[z];
 	for (int z = 0; z < 16; z++)	// Add some spaces to the end.
 		text += ' ';
+	for (int z = 0; z < 0x10000; z++)
+		loopPointers[z] = ~0;
+	
+	if (text[0] == char(0xEF) && text[1] == char(0xBB) && text[2] == char(0xBF))
+	{
+		text.erase(text.begin(), text.begin() + 3);
+	}
+
+	unsigned int p = text.find(";title=");
+	if (p != -1)
+	{
+		//name.clear();
+		p += 7;
+		while (text[p] != '\r' && text[p] != '\n' && p < text.length())
+		{
+			title += text[p++];
+		}
+	}
+	else
+	{
+		p = name.string().find_last_of('.');
+		if (p != -1)
+			title = name.string().substr(0, p);
+		p = name.string().find_last_of('/');
+		if (p != -1)
+			title = name.string().substr(p + 1);
+		p = name.string().find_last_of('\\');
+		if (p != -1)
+			title = name.string().substr(p);
+	}
+
+	pos = 0;
+
+	preprocess();
+	text += "                       ";
+
+	// this->addmusicversion is set by MMLBase::preprocess()
+	if (this->addmusicversion == -1)
+	{
+		songTargetProgram = 1;
+		targetAMKVersion = 0;
+	}
+
+	else if (this->addmusicversion == -2)
+	{
+		songTargetProgram = 2;
+		targetAMKVersion = 0;
+	}
+	else if (this->addmusicversion == 0)
+	{
+		Logging::error("Song did not specify target program with #amk, #am4, or #amm.");
+		return;
+	}
+	else						// Just assume it's AMK for now.
+	{
+		targetAMKVersion = this->addmusicversion;
+
+		if (targetAMKVersion > PARSER_VERSION)
+		{
+			Logging::error("This song was made for a newer version of AddmusicK.  You must update to use\nthis song.");
+			return;
+		}
+
+#if PARSER_VERSION != 4
+#error You forgot to update the #amk syntax. Arent you glad you at least remembered to put in this warning?
+#endif
+	}
+
+	if (targetAMKVersion >= 2)
+		usingSMWVTable = false;
+	else
+		usingSMWVTable = true;
+
+	pos = 0;
+
+	//If any channel markers exist, set the channel number to the earliest channel found.
+	if (text.find("#0") != -1)
+		channel = 0, prevChannel = 0;
+	else if (text.find("#1") != -1)
+		channel = 1, prevChannel = 1;
+	else if (text.find("#2") != -1)
+		channel = 2, prevChannel = 2;
+	else if (text.find("#3") != -1)
+		channel = 3, prevChannel = 3;
+	else if (text.find("#4") != -1)
+		channel = 4, prevChannel = 4;
+	else if (text.find("#5") != -1)
+		channel = 5, prevChannel = 5;
+	else if (text.find("#6") != -1)
+		channel = 6, prevChannel = 6;
+	else if (text.find("#7") != -1)
+		channel = 7, prevChannel = 7;
+
+	if (spc->options.validateHex && index > spc->highestGlobalSong)			// We can't just insert this at the end due to looping complications and such.
+		resizedChannel = channel;
+	else
+		resizedChannel = -1;
+	
+	pos = 0;
+
+	for (int z = 0; z < 9; z++)
+	{
+		if (songTargetProgram == 1)		// AM4 fix for tuning[] related stuff.
+			ignoreTuning[z] = true;
+		else
+			ignoreTuning[z] = false;
+	}
 }
 
 void Music::compile(SPCEnvironment* spc_)
 {
 	spc = spc_;
 	basepath = spc_->work_dir;
+
+	_init();
 
 	pos = 0;
 

@@ -35,7 +35,7 @@ class Music : public MMLBase
 	friend class SPCEnvironment;
 
 public:
-	Music();
+	// Music();
 
 	void compile(SPCEnvironment* spc_);
 
@@ -67,7 +67,6 @@ private:
 	int tempoRatio					{1};
 	bool nextHexIsArpeggioNoteLength {false};
 
-	std::string name;
 	std::string pathlessSongName;
 	fs::path basepath;
 
@@ -81,7 +80,6 @@ private:
 	std::string comment;
 	
 	unsigned short loopPointers[0x10000];
-	std::string text;
 	
 	std::vector<uint8_t> allPointersAndInstrs;
 	std::vector<uint8_t> instrumentData;
@@ -130,8 +128,11 @@ private:
 	// INTERNAL PARSER ATTRIBUTES (formerly static on Music.cpp)
 	// Defined here for thread-safety among other reasons.
 	// =======================================================================
-	unsigned int pos 				{0};
-	int line 						{1};
+	
+	// These are already defined in MMLBase.
+	// unsigned int pos 				{0};
+	// int line 						{1};
+
 	int channel 					{0};
 	int prevChannel;
 	int octave 						{4};
@@ -217,6 +218,7 @@ private:
 	// =======================================================================
 	// PRIVATE METHODS
 	// =======================================================================
+	void _init();
 
 	bool doReplacement();
 	int divideByTempoRatio(int, bool fractionIsError);	// Divides a value by tempoRatio. Errors out if it can't be done without a decimal (if the parameter is set).

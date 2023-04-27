@@ -107,12 +107,19 @@ bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCo
 		musics[i].exists = false;
 
 	// Load local songs from command-line arguments.
-	for (int i = 0; i < textFilesToCompile.size(); i++)
+	for (int i = firstLocalSong, j = 0; (i < 256) && (j < textFilesToCompile.size()); i++, j++)
 	{
-		if (firstLocalSong + i >= 256)
+		if (i >= 256)
 			Logging::error("Error: The total number of requested music files to compile exceeded 255.");
-		musics[firstLocalSong + i].exists = true;
-		musics[firstLocalSong + i].name = textFilesToCompile[i];
+		musics[i].exists = true;
+		musics[i].name = textFilesToCompile[j];
+	}
+
+	for (int i = 0; i < 256; i++)
+	{
+		// Load music file in memory.
+		if (musics[i].exists)
+			readTextFile(fs::absolute(musics[i].name), musics[i].text);
 	}
 
 	_compileMusic();
@@ -1054,7 +1061,7 @@ void SPCEnvironment::loadMusicList(const fs::path& musiclistfile)
 		{
 			if (musicFile[i] == '\n' || musicFile[i] == '\r')
 			{
-				musics[index].name = tempName;
+				musics[index].name = work_dir / "music" / tempName;
 				// Don't bother loading local songs if we're just going to compile SPCs on demand.
 				if (inLocals && justSPCsPlease == false)
 				{

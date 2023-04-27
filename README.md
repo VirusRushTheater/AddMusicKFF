@@ -42,3 +42,12 @@ cmake --build .
 
 The results will be in a `deploy` folder inside your `build` folder, where the
 program, together with the SPC drivers will be copied.
+
+Please, be aware that, if you want to build this project with debug symbols you
+will need to install the library `asan` (Address Sanitizer) in your system.
+
+In Ubuntu it would be:
+
+```
+sudo apt install libasan8
+```

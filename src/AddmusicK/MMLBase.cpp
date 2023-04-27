@@ -22,19 +22,20 @@ void MMLBase::preprocess()
 	std::map<std::string, int> defines;
 	std::stack<bool> okayStatus;
 	
-	unsigned int i = 0;					// String cursor
 	int level = 0;		
 	std::string newstr;					// Temporary string to hold the preprocessed "text"
 	bool okayToAdd = true;			
 
+	unsigned int& i = pos;				// String cursor. Also quick fix for the refactored "skipSpaces()".
 	std::string& str = text;			// Alias of "file content" to handle the previous implementation of "preprocess"
 
+	pos = 0;							// Reset the cursor.
 	line = 1;							// Defined as object attribute for error logging
 
 	// getArgument, but now as a Lambda.
 	auto getArgument = [&str, &i](char endChar, bool breakOnNewLines)
 	{
-		std::string temp;
+		std::string temp_getarg;
 		for (;; i++)
 		{
 			// Parse until a whitespace is found
@@ -58,9 +59,9 @@ void MMLBase::preprocess()
 				break;
 			
 			// Queue said character
-			temp += str[i];
+			temp_getarg += str[i];
 		}
-		return temp;
+		return temp_getarg;
 	};
 	
 	i = 0;
@@ -69,16 +70,16 @@ void MMLBase::preprocess()
 	while (true)
 	{
 		// EOF
-		if (i == str.length())
+		if (i == text.length())
 			break;
 
 		// Next line
-		if (i < str.length())
-			if (str[i] == '\n')
+		if (i < text.length())
+			if (text[i] == '\n')
 				line++;
 		
 		// Get quoted argument. Do not stop, even on line breaks
-		if (str[i] == '\"')
+		if (text[i] == '\"')
 		{
 			i++;
 			if (okayToAdd)
@@ -90,13 +91,13 @@ void MMLBase::preprocess()
 		}
 
 		// Sharp (#) directive.
-		else if (str[i] == '#')
+		else if (text[i] == '#')
 		{
 			std::string temp;
 			i++;
 
 			// Force AMK version into AMK1.
-			if (str.substr(i, 6) == "#amk=1")					// Special handling so that we can have #amk=1.
+			if (text.substr(i, 6) == "#amk=1")					// Special handling so that we can have #amk=1.
 			{
 				if (addmusicversion >= 0)
 					addmusicversion = 1;
@@ -263,8 +264,8 @@ void MMLBase::preprocess()
 				if (addmusicversion >= 0)
 				{
 					skipSpaces();
-					std::string temp = getArgument(' ', true);
-					if (temp.length() == 0)
+					std::string amk_arg = getArgument(' ', true);
+					if (amk_arg.length() == 0)
 					{
 						Logging::warning("#amk must have an integer argument specifying the version.", this);
 					}
@@ -273,7 +274,7 @@ void MMLBase::preprocess()
 						int j;
 						try
 						{
-							j = std::stoi(temp);
+							j = std::stoi(amk_arg);
 						}
 						catch (...)
 						{
@@ -309,7 +310,7 @@ void MMLBase::preprocess()
 		}
 		else
 		{
-			if (okayToAdd || str[i] == '\n')
+			if (okayToAdd || text[i] == '\n')
 				newstr += str[i];
 			i++;
 		}
@@ -337,38 +338,37 @@ void MMLBase::preprocess()
 	*/
 
 	// Finishes the deal
-	str = newstr;
+	text = newstr;
 }
 
 std::string MMLBase::getQuotedString(const std::string &string, int startPos, int &rawLength)
 {
 	std::string retval;
-	rawLength = startPos;
+	int &i = startPos;
+	auto cursor_start = string.begin() + startPos;
+	auto cursor = cursor_start;
 
-	for (;; string[++startPos] != '\"')
+	for (; *cursor != '\"'; cursor++)
 	{
-		// EOF
-		if (startPos > string.length())
-			Logging::warning("Unexpected end of file found.", this);
-
 		// Ignore quotes if they are escaped.
-		if (string[startPos] == '\\')
+		if (*cursor == '\\')
 		{
-			if (string[startPos+1] == '"')
-			{
-				retval += '"';
-				startPos++;
-			}
+			if (*(++cursor) == '"')
+				continue;
 			else
 			{
 				Logging::warning(R"(Error: The only escape sequence allowed is "\"".)", this);
 				return retval;
 			}
 		}
-		else
-			retval += string[startPos];
+
+		// EOF
+		if (cursor == string.end())
+			Logging::warning("Unexpected end of file found.", this);
+			
 	}
-	rawLength = startPos - rawLength;
+	rawLength = (cursor - cursor_start);
+	retval.assign(cursor_start, cursor);
 	return retval;
 }
 
