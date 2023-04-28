@@ -815,11 +815,11 @@ bool SPCEnvironment::_generateSPCs()
 
 				std::string pathlessSongName;
 				if (mode == 0)
-					pathlessSongName = musics[i].name;
+					pathlessSongName = musics[i].name.string();
 				else if (mode == 1)
-					pathlessSongName = soundEffects[0][i].name;
+					pathlessSongName = soundEffects[0][i].name.string();
 				else if (mode == 2)
-					pathlessSongName = soundEffects[1][i].name;
+					pathlessSongName = soundEffects[1][i].name.string();
 
 
 				int extPos = pathlessSongName.find_last_of('.');

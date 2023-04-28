@@ -2471,7 +2471,7 @@ void Music::parseSampleDefinitions()
 			pos++;
 			int quotedStringLength = 0;
 			// TODO: This might be buggy. Keep an eye on it.
-			std::string tempstr = basepath / getQuotedString(text, pos, quotedStringLength);
+			std::string tempstr = (basepath / getQuotedString(text, pos, quotedStringLength)).string();
 			std::string extension;
 			auto tmppos = tempstr.find_last_of(".");
 			if (tmppos == -1)
@@ -3087,7 +3087,7 @@ void Music::pointersFirstPass()
 
 	statStr = statStrStream.str();
 
-	std::string fname = name;
+	std::string fname = name.string();
 
 	int extPos = fname.find_last_of('.');
 	if (extPos != -1)
@@ -3457,19 +3457,19 @@ void Music::addSample(const fs::path &fileName, bool important)
 	std::vector<uint8_t> temp;
 	std::string actualPath = "";
 
-	std::string relativeDir = this->name;
-	std::string absoluteDir = "samples/" + (std::string)fileName;
+	std::string relativeDir = this->name.string();
+	std::string absoluteDir = "samples/" + fileName.string();
 	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
 	relativeDir = "music/" + relativeDir;
 	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
-	relativeDir += "/" + (std::string)fileName;
+	relativeDir += "/" + fileName.string();
 
 	if (fs::exists(relativeDir))
 		actualPath = relativeDir;
 	else if (fs::exists(absoluteDir))
 		actualPath = absoluteDir;
 	else
-		Logging::error("Could not find sample " + (std::string)fileName, this);
+		Logging::error("Could not find sample " + fileName.string(), this);
 
 	readBinaryFile(actualPath, temp);
 	addSample(temp, actualPath, important, false);
@@ -3560,7 +3560,7 @@ void Music::addSampleGroup(const fs::path &groupName)
 
 	for (int i = 0; i < spc->bankDefines.size(); i++)
 	{
-		if ((std::string)groupName == spc->bankDefines[i]->name)
+		if (groupName == spc->bankDefines[i]->name)
 		{
 			for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
 			{
@@ -3583,19 +3583,19 @@ void Music::addSampleBank(const fs::path &fileName)
 	std::vector<uint8_t> bankFile;
 	std::string actualPath = "";
 
-	std::string relativeDir = this->name;
-	std::string absoluteDir = "samples/" + (std::string)fileName;
+	std::string relativeDir = this->name.string();
+	std::string absoluteDir = "samples/" + fileName.string();
 	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
 	relativeDir = "music/" + relativeDir;
 	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
-	relativeDir += "/" + (std::string)fileName;
+	relativeDir += "/" + fileName.string();
 
 	if (fs::exists(relativeDir))
 		actualPath = relativeDir;
 	else if (fs::exists(absoluteDir))
 		actualPath = absoluteDir;
 	else
-		Logging::error("Could not find sample bank " + (std::string)fileName, this);
+		Logging::error("Could not find sample bank " + fileName.string(), this);
 
 	readBinaryFile(actualPath, bankFile);
 
@@ -3646,19 +3646,19 @@ int Music::getSample(const fs::path &name)
 {
 	std::string actualPath = "";
 
-	std::string relativeDir = this->name;
-	std::string absoluteDir = "samples/" + (std::string)name;
+	std::string relativeDir = this->name.string();
+	std::string absoluteDir = "samples/" + name.string();
 	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
 	relativeDir = "music/" + relativeDir;
 	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
-	relativeDir += "/" + (std::string)name;
+	relativeDir += "/" + name.string();
 
 	if (fs::exists(relativeDir))
 		actualPath = relativeDir;
 	else if (fs::exists(absoluteDir))
 		actualPath = absoluteDir;
 	else
-		Logging::error("Could not find sample " + (std::string)name, this);
+		Logging::error("Could not find sample " + name.string(), this);
 
 
 
@@ -3669,7 +3669,7 @@ int Music::getSample(const fs::path &name)
 
 	while (it != spc->sampleToIndex.end())
 	{
-		fs::path p2 = (std::string)it->first;
+		fs::path p2 = it->first.string();
 		if (fs::equivalent(p1, p2))
 			return it->second;
 
