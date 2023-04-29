@@ -26,7 +26,11 @@ template <typename T>
 inline void readBinaryFile(const fs::path &fileName, std::vector<T> &v)
 {
 	std::ifstream is (fileName, std::ios::binary);
-	v.assign(std::istream_iterator<T>(is), std::istream_iterator<T>());
+	if (!is)
+		throw fs::filesystem_error("File cannot be read.", fileName, std::make_error_code(std::errc::no_such_file_or_directory));
+	const size_t file_size {fs::file_size(fileName)};
+	v.resize(file_size / sizeof(T));
+	is.read(reinterpret_cast<char*>(v.data()), file_size);
 	is.close();
 }
 
@@ -36,7 +40,11 @@ inline void readBinaryFile(const fs::path &fileName, std::vector<T> &v)
 inline void readTextFile(const fs::path &fileName, std::string &str)
 {
 	std::ifstream is (fileName);
-	str.assign(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>());
+	if (!is)
+		throw fs::filesystem_error("File cannot be read.", fileName, std::make_error_code(std::errc::no_such_file_or_directory));
+	const size_t file_size {fs::file_size(fileName)};
+	str.resize(file_size);
+	is.read(str.data(), file_size);
 	is.close();
 }
 
@@ -47,6 +55,8 @@ template <typename T>
 inline void writeBinaryFile(const fs::path &fileName, std::vector<T> &v)
 {
 	std::ofstream ofs (fileName, std::ios::binary);
+	if (!ofs)
+		throw fs::filesystem_error("File cannot be written.", fileName, std::make_error_code(std::errc::no_such_file_or_directory));
 	std::copy(v.begin(), v.end(), std::ostream_iterator<T>(ofs));
 	ofs.close();
 }
@@ -57,6 +67,8 @@ inline void writeBinaryFile(const fs::path &fileName, std::vector<T> &v)
 inline void writeTextFile(const fs::path &fileName, const std::string &str)
 {
 	std::ofstream ofs (fileName);
+	if (!ofs)
+		throw fs::filesystem_error("File cannot be written.", fileName, std::make_error_code(std::errc::no_such_file_or_directory));
 	std::copy(str.begin(), str.end(), std::ostream_iterator<char>(ofs));
 	ofs.close();
 }

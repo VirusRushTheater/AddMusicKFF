@@ -67,7 +67,7 @@ public:
 	/**
 	 * @brief Equivalent of running AddMusicK with the "justSPCsPlease" option. Does not need a SMW ROM to run.
 	 */
-	bool generateSPCFiles(const std::vector<fs::path>& textFilesToCompile);
+	bool generateSPCFiles(const std::vector<fs::path>& textFilesToCompile, const fs::path& output_folder = ".");
 
 	/**
 	 * Loads a sample list file.
@@ -116,6 +116,8 @@ private:
 	fs::path driver_srcdir;									// Root directory from which driver ASM files will be found.
 	fs::path driver_builddir;								// Directory in which generated driver files will be put.
 	fs::path work_dir;										// Root directory from which user-editable files will be found.
+	fs::path spc_output_dir;								// Where to store the resulting SPCs.
+	bool spc_build_plan {false};
 
 	int programUploadPos;
 

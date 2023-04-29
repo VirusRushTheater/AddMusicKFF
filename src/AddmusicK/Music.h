@@ -304,6 +304,8 @@ private:
 	void markEchoBufferAllocVCMD();						// Called when the Hot Patch VCMD is manually defined. Required because of a bit that handles a special case when the echo buffer size is zero.
 
 	// Ported from globals.cpp
+	fs::path _resolvePath(const fs::path &fileName);
+
 	void addSample(const fs::path &fileName, bool important);
 	void addSample(const std::vector<uint8_t> &sample, const std::string &name, bool important, bool noLoopHeader, int loopPoint = 0, bool isBNK = false);
 	void addSampleGroup(const fs::path &groupName);

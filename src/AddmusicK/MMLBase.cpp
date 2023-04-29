@@ -320,10 +320,9 @@ void MMLBase::preprocess()
 		Logging::error("There was an #ifdef, #ifndef, or #if without a matching #endif.", this);
 
 	i = 0;
-	/*
-	if (version != -2)			// For now, skip comment erasing for #amm songs.  #amk songs will follow suit in a later version.
+	
+	if (addmusicversion != -2)			// For now, skip comment erasing for #amm songs.  #amk songs will follow suit in a later version.
 	{
-
 		while (i < newstr.length())
 		{
 			if (newstr[i] == ';')
@@ -335,7 +334,6 @@ void MMLBase::preprocess()
 			i++;
 		}
 	}
-	*/
 
 	// Finishes the deal
 	text = newstr;
@@ -344,7 +342,6 @@ void MMLBase::preprocess()
 std::string MMLBase::getQuotedString(const std::string &string, int startPos, int &rawLength)
 {
 	std::string retval;
-	int &i = startPos;
 	auto cursor_start = string.begin() + startPos;
 	auto cursor = cursor_start;
 

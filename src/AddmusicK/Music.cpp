@@ -136,7 +136,8 @@ void Music::_init()
 void Music::compile(SPCEnvironment* spc_)
 {
 	spc = spc_;
-	basepath = spc_->work_dir;
+	// basepath = spc_->work_dir;
+	basepath = "";
 
 	_init();
 
@@ -255,22 +256,24 @@ bool Music::doReplacement()
 
 void Music::parseComment()
 {
-	if (songTargetProgram == 2)
+	switch (songTargetProgram)
 	{
-
-		pos++;
-		while (pos < text.length())
-		{
-			if (text[pos] == '\n')
-				break;
+		// case 0:
+		case 2:
 			pos++;
-		}
-		line++;
-	}
-	else
-	{
-		pos++;
-		musicError("Illegal use of comments. Sorry about that. Should be fixed in AddmusicK 2.");
+			while (pos < text.length())
+			{
+				if (text[pos] == '\n')
+					break;
+				pos++;
+			}
+			line++;
+			break;
+		
+		default:
+			pos++;
+			musicError("Illegal use of comments. Sorry about that. Should be fixed in AddmusicK 2.");
+
 	}
 }
 
@@ -3087,18 +3090,15 @@ void Music::pointersFirstPass()
 
 	statStr = statStrStream.str();
 
-	std::string fname = name;
+	// Store the stats in a TXT file.
+	fs::path spc_basedir {"."}, fname;
+	if (spc->spc_build_plan)
+		spc_basedir = spc->spc_output_dir;
 
-	int extPos = fname.find_last_of('.');
-	if (extPos != -1)
-		fname = fname.substr(0, extPos);
-
-	if (fname.find('/') != -1)
-		fname = fname.substr(fname.find_last_of('/') + 1);
-	else if (fname.find('\\') != -1)
-		fname = fname.substr(fname.find_last_of('\\') + 1);
-	fname = "stats/" + fname + ".txt";
-
+	if (!fs::exists(spc_basedir / "stats"))
+		fs::create_directories(spc_basedir / "stats");
+	
+	fname = spc_basedir / "stats" / (name.stem().string() + ".txt");
 	writeTextFile(fname, statStr);
 }
 
@@ -3451,28 +3451,33 @@ int Music::multiplyByTempoRatio(int value)
 	return temp;
 }
 
+fs::path Music::_resolvePath(const fs::path &fileName)
+{
+	const fs::path basedir_alternatives[] {
+		this->name.parent_path() / basepath,		// relativeDir
+		this->spc->work_dir / "samples" / basepath,	// absoluteDir (on individual sample)
+		this->spc->work_dir / "samples"				// absoluteDir (on sample group)
+	};
+
+	fs::path actualPath;
+	for (auto& b_i : basedir_alternatives)
+	{
+		actualPath = b_i / fileName;
+		if (fs::exists(actualPath))
+			return actualPath;
+	}
+
+	Logging::error("Could not find path " + (std::string)fileName, this);
+	return fs::path();
+}
 
 void Music::addSample(const fs::path &fileName, bool important)
 {
-	std::vector<uint8_t> temp;
-	std::string actualPath = "";
+	std::vector<uint8_t> sample_data;
+	std::string actualPath = _resolvePath(fileName);
 
-	std::string relativeDir = this->name;
-	std::string absoluteDir = "samples/" + (std::string)fileName;
-	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
-	relativeDir = "music/" + relativeDir;
-	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
-	relativeDir += "/" + (std::string)fileName;
-
-	if (fs::exists(relativeDir))
-		actualPath = relativeDir;
-	else if (fs::exists(absoluteDir))
-		actualPath = absoluteDir;
-	else
-		Logging::error("Could not find sample " + (std::string)fileName, this);
-
-	readBinaryFile(actualPath, temp);
-	addSample(temp, actualPath, important, false);
+	readBinaryFile(actualPath, sample_data);
+	addSample(sample_data, actualPath, important, false);
 }
 
 void Music::addSample(const std::vector<uint8_t> &sample, const std::string &name, bool important, bool noLoopHeader, int loopPoint, bool isBNK)
@@ -3581,21 +3586,7 @@ int bankSampleCount = 0;			// Used to give unique names to sample bank brrs.
 void Music::addSampleBank(const fs::path &fileName)
 {
 	std::vector<uint8_t> bankFile;
-	std::string actualPath = "";
-
-	std::string relativeDir = this->name;
-	std::string absoluteDir = "samples/" + (std::string)fileName;
-	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
-	relativeDir = "music/" + relativeDir;
-	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
-	relativeDir += "/" + (std::string)fileName;
-
-	if (fs::exists(relativeDir))
-		actualPath = relativeDir;
-	else if (fs::exists(absoluteDir))
-		actualPath = absoluteDir;
-	else
-		Logging::error("Could not find sample bank " + (std::string)fileName, this);
+	std::string actualPath = _resolvePath(fileName);
 
 	readBinaryFile(actualPath, bankFile);
 
@@ -3642,30 +3633,12 @@ void Music::addSampleBank(const fs::path &fileName)
 	}
 }
 
-int Music::getSample(const fs::path &name)
+int Music::getSample(const fs::path &sp_path)
 {
-	std::string actualPath = "";
-
-	std::string relativeDir = this->name;
-	std::string absoluteDir = "samples/" + (std::string)name;
-	std::replace(relativeDir.begin(), relativeDir.end(), '\\', '/');
-	relativeDir = "music/" + relativeDir;
-	relativeDir = relativeDir.substr(0, relativeDir.find_last_of('/'));
-	relativeDir += "/" + (std::string)name;
-
-	if (fs::exists(relativeDir))
-		actualPath = relativeDir;
-	else if (fs::exists(absoluteDir))
-		actualPath = absoluteDir;
-	else
-		Logging::error("Could not find sample " + (std::string)name, this);
-
-
-
-	fs::path ftemp = actualPath;
+	fs::path ftemp = _resolvePath(sp_path);
 	std::map<fs::path, int>::const_iterator it = spc->sampleToIndex.begin();
 
-	fs::path p1 = actualPath;
+	fs::path p1 = ftemp;
 
 	while (it != spc->sampleToIndex.end())
 	{

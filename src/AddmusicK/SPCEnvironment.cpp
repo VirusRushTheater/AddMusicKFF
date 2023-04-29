@@ -81,9 +81,11 @@ SPCEnvironment::~SPCEnvironment()
 	delete[] (soundEffectsDFC);
 }
 
-bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCompile)
+bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCompile, const fs::path& output_folder)
 {
 	justSPCsPlease = true;
+	spc_output_dir = output_folder;
+	spc_build_plan = true;
 
 	loadSampleList(work_dir / DEFAULT_SAMPLELIST_FILENAME);
 	loadMusicList(work_dir / DEFAULT_SONGLIST_FILENAME);
@@ -127,6 +129,7 @@ bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCo
 	_fixMusicPointers();
 
 	_generateSPCs();
+	spc_build_plan = false;
 
 	/*
 	if (visualizeSongs)
@@ -813,31 +816,27 @@ bool SPCEnvironment::_generateSPCs()
 				strftime(buffer, 11, "%m/%d/%Y", localtime(&t));
 				strncpy((char *)SPC.data() + 0x9E, buffer, 10);
 
-				std::string pathlessSongName;
+				fs::path pathlessSongName;
 				if (mode == 0)
-					pathlessSongName = musics[i].name;
+					pathlessSongName = musics[i].name.stem();
 				else if (mode == 1)
-					pathlessSongName = soundEffects[0][i].name;
+					pathlessSongName = soundEffects[0][i].name.stem();
 				else if (mode == 2)
-					pathlessSongName = soundEffects[1][i].name;
+					pathlessSongName = soundEffects[1][i].name.stem();
 
+				if (mode == 0) musics[i].pathlessSongName = pathlessSongName.string();
+				if (mode == 1) {
+					pathlessSongName = "1DF9" / pathlessSongName;
+					if (!fs::exists("1DF9"))
+						fs::create_directory(spc_output_dir / "1DF9");
+				}
+				if (mode == 2) {
+					pathlessSongName = "1DFC" / pathlessSongName;
+					if (!fs::exists("1DFC"))
+						fs::create_directory(spc_output_dir / "1DFC");
+				}
 
-				int extPos = pathlessSongName.find_last_of('.');
-				if (extPos != -1)
-					pathlessSongName = pathlessSongName.substr(0, extPos);
-
-
-				if (pathlessSongName.find('/') != -1)
-					pathlessSongName = pathlessSongName.substr(pathlessSongName.find_last_of('/') + 1);
-				else if (pathlessSongName.find('\\') != -1)
-					pathlessSongName = pathlessSongName.substr(pathlessSongName.find_last_of('\\') + 1);
-
-				if (mode == 0) musics[i].pathlessSongName = pathlessSongName;
-				if (mode == 1) pathlessSongName.insert(0, "1DF9/");
-				if (mode == 2) pathlessSongName.insert(0, "1DFC/");
-
-				std::string fname = "SPCs/" + pathlessSongName;
-
+				fs::path fname = spc_output_dir / pathlessSongName;
 
 				if (y == 2)
 					fname += " (Yoshi)";
@@ -846,7 +845,6 @@ bool SPCEnvironment::_generateSPCs()
 
 				Logging::debug(std::stringstream() << "Wrote \"" << fname << "\" to file.");
 
-				// TODO: solve where to store the SPCs.
 				writeBinaryFile(fname, SPC);
 				y--;
 			}
