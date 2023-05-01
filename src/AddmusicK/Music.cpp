@@ -26,7 +26,12 @@ void Music::_init()
 		text += ' ';
 	for (int z = 0; z < 0x10000; z++)
 		loopPointers[z] = ~0;
-	
+	for (int z = 0; z < 9; z++)
+	{
+		q[z] = 0x7F;
+		updateQ[z] = true;
+	}
+
 	if (text[0] == char(0xEF) && text[1] == char(0xBB) && text[2] == char(0xBF))
 	{
 		text.erase(text.begin(), text.begin() + 3);
@@ -330,7 +335,7 @@ void Music::parseChannelDirective()
 	if (i < 0 || i > 7)
 		musicError("Illegal value for channel directive.");
 
-		channel = i;
+	channel = i;
 	q[8] = q[channel];
 	updateQ[8] = updateQ[channel];
 	prevNoteLength = -1;
@@ -1470,19 +1475,30 @@ void Music::parseHexCommand()
 				Logging::warning("WARNING: A hex command was used which is not native to AddMusicM.\nDid you mean: #amk 1");
 				nonNativeHexWarning = false;
 			}
+
 			if (i < 0xDA)
 			{
-				if (manualNoteWarning)
+				if (targetAMKVersion == 0)
 				{
-					if (targetAMKVersion == 0)
+					if (manualNoteWarning && i >= 0x80)
 					{
-						Logging::warning("Warning: A hex command was found that will act as a note instead of a special\neffect. If this is a song you're using from someone else, you can most likely\nignore this message, though it may indicate that a necessary #amm or #am4 is\nmissing.");
+						Logging::warning("Warning: A hex command was found that will act as a note instead of a special\neffect. If this is a song you're using from someone else, you can most likely\nignore this message, though it may indicate that a necessary #amm or #am4 is\nmissing or that the wrong one was used.", this);
 						manualNoteWarning = false;
 					}
-					else
+					else if (manualDurQuantWarning && i > 0x00)
 					{
-						musicError("Unknown hex command.");
+						Logging::warning("Warning: A hex command was found that will act as a duration or a quantization\nand velocity byte instead of a special effect. If this is a song you're using\nfrom someone else, you can most likely ignore this message, though it may\nindicate that a necessary #amm or #am4 is missing or that the wrong one was\nused.", this);
+						manualDurQuantWarning = false;
 					}
+					else if (manualPhraseEndWarning && i == 0x00)
+					{
+						Logging::warning("WARNING: A hex command was found that will act as a phrase end marker instead of\na special effect, which more likely than not will mean your song will\nprematurely terminate. This may indicate that a necessary #amm or #am4 is\nmissing, or it could mean that the wrong one was used.", this);
+						manualPhraseEndWarning = false;
+					}
+				}
+				else
+				{
+					musicError("Unknown hex command.");
 				}
 			}
 			else if (i > 0xFE)

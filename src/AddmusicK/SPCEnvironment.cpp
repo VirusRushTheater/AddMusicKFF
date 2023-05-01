@@ -501,7 +501,6 @@ bool SPCEnvironment::_fixMusicPointers()
 			}
 		}
 
-
 		std::vector<uint8_t> final;
 
 		int sizeWithPadding = (musics[i].minSize > 0) ? musics[i].minSize : musics[i].totalSize;
@@ -745,11 +744,8 @@ bool SPCEnvironment::_generateSPCs()
 
 				if (mode == 0)
 				{
-
 					for (unsigned int j = 0; j < musics[i].finalData.size(); j++)
 						SPC[localPos + 0x100 + j] = musics[i].finalData[j];
-
-
 				}
 
 				int tablePos = localPos + musics[i].finalData.size();

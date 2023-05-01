@@ -42,6 +42,43 @@ TEST_CASE("Logging", "[logging]")
     REQUIRE(true);
 }
 
+TEST_CASE("Creating and reading files", "[utility][i-o]")
+{
+    const fs::path BIN_FILENAME = "bin.bin",
+        TEXT_FILENAME = "txt.txt";
+
+    std::vector<uint8_t> st_vec {1,2,3,4,5,6,7,8,9},
+        blank_vec;
+    writeBinaryFile(BIN_FILENAME, st_vec);
+    readBinaryFile(BIN_FILENAME, blank_vec);
+
+    REQUIRE(st_vec.size() == blank_vec.size());
+    REQUIRE(fs::file_size(BIN_FILENAME) == st_vec.size());
+
+    std::string st_str {"123456789\n"},
+        blank_str;
+    writeTextFile(TEXT_FILENAME, st_str);
+    readTextFile(TEXT_FILENAME, blank_str);
+
+    REQUIRE(st_str.size() == blank_str.size());
+    REQUIRE(fs::file_size(TEXT_FILENAME) == st_str.size());
+}
+
+TEST_CASE("Testing the scanInt method", "[utility][scanint]")
+{
+    std::string test4scanint {R"(
+        MainLoopPos: $00042E
+        ReuploadPos: $00182A
+    )"};
+
+    uint32_t mainLoopPos, reuploadPos;
+    mainLoopPos = scanInt(test4scanint, "MainLoopPos: ");
+    reuploadPos = scanInt(test4scanint, "ReuploadPos: ");
+
+    REQUIRE(mainLoopPos == 0x00042e);
+    REQUIRE(reuploadPos == 0x00182a);
+}
+
 TEST_CASE("SPCEnvironment creation of a build environment", "[spcenvironment][instancing]")
 {
     SPCEnvironment spc (WORK_DIR, DRIVER_DIR);

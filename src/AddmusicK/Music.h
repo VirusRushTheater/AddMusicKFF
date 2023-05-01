@@ -203,6 +203,8 @@ private:
 
 	bool sortReplacements 			{true};
 	bool manualNoteWarning 			{true};
+	bool manualDurQuantWarning 		{true};
+	bool manualPhraseEndWarning 	{true};
 	bool nonNativeHexWarning 		{true};
 	bool nonNativeCmdWarning 		{true};
 	bool caseNoteWarning 			{true};

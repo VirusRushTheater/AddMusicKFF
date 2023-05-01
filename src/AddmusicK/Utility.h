@@ -79,7 +79,7 @@ inline void writeTextFile(const fs::path &fileName, const std::string &str)
  */
 inline int scanInt(const std::string &str, const std::string &needle)
 {
-	std::string needle_concat = needle + R"(\s*\$([A-Fa-f0-9]{1,4}))";
+	std::string needle_concat = needle + R"(\s*\$([A-Fa-f0-9]+))";
 	std::regex pattern (needle_concat);
 	std::smatch matches;
 
