@@ -6,6 +6,12 @@ project(AddMusicK
 	LANGUAGES	C CXX
 )
 
+# As this program uses the little endian capabilities of your host processor,
+# this will not compile on big endian machines.
+if(CMAKE_BYTE_ORDER EQUAL "BIG_ENDIAN")
+	message(FATAL_ERROR "AddMusic will not compile on big-endian architectures.")
+endif()
+
 # The compiled program and driver source files will be end up being copied to this folder
 set(PROJECT_DEPLOY_DIR				${CMAKE_BINARY_DIR}/deploy)
 set(PROJECT_BUILD_SCRIPTS_DIR		${CMAKE_SOURCE_DIR}/build_scripts)
@@ -33,6 +39,9 @@ OFF)
 option(ADDMUSICK_COMPILE_TESTS
 	"Compile tests"
 ON)
+option(ASAR_DYNAMIC_LINKAGE
+	"Link asar dynamically (if OFF, it will link asar statically)"
+OFF)
 
 if (ADDMUSICK_COMPILE_AMKGUI)
 	message(FATAL_ERROR "No support yet for building AMKGUI.")
@@ -41,9 +50,19 @@ endif()
 # Standardize this as much as possible.
 set(CMAKE_CXX_STANDARD		17)
 set(CMAKE_CXX_EXTENSIONS 	OFF)
+
 # set(CMAKE_CXX_FLAGS 		"${CMAKE_CXX_FLAGS} -Wall")
 
-set(ASAR_LIB_TARGET			asar-static)
+# asar builds a target called "asar" if you build a .so/.dll, but builds
+# a target called "asar-static" when you build it statically.
+# That's why we define asar's target name as a variable. 
+if (ASAR_DYNAMIC_LINKAGE)
+	set(ASAR_LIB_TARGET			asar)
+	message(STATUS "Linking asar dynamically")
+else()
+	set(ASAR_LIB_TARGET			asar-static)
+	message(STATUS "Linking asar statically")
+endif()
 
 # Branch the build to these directories
 add_subdirectory(third-party)

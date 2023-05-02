@@ -2,10 +2,16 @@
 # Also, hardcode these options.
 
 set(ASAR_GEN_EXE 			OFF CACHE BOOL "" FORCE)
-set(ASAR_GEN_DLL 			OFF CACHE BOOL "" FORCE)
 set(ASAR_GEN_EXE_TEST 		OFF CACHE BOOL "" FORCE)
 set(ASAR_GEN_DLL_TEST 		OFF CACHE BOOL "" FORCE)
-set(ASAR_GEN_LIB 			ON  CACHE BOOL "" FORCE)
+
+if (ASAR_DYNAMIC_LINKAGE)
+	set(ASAR_GEN_DLL 			ON CACHE BOOL "" FORCE)
+	set(ASAR_GEN_LIB 			OFF  CACHE BOOL "" FORCE)
+else()
+	set(ASAR_GEN_DLL 			OFF CACHE BOOL "" FORCE)
+	set(ASAR_GEN_LIB 			ON  CACHE BOOL "" FORCE)
+endif()
 
 add_subdirectory(asar/src)
 add_subdirectory(Catch2)

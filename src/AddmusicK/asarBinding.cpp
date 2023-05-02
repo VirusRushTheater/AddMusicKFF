@@ -56,6 +56,10 @@ bool AsarBinding::compileToBin()
 	std::string abspatch_path = std::filesystem::absolute(_patchfilename).string();
 	asar_patch(abspatch_path.c_str(), (char *)binOutput, buflen, &binlen);
 
+	// Clears the buffers.
+	asar_stderr.clear();
+	asar_stdout.clear();
+
 	asar_getprints(&count);
 	for (currentCount = 0; currentCount != count; currentCount++)
 		asar_stdout.push_back(asar_getprints(&count)[currentCount]);
