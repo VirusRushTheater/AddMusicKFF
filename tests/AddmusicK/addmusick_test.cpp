@@ -85,6 +85,22 @@ TEST_CASE("SPCEnvironment creation of a build environment", "[spcenvironment][in
     REQUIRE(fs::exists(DRIVER_DIR / "build"));
 }
 
+TEST_CASE("insertHexValue testing", "[utility][inserthexvalue]")
+{
+    std::string test4insertion {R"(
+        Tag_1: 
+        Tag_2: 
+        Tag_3: 
+        Tag_4: 
+    )"};
+    insertHexValue((uint8_t)0x42, "Tag_1", test4insertion);
+    insertHexValue((uint16_t)0x42, "Tag_2", test4insertion);
+    insertHexValue((uint32_t)0x42, "Tag_3", test4insertion);
+    insertHexValue<uint32_t, 6>(0x42, "Tag_4", test4insertion);
+    
+    std::cout << test4insertion << std::endl;
+}
+
 TEST_CASE("SPCEnvironment creation of a set of SPC files", "[spcenvironment][spc][generation]")
 {
     const fs::path testset = TEST_WORKDIR / "music";

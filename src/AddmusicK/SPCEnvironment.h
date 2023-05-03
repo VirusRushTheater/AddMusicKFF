@@ -16,7 +16,8 @@ namespace AddMusic
 {
 
 /**
- * @brief By default, SPCOptions will load with these parameters.
+ * @brief Initialization options that combine the SPC and ROM hacking
+ * functionality. Normally you won't need to change any of these.
  */
 struct SPCEnvironmentOptions
 {
@@ -31,22 +32,23 @@ struct SPCEnvironmentOptions
 	bool checkEcho {true};
 	
 	bool sfxDump {false};
+	bool doNotPatch {false};
+	uint32_t bankStart {0x200000};
 };
 
 /**
  * @brief The heart of the program. It encompasses some utility functions
- * related specifically to SPC and Rom hacking (which are different to the
- * general utility functions located in Utility.cpp), global options which
+ * related specifically to SPC generation, global options which
  * were previously defined on the program's argument list; and the environment
  * in which the songs are compiled.
  * 
- * If you're scouring through the code, it's recommended you start with this
- * class.
+ * If you want ROM hacking capabilities, you might need to instance a
+ * ROMEnvironment instead, which inherits this class and adds those capabilities
+ * on top.
  */
 class SPCEnvironment
 {
 	friend class Music;
-	friend class ROMEnvironment;
 
 public:
 	/**
@@ -89,8 +91,8 @@ public:
 	int PCToSNES(int addr);
 
 	SPCEnvironmentOptions options;							// User-defined options.
-private:
 
+protected:
 	/**
 	 * Useful to retrieve patch info embedded in SNES/patch.asm.
 	 * Equivalent to assembleSNESDriver().

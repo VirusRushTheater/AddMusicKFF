@@ -12,17 +12,21 @@ namespace AddMusic
 {
 
 /**
- * @brief Stuff pertaining to the ROM.
+ * @brief Working environment that includes Super Mario World ROM hacking
+ * capabilities.
+ * If you only want to generate playable SPCs you will need just an instance
+ * of SPCEnvironment, which won't require a ROM to initialize.
  */
-class ROMEnvironment
+class ROMEnvironment : public SPCEnvironment
 {
 public:
-	bool loadROM(fs::path _rom_path);
-	void prepareROM();
-	void tryToCleanSampleToolData();
-	void tryToCleanAM4Data();
-	void tryToCleanAMMData();
-	void cleanROM();
+
+	bool loadROM(const fs::path& _rom_path);
+	bool _cleanROM();
+
+	bool _tryToCleanSampleToolData();
+	bool _tryToCleanAM4Data();
+	bool _tryToCleanAMMData();
 
 	/**
 	 * @brief Returns a position in the ROM with the specified amount of free
@@ -35,10 +39,13 @@ public:
 	int clearRATS(int PCaddr);
 	bool findRATS(int addr);
 
-private:
+	bool _assembleSNESDriverROMSide();
+	bool _compileMusicROMSide();
+	void generateMSC();
+
+protected:
 	// Attributes
-	SPCEnvironment* spcenv;
-	fs::path rom_path;
+	fs::path ROMName;
 
 	std::vector<uint8_t> rom;
 	std::vector<uint8_t> romHeader;

@@ -3,6 +3,7 @@ set(ADDMUSICK_SOURCES
 	Utility.cpp
 
 	SPCEnvironment.cpp
+	# ROMEnvironment.cpp
 	MMLBase.cpp
 	Music.cpp
 	SoundEffect.cpp
@@ -17,6 +18,7 @@ set(ADDMUSICK_HEADERS
 	Utility.h
 
 	SPCEnvironment.h
+	# ROMEnvironment.h
 	MMLBase.h
 	Music.h
 	SoundEffect.h
@@ -38,3 +40,7 @@ add_library(AddmusicK STATIC
 # Solution to have any application that uses this library to find the include
 # files in this folder.
 target_include_directories(AddmusicK PUBLIC "./")
+
+target_link_libraries(AddmusicK
+	AM405Remover
+)

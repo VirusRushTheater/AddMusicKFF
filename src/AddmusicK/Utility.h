@@ -91,9 +91,31 @@ inline int scanInt(const std::string &str, const std::string &needle)
 		return std::strtoul(matches[1].str().c_str(), NULL, 16);
 	else
 	{
-		throw AddmusicException(std::string("Error: Could not find \"") + needle + "\"");
+		throw std::runtime_error(std::string("Error: Could not find \"") + needle + "\" inside your string.");
 		return 0;
 	}
+}
+
+/**
+ * @brief Implants a hexadecimal value after a certain tag to be found inside
+ * the string "str".
+ */
+template<typename T, int t_size = sizeof(T) * 2>
+inline void insertHexValue(T value, const std::string &tag, std::string &str)
+{
+	constexpr int MAX_LEN = 16;
+	static_assert(t_size > 0 && t_size <= MAX_LEN, "Invalid size");
+
+	int pos = str.find(tag);
+	if (pos == -1){
+		throw std::runtime_error(std::string("Error: \"") + tag + "\" could not be found.");
+	}
+	pos += tag.length();
+
+	std::stringstream ss;
+	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(t_size) << value << std::dec;
+	std::string tempStr = ss.str();
+	str.replace(pos+1, t_size, tempStr);
 }
 
 /**

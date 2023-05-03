@@ -33,6 +33,7 @@ struct SpaceInfo
 class Music : public MMLBase
 {
 	friend class SPCEnvironment;
+	friend class ROMEnvironment;
 
 public:
 	// Music();
