@@ -546,7 +546,8 @@ bool SPCEnvironment::_fixMusicPointers()
 		}
 
 		std::stringstream fname;
-		writeBinaryFile(driver_builddir / "SNES" / "bin" / (std::stringstream("music") << hex2 << i << ".bin").str(), final);
+		std::string globalinc_name (driver_builddir / "SNES" / "bin" / (std::stringstream() << "music" << hex2 << i << ".bin").str());
+		writeBinaryFile(globalinc_name, final);
 
 		if (i <= highestGlobalSong)
 		{
