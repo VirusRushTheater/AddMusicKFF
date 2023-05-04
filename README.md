@@ -1,15 +1,15 @@
 # VirusRushTheater's fork of AddMusicKFF
 
 This fork was made by VirusRushTheater in order to modify some aspects of
-KungFuFurby's AddMusicKFF v1.0.8:
+KungFuFurby's AddMusicKFF v1.0.9 RC:
 
 * Remove Visual Studio dependencies and use a CMake build based system.
 * Tidy up program dependencies, moving them to the `deploy` folder.
 * Make it multiplatform with minor modifications.
 * Including Asar repository into the building system, allowing a more straightforward usage of it as a library.
 * Merge the music hacking base directory system (in other words, the clean `deploy` folder) into the program, so it can be restored to a clean slate with a single call, relieving the user of the burden of making backup directories.
-* Compiling AddMusicKFF as a library, which would allow for more complex
-  SMW hacking tools to integrate it easily.
+* Compiling AddMusicKFF as a library, which would allow for more complex SMW hacking tools to integrate it easily.
+* Removing as many boilerplate dependencies as possible (Addmusic_list.txt, etc.) if generating SPC files.
 
 ## Cloning ##
 
@@ -21,7 +21,7 @@ git clone --recursive https://github.com/VirusRushTheater/AddMusicKFF.git
 
 ## Building the project with CMake ##
 
-First of all, create a folder named `build` in the repositor root.
+First of all, create a folder named `build` in the repository root.
 
 ```
 mkdir build

@@ -24,6 +24,7 @@ else()
 	message(STATUS "AM4Batch set to NOT be built.")
 endif(ADDMUSICK_COMPILE_AM4BATCH)
 
+# AM4Batch
 if(ADDMUSICK_COMPILE_AMMBATCH)
 	add_subdirectory(AMMBatch)
 	message(STATUS "AMMBatch set to build.")
@@ -31,3 +32,5 @@ else()
 	message(STATUS "AMMBatch set to NOT be built.")
 endif(ADDMUSICK_COMPILE_AMMBATCH)
 	
+# Generate resource files out of every folder in "package".
+add_subdirectory(package)
