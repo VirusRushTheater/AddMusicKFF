@@ -1,6 +1,7 @@
 set(ADDMUSICK_SOURCES
 	asarBinding.cpp
 	Utility.cpp
+	Package.cpp
 
 	SPCEnvironment.cpp
 	# ROMEnvironment.cpp
@@ -16,6 +17,7 @@ set(ADDMUSICK_HEADERS
 	BankDefine.h
 	Sample.h
 	Utility.h
+	Package.h
 
 	SPCEnvironment.h
 	# ROMEnvironment.h

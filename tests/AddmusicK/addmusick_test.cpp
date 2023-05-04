@@ -8,6 +8,7 @@
 
 #include "asarBinding.h"
 #include "Utility.h"
+#include "Package.h"
 #include "SPCEnvironment.h"
 
 using namespace AddMusic;
@@ -83,6 +84,12 @@ TEST_CASE("SPCEnvironment creation of a build environment", "[spcenvironment][in
 {
     SPCEnvironment spc (WORK_DIR, DRIVER_DIR);
     REQUIRE(fs::exists(DRIVER_DIR / "build"));
+}
+
+TEST_CASE("Package extraction", "[package][extraction]")
+{
+    asm_package.extract(fs::path("extraction"));
+    REQUIRE(true);
 }
 
 TEST_CASE("insertHexValue testing", "[utility][inserthexvalue]")

@@ -48,5 +48,11 @@ function(create_file_package SRC_FOLDER)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packageblob.h.in "packageblob_${SRC_FOLDER}.h")
 endfunction()
 
+# Generate packages for the folders "asm" and "boilerplate".
+# These will result in the files:
+# * packageblob_asm.h
+# * packageblob_boilerplate.h
 create_file_package(asm)
 create_file_package(boilerplate)
+
+target_include_directories(AddmusicK PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
