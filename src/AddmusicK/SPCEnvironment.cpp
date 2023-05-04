@@ -5,6 +5,7 @@
 #include "asarBinding.h"
 #include "SPCEnvironment.h"
 #include "Utility.h"
+#include "Package.h"
 
 #include <iostream>
 
@@ -18,17 +19,17 @@ constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
 constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
 constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
 
-SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir) :
+SPCEnvironment::SPCEnvironment(const fs::path& work_dir) :
 	work_dir(work_dir),
-	driver_srcdir(driver_srcdir),	
-	driver_builddir(driver_srcdir / DEFAULT_BUILD_FOLDER)
+	driver_srcdir(std::filesystem::temp_directory_path() / "amkdriver"),	// /tmp/amkdriver in Linux
+	driver_builddir(driver_srcdir)
 {
 	// Delegate these "if (verbose)" clauses to this Logging singleton.
 	if (options.verbose)
 		Logging::setVerbosity(Logging::Levels::DEBUG);
 
 	if (!options.allowSA1)
-		usingSA1 = false;	
+		usingSA1 = false;
 	
 	// Does your work directory have these files?
 	if (!fs::exists(work_dir))
@@ -40,23 +41,8 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_
 	if (!fs::exists(work_dir / DEFAULT_SFXLIST_FILENAME))
 		throw fs::filesystem_error("The SFX list file was not found within the work directory.", work_dir / DEFAULT_SFXLIST_FILENAME, std::error_code());
 
-	// Make sure the SPC driver source folder exists as well.
-	if (!fs::exists(driver_srcdir))
-		throw fs::filesystem_error("SPC driver source directory not found", driver_srcdir, std::error_code());
-	
-	// Copy the SPC driver source entirely into the "build" folder so it can
-	// be clean from any procedurally generated files.
-
-	// I do all the hassle with the temporary directory in order to trick the
-	// copy method into not recursing infinitely.
-	
-	// fs::rename throws exceptions when the temporary directory is not located
-	// in the same filesystem as the driver.
-	
-	if (fs::exists(driver_builddir))
-		deleteDir(driver_builddir);
-	fs::path tempdir = fs::temp_directory_path();
-	copyDir(driver_srcdir, driver_builddir);
+	// Extract the embedded ASM driver into a temporary folder.
+	asm_package.extract(driver_srcdir);
 	
 	// Dynamic allocation of some arrays.
 	musics = new Music[256];
@@ -68,8 +54,8 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_
 	Logging::debug(std::string("Driver will be compiled in ") + fs::absolute(driver_builddir).string());
 }
 
-SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir, const SPCEnvironmentOptions& opts) :
-	SPCEnvironment(work_dir, driver_srcdir)
+SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const SPCEnvironmentOptions& opts) :
+	SPCEnvironment(work_dir)
 {
 	options = opts;
 }
@@ -79,6 +65,8 @@ SPCEnvironment::~SPCEnvironment()
 	delete[] (musics);
 	delete[] (soundEffectsDF9);
 	delete[] (soundEffectsDFC);
+
+	deleteDir(driver_srcdir);
 }
 
 bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCompile, const fs::path& output_folder)

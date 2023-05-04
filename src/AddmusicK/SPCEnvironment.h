@@ -54,12 +54,12 @@ public:
 	/**
 	 * @brief Instance SPCEnvironment with the default options.
 	 */
-	SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir);
+	SPCEnvironment(const fs::path& work_dir);
 
 	/**
 	 * @brief Instance SPCEnvironment with different options.
 	 */
-	SPCEnvironment(const fs::path& work_dir, const fs::path& driver_srcdir, const SPCEnvironmentOptions& opts);
+	SPCEnvironment(const fs::path& work_dir, const SPCEnvironmentOptions& opts);
 
 	/**
 	 * @brief Destructor.

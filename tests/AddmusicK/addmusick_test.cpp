@@ -80,17 +80,17 @@ TEST_CASE("Testing the scanInt method", "[utility][scanint]")
     REQUIRE(reuploadPos == 0x00182a);
 }
 
-TEST_CASE("SPCEnvironment creation of a build environment", "[spcenvironment][instancing]")
-{
-    SPCEnvironment spc (WORK_DIR, DRIVER_DIR);
-    REQUIRE(fs::exists(DRIVER_DIR / "build"));
-}
+// TEST_CASE("SPCEnvironment creation of a build environment", "[spcenvironment][instancing]")
+// {
+//     SPCEnvironment spc (WORK_DIR, DRIVER_DIR);
+//     REQUIRE(fs::exists(DRIVER_DIR / "build"));
+// }
 
-TEST_CASE("Package extraction", "[package][extraction]")
-{
-    asm_package.extract(fs::path("extraction"));
-    REQUIRE(true);
-}
+// TEST_CASE("Package extraction", "[package][extraction]")
+// {
+//     asm_package.extract(fs::path("extraction"));
+//     REQUIRE(true);
+// }
 
 TEST_CASE("insertHexValue testing", "[utility][inserthexvalue]")
 {
@@ -120,7 +120,7 @@ TEST_CASE("SPCEnvironment creation of a set of SPC files", "[spcenvironment][spc
             input_files.push_back(fs::absolute(file_i.path()));
     }
 
-    SPCEnvironment spc (TEST_WORKDIR, DRIVER_DIR);
+    SPCEnvironment spc (TEST_WORKDIR);
     spc.generateSPCFiles(input_files);
 
 }

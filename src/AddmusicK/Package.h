@@ -47,7 +47,7 @@ struct Package
 /**
  * @brief Package which holds the ASM and SNES drivers.
  */
-Package asm_package {
+static Package asm_package {
 	.package_file_amount = __package_file_amount_asm,
 	.package_files = __package_files_asm,
 	.package_lengths = __package_lengths_asm,
@@ -58,7 +58,7 @@ Package asm_package {
 /**
  * @brief Package which holds a boilerplate for AMK building.
  */
-Package boilerplate_package {
+static Package boilerplate_package {
 	.package_file_amount = __package_file_amount_boilerplate,
 	.package_files = __package_files_boilerplate,
 	.package_lengths = __package_lengths_boilerplate,
