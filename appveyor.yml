@@ -15,13 +15,6 @@ platform:
   - x64
   - ARM
 
-install:
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
-        choco install python --version=3.8.8;
-    ) else (
-        sudo apt-get -y install python3;
-    )
-
 before_build:
   - git submodule update --init --recursive
 
