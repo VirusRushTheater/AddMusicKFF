@@ -1,23 +1,35 @@
 version: 1.0.9.{build}
 
-platform:
-  # - x86
-  - x64
-
-configuration:
-  - Release
-
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
+  - Ubuntu1804
   - macOS
-  - Ubuntu
+
+environment:
+  matrix:
+    - BUILD_TYPE: Debug
+    - BUILD_TYPE: Release
+
+platform:
+  - x86
+  - x64
+  - ARM
+
+install:
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
+        choco install python --version=3.8.8;
+    ) else (
+        sudo apt-get -y install python3;
+    )
 
 before_build:
   - git submodule update --init --recursive
-  - mkdir build
-  - cd build
-  - ps: cmake -DCMAKE_BUILD_TYPE=Release -DADDMUSICK_COMPILE_AMKGUI=OFF ..  
-  - sh: cmake -DCMAKE_BUILD_TYPE=Release -DADDMUSICK_COMPILE_AMKGUI=OFF ..
 
 build_script:
-  - cmake --build . 
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+  - cmake --build .
+
+# test_script:
+#   - ctest --output-on-failure

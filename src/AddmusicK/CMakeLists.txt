@@ -1,7 +1,6 @@
 set(ADDMUSICK_SOURCES
 	asarBinding.cpp
 	Utility.cpp
-	Package.cpp
 
 	SPCEnvironment.cpp
 	# ROMEnvironment.cpp

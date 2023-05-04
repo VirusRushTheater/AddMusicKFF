@@ -11,9 +11,6 @@
 
 using namespace AddMusic;
 
-// Will be evaluated relatively to work_dir to find source codes.
-constexpr const char DEFAULT_BUILD_FOLDER[] {"build"};
-
 // Default file names
 constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
 constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
