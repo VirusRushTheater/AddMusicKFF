@@ -15,6 +15,11 @@ namespace fs = std::filesystem;
 namespace AddMusic
 {
 
+// Default file names
+constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
+constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
+constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
+
 /**
  * @brief Initialization options that combine the SPC and ROM hacking
  * functionality. Normally you won't need to change any of these.
@@ -55,14 +60,9 @@ class SPCEnvironment
 
 public:
 	/**
-	 * @brief Instance SPCEnvironment with the default options.
-	 */
-	SPCEnvironment(const fs::path& work_dir);
-
-	/**
 	 * @brief Instance SPCEnvironment with different options.
 	 */
-	SPCEnvironment(const fs::path& work_dir, const SPCEnvironmentOptions& opts);
+	SPCEnvironment(const fs::path& work_dir, SPCEnvironmentOptions opts = SPCEnvironmentOptions());
 
 	/**
 	 * @brief Destructor.

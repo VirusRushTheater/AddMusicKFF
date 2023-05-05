@@ -20,10 +20,11 @@ namespace AddMusic
 class ROMEnvironment : public SPCEnvironment
 {
 public:
+	ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir, SPCEnvironmentOptions opts = SPCEnvironmentOptions());
 
-	bool loadROM(const fs::path& _rom_path);
+	bool patchROM(const fs::path& patched_rom_location);
+
 	bool _cleanROM();
-
 	bool _tryToCleanSampleToolData();
 	bool _tryToCleanAM4Data();
 	bool _tryToCleanAMMData();
@@ -41,7 +42,7 @@ public:
 
 	bool _assembleSNESDriverROMSide();
 	bool _compileMusicROMSide();
-	void generateMSC();
+	void _generateMSC();
 
 protected:
 	// Attributes
@@ -49,8 +50,6 @@ protected:
 
 	std::vector<uint8_t> rom;
 	std::vector<uint8_t> romHeader;
-
-	bool usingSA1;	// Does the ROM use SA1?
 };
 
 }

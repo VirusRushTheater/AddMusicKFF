@@ -7,9 +7,10 @@
 
 using namespace AddMusic;
 
-bool ROMEnvironment::loadROM(const fs::path& _rom_path)
+ROMEnvironment::ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir, SPCEnvironmentOptions opts) :
+	SPCEnvironment(work_dir, opts)
 {
-	ROMName = _rom_path;
+	ROMName = smw_rom;
 	readBinaryFile(ROMName, rom);
 
 	_tryToCleanAM4Data();
@@ -23,16 +24,46 @@ bool ROMEnvironment::loadROM(const fs::path& _rom_path)
 
 	if (rom.size() <= 0x80000)
 	{
-		Logging::error("Your ROM is too small. Save a level in Lunar Magic or expand it with Lunar Expand, then try again.");
-		return false;
+		throw std::runtime_error("Your ROM is too small. Save a level in Lunar Magic or expand it with Lunar Expand, then try again.");
 	}
 
 	usingSA1 = (rom[SNESToPC(0xFFD5)] == 0x23 && options.allowSA1);
 
 	_cleanROM();
-	return true;
 }
 
+bool ROMEnvironment::patchROM(const fs::path& patched_rom_location)
+{
+	bool visualizeSongs = false;
+
+	justSPCsPlease = false;
+	spc_output_dir = output_folder;
+	spc_build_plan = false;
+
+	loadSampleList(work_dir / DEFAULT_SAMPLELIST_FILENAME);
+	loadMusicList(work_dir / DEFAULT_SONGLIST_FILENAME);
+	loadSFXList(work_dir / DEFAULT_SFXLIST_FILENAME);
+
+	_assembleSNESDriver();
+	_assembleSPCDriver();
+	_compileSFX();
+	_compileGlobalData();
+
+	_compileMusic();
+	_fixMusicPointers();
+
+	_generateSPCs();
+
+	/*
+	if (visualizeSongs)
+		generatePNGs();
+	*/
+
+	_assembleSNESDriverROMSide();
+	_generateMSC();
+
+	return true;
+}
 
 bool ROMEnvironment::_cleanROM()
 {
@@ -126,7 +157,7 @@ bool ROMEnvironment::_tryToCleanSampleToolData()
 
 	if (found == false) return;
 
-	Logging::info("Sample Tool detected.  Erasing data...");
+	Logging::info("Sample Tool detected. Erasing data...");
 
 	int hackPos = i - 8;
 
@@ -502,7 +533,7 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 	}
 }
 
-void ROMEnvironment::generateMSC()
+void ROMEnvironment::_generateMSC()
 {
 	std::string mscname = ((std::string)ROMName).substr(0, (unsigned int)((std::string)ROMName).find_last_of('.'));
 

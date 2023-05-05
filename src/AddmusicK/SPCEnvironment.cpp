@@ -11,16 +11,13 @@
 
 using namespace AddMusic;
 
-// Default file names
-constexpr const char DEFAULT_SONGLIST_FILENAME[] {"Addmusic_list.txt"};
-constexpr const char DEFAULT_SAMPLELIST_FILENAME[] {"Addmusic_sample groups.txt"};
-constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
-
-SPCEnvironment::SPCEnvironment(const fs::path& work_dir) :
+SPCEnvironment::SPCEnvironment(const fs::path& work_dir, SPCEnvironmentOptions opts) :
 	work_dir(work_dir),
 	driver_srcdir(std::filesystem::temp_directory_path() / "amkdriver"),	// /tmp/amkdriver in Linux
 	driver_builddir(driver_srcdir)
 {
+	options = opts;
+
 	// Delegate these "if (verbose)" clauses to this Logging singleton.
 	if (options.verbose)
 		Logging::setVerbosity(Logging::Levels::DEBUG);
@@ -71,12 +68,6 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir) :
 	soundEffects[1] = soundEffectsDFC;
 
 	Logging::debug(std::string("Driver will be compiled in ") + fs::absolute(driver_builddir).string());
-}
-
-SPCEnvironment::SPCEnvironment(const fs::path& work_dir, const SPCEnvironmentOptions& opts) :
-	SPCEnvironment(work_dir)
-{
-	options = opts;
 }
 
 SPCEnvironment::~SPCEnvironment()
