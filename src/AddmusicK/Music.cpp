@@ -150,10 +150,6 @@ void Music::compile(SPCEnvironment* spc_)
 
 	while (pos < text.length())
 	{
-#ifdef _DEBUG
-		current = text.substr(pos);
-#endif
-
 		doReplacement();
 
 		if (hexLeft != 0 && !isspace(tolower(text[pos])) && tolower(text[pos]) != '$' && text[pos] != '\n')

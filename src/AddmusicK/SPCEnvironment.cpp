@@ -25,6 +25,29 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir) :
 	if (options.verbose)
 		Logging::setVerbosity(Logging::Levels::DEBUG);
 
+	// If we don't have an empty custom SPC driver path, change our driver_srcdir and driver_builddir
+	using_custom_spc_driver = options.useCustomSPCDriver && !options.customSPCDriverPath.empty();
+	if (using_custom_spc_driver)
+	{
+		// Use that custom driver and create a "build" directory on it.
+		driver_srcdir = options.customSPCDriverPath;
+		driver_builddir = driver_srcdir / "build";
+
+		// If the "build" directory exists, remove it and copy the driver entirely into it.
+		// It won't be deleted after the program exits.
+		if (fs::exists(driver_builddir))
+			deleteDir(driver_builddir);
+		copyDir(driver_srcdir, driver_builddir);
+
+		Logging::debug("Using custom SPC driver at " + options.customSPCDriverPath.string());
+	}
+	else
+	{
+		// Extract the embedded ASM driver into a temporary folder.
+		asm_package.extract(driver_srcdir);
+		Logging::debug("Extracting the embedded SPC driver into a temporary folder.");
+	}
+
 	if (!options.allowSA1)
 		usingSA1 = false;
 	
@@ -38,8 +61,7 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir) :
 	if (!fs::exists(work_dir / DEFAULT_SFXLIST_FILENAME))
 		throw fs::filesystem_error("The SFX list file was not found within the work directory.", work_dir / DEFAULT_SFXLIST_FILENAME, std::error_code());
 
-	// Extract the embedded ASM driver into a temporary folder.
-	asm_package.extract(driver_srcdir);
+	
 	
 	// Dynamic allocation of some arrays.
 	musics = new Music[256];
@@ -63,7 +85,9 @@ SPCEnvironment::~SPCEnvironment()
 	delete[] (soundEffectsDF9);
 	delete[] (soundEffectsDFC);
 
-	deleteDir(driver_srcdir);
+	// If using an extracted driver, delete such temporary folder.
+	if (!using_custom_spc_driver)
+		deleteDir(driver_srcdir);
 }
 
 bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCompile, const fs::path& output_folder)
@@ -825,7 +849,7 @@ bool SPCEnvironment::_generateSPCs()
 
 				fname += ".spc";
 
-				Logging::debug(std::stringstream() << "Wrote \"" << fname << "\" to file.");
+				Logging::debug(std::string("Wrote \"") + fname.string() + "\" to file.");
 
 				writeBinaryFile(fname, SPC);
 				y--;
@@ -834,7 +858,7 @@ bool SPCEnvironment::_generateSPCs()
 		}
 	}
 
-	Logging::debug(std::stringstream() << "Generated " << SPCsGenerated << " SPC file" << ((SPCsGenerated == 1) ? "s" : "") << ".");
+	Logging::debug(std::string("Generated ") + std::to_string(SPCsGenerated) + " SPC file(s)");
 	return true;
 }
 

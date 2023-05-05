@@ -30,6 +30,9 @@ struct SPCEnvironmentOptions
 	bool convert {true};
 	bool dupCheck {true};
 	bool checkEcho {true};
+
+	bool useCustomSPCDriver {false};
+	fs::path customSPCDriverPath;
 	
 	bool sfxDump {false};
 	bool doNotPatch {false};
@@ -119,7 +122,9 @@ protected:
 	fs::path driver_builddir;								// Directory in which generated driver files will be put.
 	fs::path work_dir;										// Root directory from which user-editable files will be found.
 	fs::path spc_output_dir;								// Where to store the resulting SPCs.
+	
 	bool spc_build_plan {false};
+	bool using_custom_spc_driver {false};
 
 	int programUploadPos;
 
