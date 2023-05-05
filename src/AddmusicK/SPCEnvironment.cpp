@@ -555,7 +555,7 @@ bool SPCEnvironment::_fixMusicPointers()
 		}
 
 		std::stringstream fname;
-		std::string globalinc_name (driver_builddir / "SNES" / "bin" / (std::stringstream() << "music" << hex2 << i << ".bin").str());
+		fs::path globalinc_name (driver_builddir / "SNES" / "bin" / (std::stringstream() << "music" << hex2 << i << ".bin").str());
 		writeBinaryFile(globalinc_name, final);
 
 		if (i <= highestGlobalSong)
@@ -657,7 +657,7 @@ bool SPCEnvironment::_fixMusicPointers()
 		temp2[4+i] = temp[i];
 	writeBinaryFile(driver_builddir / "SNES" / "bin" / "main.bin", temp2);
 
-	Logging::debug(std::stringstream("Total space in ARAM left for local songs: 0x") << hex4 << (0x10000 - programSize - 0x400) << " bytes." << std::dec);
+	Logging::debug(std::stringstream() << "Total space in ARAM left for local songs: 0x" << hex4 << (0x10000 - programSize - 0x400) << " bytes." << std::dec);
 
 	int defaultIndex = -1, optimizedIndex = -1;
 	for (unsigned int i = 0; i < bankDefines.size(); i++)
