@@ -2490,16 +2490,15 @@ void Music::parseSampleDefinitions()
 			pos++;
 			int quotedStringLength = 0;
 			// TODO: This might be buggy. Keep an eye on it.
-			std::string tempstr = basepath / getQuotedString(text, pos, quotedStringLength);
+			fs::path temp_path = basepath / getQuotedString(text, pos, quotedStringLength);
 			std::string extension;
-			auto tmppos = tempstr.find_last_of(".");
-			if (tmppos == -1)
+			if (!temp_path.has_extension())
 				Logging::error("The filename for the sample was missing its extension; is it a .brr or .bnk?", this);
-				extension = tempstr.substr(tmppos);
-			if (extension == ".bnk")
-				addSampleBank(tempstr);
-			else if (extension == ".brr")
-				addSample(tempstr, true);
+				extension = temp_path;
+			if (temp_path.extension() == ".bnk")
+				addSampleBank(temp_path);
+			else if (temp_path.extension() == ".brr")
+				addSample(temp_path, true);
 			else
 				Logging::error("The filename for the sample was invalid.  Only \".brr\" and \".bnk\" are allowed.", this);
 
@@ -3467,6 +3466,7 @@ int Music::multiplyByTempoRatio(int value)
 	return temp;
 }
 
+
 fs::path Music::_resolvePath(const fs::path &fileName)
 {
 	const fs::path basedir_alternatives[] {
@@ -3483,14 +3483,14 @@ fs::path Music::_resolvePath(const fs::path &fileName)
 			return actualPath;
 	}
 
-	Logging::error("Could not find path " + (std::string)fileName, this);
+	Logging::error("Could not find path " + fileName.string(), this);
 	return fs::path();
 }
 
 void Music::addSample(const fs::path &fileName, bool important)
 {
 	std::vector<uint8_t> sample_data;
-	std::string actualPath = _resolvePath(fileName);
+	fs::path actualPath = _resolvePath(fileName);
 
 	readBinaryFile(actualPath, sample_data);
 	addSample(sample_data, actualPath, important, false);
@@ -3581,7 +3581,7 @@ void Music::addSampleGroup(const fs::path &groupName)
 
 	for (int i = 0; i < spc->bankDefines.size(); i++)
 	{
-		if ((std::string)groupName == spc->bankDefines[i]->name)
+		if (fs::equivalent(groupName, spc->bankDefines[i]->name))
 		{
 			for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
 			{
@@ -3602,7 +3602,7 @@ int bankSampleCount = 0;			// Used to give unique names to sample bank brrs.
 void Music::addSampleBank(const fs::path &fileName)
 {
 	std::vector<uint8_t> bankFile;
-	std::string actualPath = _resolvePath(fileName);
+	fs::path actualPath = _resolvePath(fileName);
 
 	readBinaryFile(actualPath, bankFile);
 
@@ -3658,7 +3658,7 @@ int Music::getSample(const fs::path &sp_path)
 
 	while (it != spc->sampleToIndex.end())
 	{
-		fs::path p2 = (std::string)it->first;
+		fs::path p2 = it->first;
 		if (fs::equivalent(p1, p2))
 			return it->second;
 

@@ -48,22 +48,22 @@ struct Package
  * @brief Package which holds the ASM and SNES drivers.
  */
 static Package asm_package {
-	.package_file_amount = __package_file_amount_asm,
-	.package_files = __package_files_asm,
-	.package_lengths = __package_lengths_asm,
-	.package_ranges = __package_ranges_asm,
-	.package_blob = reinterpret_cast<const char*>(__package_blob_asm.data())
+	__package_file_amount_asm,
+	__package_files_asm,
+	__package_lengths_asm,
+	__package_ranges_asm,
+	reinterpret_cast<const char*>(__package_blob_asm.data())
 };
 
 /**
  * @brief Package which holds a boilerplate for AMK building.
  */
 static Package boilerplate_package {
-	.package_file_amount = __package_file_amount_boilerplate,
-	.package_files = __package_files_boilerplate,
-	.package_lengths = __package_lengths_boilerplate,
-	.package_ranges = __package_ranges_boilerplate,
-	.package_blob = reinterpret_cast<const char*>(__package_blob_boilerplate.data())
+	__package_file_amount_boilerplate,
+	__package_files_boilerplate,
+	__package_lengths_boilerplate,
+	__package_ranges_boilerplate,
+	reinterpret_cast<const char*>(__package_blob_boilerplate.data())
 };
 
 }
