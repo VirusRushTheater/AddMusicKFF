@@ -2494,7 +2494,7 @@ void Music::parseSampleDefinitions()
 			std::string extension;
 			if (!temp_path.has_extension())
 				Logging::error("The filename for the sample was missing its extension; is it a .brr or .bnk?", this);
-				extension = temp_path;
+			extension = temp_path.extension().string();
 			if (temp_path.extension() == ".bnk")
 				addSampleBank(temp_path);
 			else if (temp_path.extension() == ".brr")
@@ -3493,7 +3493,7 @@ void Music::addSample(const fs::path &fileName, bool important)
 	fs::path actualPath = _resolvePath(fileName);
 
 	readBinaryFile(actualPath, sample_data);
-	addSample(sample_data, actualPath, important, false);
+	addSample(sample_data, actualPath.string(), important, false);
 }
 
 void Music::addSample(const std::vector<uint8_t> &sample, const std::string &name, bool important, bool noLoopHeader, int loopPoint, bool isBNK)

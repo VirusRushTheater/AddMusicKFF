@@ -7,13 +7,13 @@ image:
 
 environment:
   matrix:
-    - BUILD_TYPE: Debug
+    # - BUILD_TYPE: Debug
     - BUILD_TYPE: Release
 
 platform:
-  - x86
+  # - x86
   - x64
-  - ARM
+  # - ARM
 
 before_build:
   - git submodule update --init --recursive
