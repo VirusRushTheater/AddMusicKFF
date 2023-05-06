@@ -42,7 +42,7 @@ public:
 
 	bool _assembleSNESDriverROMSide();
 	bool _compileMusicROMSide();
-	void _generateMSC();
+	void generateMSC(const fs::path& location);
 
 protected:
 	// Attributes
@@ -50,6 +50,8 @@ protected:
 
 	std::vector<uint8_t> rom;
 	std::vector<uint8_t> romHeader;
+
+	std::vector<uint8_t> patched_rom;
 };
 
 }

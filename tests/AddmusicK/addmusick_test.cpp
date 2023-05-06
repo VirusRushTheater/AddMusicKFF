@@ -5,6 +5,7 @@
 #include <vector>
 #include <filesystem>
 #include <iostream>
+#include <type_traits>
 
 #include "asarBinding.h"
 #include "Utility.h"
@@ -72,7 +73,7 @@ TEST_CASE("Testing the scanInt method", "[utility][scanint]")
         ReuploadPos: $00182A
     )"};
 
-    uint32_t mainLoopPos, reuploadPos;
+    uint24_t mainLoopPos, reuploadPos;
     mainLoopPos = scanInt(test4scanint, "MainLoopPos: ");
     reuploadPos = scanInt(test4scanint, "ReuploadPos: ");
 
@@ -92,20 +93,53 @@ TEST_CASE("Testing the scanInt method", "[utility][scanint]")
 //     REQUIRE(true);
 // }
 
-TEST_CASE("insertHexValue testing", "[utility][inserthexvalue]")
+TEST_CASE("replaceHexValue testing", "[utility][replacehexvalue]")
 {
-    std::string test4insertion {R"(
-        Tag_1: 
-        Tag_2: 
-        Tag_3: 
-        Tag_4: 
-    )"};
-    insertHexValue((uint8_t)0x42, "Tag_1", test4insertion);
-    insertHexValue((uint16_t)0x42, "Tag_2", test4insertion);
-    insertHexValue((uint32_t)0x42, "Tag_3", test4insertion);
-    insertHexValue<uint32_t, 6>(0x42, "Tag_4", test4insertion);
+    std::string test4insertion 
+    {R"(!ExpARAMRet = $0400
+        !DefARAMRet = $042F
+        !SongCount = $00
+        !GlobalMusicCount = #$00
+
+        !uint8_t = $01
+        !uint16_t = $01
+        !uint24_t = $01
+        !uint32_t = $01)"};
     
-    std::cout << test4insertion << std::endl;
+    replaceHexValue(0x01_u16, "!ExpARAMRet = ", test4insertion);
+    replaceHexValue(0x02_u16, "!DefARAMRet = ", test4insertion);
+    replaceHexValue(0x03_u8, "!SongCount = ", test4insertion);
+    replaceHexValue(0x04_u8, "!GlobalMusicCount = #", test4insertion);
+    
+    replaceHexValue(0x05_u8, "!uint8_t = ", test4insertion);
+    replaceHexValue(0x06_u16, "!uint16_t = ", test4insertion);
+    replaceHexValue(0x07_u24, "!uint24_t = ", test4insertion);
+    replaceHexValue(0x08_u32, "!uint32_t = ", test4insertion);
+    
+    REQUIRE (test4insertion == 
+     R"(!ExpARAMRet = $0001
+        !DefARAMRet = $0002
+        !SongCount = $03
+        !GlobalMusicCount = #$04
+
+        !uint8_t = $05
+        !uint16_t = $0006
+        !uint24_t = $000007
+        !uint32_t = $00000008)");
+}
+
+TEST_CASE("hexDump testing", "[utility][hexdump]")
+{
+    std::string
+        t_8 = hexDump(0x25_u8),
+        t_16 = hexDump(0x25_u16),
+        t_24 = hexDump(0x25_u24),
+        t_32 = hexDump(0x25_u32);
+    
+    REQUIRE(t_8 == "25");
+    REQUIRE(t_16 == "0025");
+    REQUIRE(t_24 == "000025");
+    REQUIRE(t_32 == "00000025");
 }
 
 TEST_CASE("SPCEnvironment creation of a set of SPC files", "[spcenvironment][spc][generation]")

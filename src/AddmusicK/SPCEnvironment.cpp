@@ -125,25 +125,10 @@ bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCo
 	}
 
 	_compileMusic();
-	// _generateSampleList(); <- Applies only to ROM generation
 	_fixMusicPointers();
 
 	_generateSPCs();
 	spc_build_plan = false;
-
-	/*
-	if (visualizeSongs)
-		generatePNGs();
-
-	if (justSPCsPlease == false)
-	{
-		assembleSNESDriver2();
-		generateMSC();
-#ifndef _DEBUG
-			cleanUpTempFiles();
-#endif
-	}
-	*/
 
 	return true;
 }
@@ -842,7 +827,9 @@ bool SPCEnvironment::_generateSPCs()
 
 				Logging::debug(std::string("Wrote \"") + fname.string() + "\" to file.");
 
-				writeBinaryFile(fname, SPC);
+				// Hotfix to not store SPCs if we're patching a ROM.
+				if (spc_build_plan)
+					writeBinaryFile(fname, SPC);
 				y--;
 			}
 

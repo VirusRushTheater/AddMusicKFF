@@ -3103,8 +3103,7 @@ void Music::pointersFirstPass()
 
 	// Store the stats in a TXT file.
 	fs::path spc_basedir {"."}, fname;
-	if (spc->spc_build_plan)
-		spc_basedir = spc->spc_output_dir;
+	spc_basedir = spc->spc_output_dir;
 
 	if (!fs::exists(spc_basedir / "stats"))
 		fs::create_directories(spc_basedir / "stats");

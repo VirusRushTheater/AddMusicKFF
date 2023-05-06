@@ -3,7 +3,7 @@ set(ADDMUSICK_SOURCES
 	Utility.cpp
 
 	SPCEnvironment.cpp
-	ROMEnvironment.cpp
+	# ROMEnvironment.cpp
 	MMLBase.cpp
 	Music.cpp
 	SoundEffect.cpp
@@ -19,7 +19,7 @@ set(ADDMUSICK_HEADERS
 	Package.h
 
 	SPCEnvironment.h
-	ROMEnvironment.h
+	# ROMEnvironment.h
 	MMLBase.h
 	Music.h
 	SoundEffect.h

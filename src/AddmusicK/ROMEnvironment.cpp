@@ -1,6 +1,7 @@
 #include "ROMEnvironment.h"
 #include "AddmusicLogging.h"
 #include "Utility.h"
+#include "asarBinding.h"
 
 #include <AM405Remover.h>
 #include <iostream>
@@ -37,30 +38,37 @@ bool ROMEnvironment::patchROM(const fs::path& patched_rom_location)
 	bool visualizeSongs = false;
 
 	justSPCsPlease = false;
-	spc_output_dir = output_folder;
 	spc_build_plan = false;
 
 	loadSampleList(work_dir / DEFAULT_SAMPLELIST_FILENAME);
 	loadMusicList(work_dir / DEFAULT_SONGLIST_FILENAME);
 	loadSFXList(work_dir / DEFAULT_SFXLIST_FILENAME);
 
-	_assembleSNESDriver();
-	_assembleSPCDriver();
-	_compileSFX();
-	_compileGlobalData();
+	bool result = true;
+	result &= _assembleSNESDriver();
+	result &= _assembleSPCDriver();
+	result &= _compileSFX();
+	result &= _compileGlobalData();
 
-	_compileMusic();
-	_fixMusicPointers();
+	result &= _compileMusic();
+	result &= _compileMusicROMSide();
+	result &= _fixMusicPointers();
 
-	_generateSPCs();
+	result &= _generateSPCs();
 
 	/*
 	if (visualizeSongs)
 		generatePNGs();
 	*/
 
-	_assembleSNESDriverROMSide();
-	_generateMSC();
+	result &= _assembleSNESDriverROMSide();
+
+	if (result)
+	{
+		fs::path rom_folder = patched_rom_location.has_parent_path() ? patched_rom_location.parent_path() : ".";
+		writeBinaryFile(patched_rom_location, patched_rom);
+		generateMSC(rom_folder / (patched_rom_location.stem().string() + ".msc"));
+	}
 
 	return true;
 }
@@ -72,7 +80,7 @@ bool ROMEnvironment::_cleanROM()
 	if (rom[0x70000] == 0x3E && rom[0x70001] == 0x0E)	// If this is a "clean" ROM, then we don't need to do anything.
 	{
 		writeBinaryFile(driver_builddir / "SNES" / "temp.sfc", rom);
-		return;
+		return true;
 	}
 	else
 	{
@@ -136,6 +144,7 @@ bool ROMEnvironment::_cleanROM()
 		}
 	}
 
+	// temp.sfc is now a clean ROM.
 	writeBinaryFile(driver_builddir / "SNES" / "temp.sfc", rom);
 	return true;
 }
@@ -155,7 +164,8 @@ bool ROMEnvironment::_tryToCleanSampleToolData()
 		}
 	}
 
-	if (found == false) return;
+	if (found == false)
+		return false;
 
 	Logging::info("Sample Tool detected. Erasing data...");
 
@@ -176,7 +186,6 @@ bool ROMEnvironment::_tryToCleanSampleToolData()
 	}
 
 	int sampleDataSize = sizeOfErasedData;
-
 
 	sizeOfErasedData += clearRATS(hackPos);
 
@@ -212,6 +221,8 @@ bool ROMEnvironment::_tryToCleanAM4Data()
 		int romiSPCProgramAddress = (unsigned char)rom[0x2E9] | ((unsigned char)rom[0x2EE]<<8) | ((unsigned char)rom[0x2F3]<<16);
 		clearRATS(SNESToPC(romiSPCProgramAddress) - 12 + 0x200);
 	}
+
+	return true;
 }
 
 bool ROMEnvironment::_tryToCleanAMMData()
@@ -264,9 +275,9 @@ int ROMEnvironment::clearRATS(int offset)
 int ROMEnvironment::findFreeSpace(unsigned int size, int start, std::vector<uint8_t> &ROM)
 {
 	if (size == 0)
-		throw AddmusicException("Internal error: Requested free ROM space cannot be 0 bytes.");
+		Logging::error("Internal error: Requested free ROM space cannot be 0 bytes.");
 	if (size > 0x7FF8)
-		throw AddmusicException("Internal error: Requested free ROM space cannot exceed 0x7FF8 bytes.");
+		Logging::error("Internal error: Requested free ROM space cannot exceed 0x7FF8 bytes.");
 
 	size_t pos = 0;
 	size_t runningSpace = 0;
@@ -341,26 +352,11 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 
 	std::string patch;
 
-	//removeFile("asm/SNES/temppatch.sfc");
-	//openTextFile("asm/SNES/patch.asm", patch);
-
-	//writeTextFile("asm/SNES/temppatch.asm", patch);
-
-	//execute("asar asm/SNES/temppatch.asm 2> temp.log");
-	//if (fileExists("temp.log"))
-	//{
-	//	std::cout << "asar reported an error assembling patch.asm. Refer to temp.log for details." << std::endl;
-	//	quit(1);
-	//}
-
-	//std::vector<uint8_t> patchBin;
-	//openFile("asm/SNES/temppatch.sfc", patchBin);
-
 	readTextFile(driver_builddir / "SNES" / "patch.asm", patch);
 
-	insertHexValue((uint32_t)reuploadPos, "!ExpARAMRet = ", patch);
-	insertHexValue((uint32_t)mainLoopPos, "!DefARAMRet = ", patch);
-	insertHexValue((uint16_t)songCount, "!SongCount = ", patch);
+	replaceHexValue((uint32_t)reuploadPos, "!ExpARAMRet = ", patch);
+	replaceHexValue((uint32_t)mainLoopPos, "!DefARAMRet = ", patch);
+	replaceHexValue((uint16_t)songCount, "!SongCount = ", patch);
 
 	int pos;
 
@@ -393,10 +389,8 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 		{
 			int requestSize;
 			int freeSpace;
-			std::stringstream musicBinPath;
-			// TODO: !
-			musicBinPath << "asm/SNES/bin/music" << hex2 << i << ".bin";
-			requestSize = fs::file_size(musicBinPath.str());
+			fs::path musicBinPath {driver_builddir / "SNES" / "bin" / ("music" + hex<2>(i) + ".bin")};
+			requestSize = fs::file_size(musicBinPath);
 			freeSpace = findFreeSpace(requestSize, options.bankStart, rom);
 			if (freeSpace == -1)
 			{
@@ -406,7 +400,7 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 
 			freeSpace = PCToSNES(freeSpace);
 			musicPtrStr << "music" << hex2 << i << "+8";
-			musicIncbins << "org $" << hex6 << freeSpace << "\nmusic" << hex2 << i << ": incbin \"bin/music" << hex2 << i << ".bin\"" << std::endl;
+			musicIncbins << "org $" << hex6 << freeSpace << "\nmusic" << hex2 << i << ": incbin \"bin/music" + hex<2>(i) + ".bin\"" << std::endl;
 		}
 		else
 		{
@@ -444,13 +438,10 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 
 			for (unsigned int j = 0; j < samples[i].data.size(); j++)
 				temp[j+10] = samples[i].data[j];
-			std::stringstream filename;
+			fs::path filename {driver_builddir / "SNES" / "bin" / ("brr" + hex<2>(i) + ".bin")};
+			writeBinaryFile(filename, temp);
 
-			// TODO: !
-			filename << "asm/SNES/bin/brr" << hex2 << i << ".bin";
-			writeFile(filename.str(), temp);
-
-			int requestSize = fs::file_size(filename.str());
+			int requestSize = fs::file_size(filename);
 			int freeSpace = findFreeSpace(requestSize, options.bankStart, rom);
 			if (freeSpace == -1)
 			{
@@ -495,63 +486,50 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 	patch += musicIncbins.str();
 	patch += sampleIncbins.str();
 
-	insertHexValue(highestGlobalSong, 2, "!GlobalMusicCount = #", patch);
+	replaceHexValue((uint8_t)highestGlobalSong, "!GlobalMusicCount = #", patch);
 
 	std::stringstream ss;
 	ss << "\n\norg !SPCProgramLocation" << "\nincbin \"bin/main.bin\"";
 	patch += ss.str();
 
-	remove("asm/SNES/temppatch.sfc");
-
 	std::string undoPatch;
-	openTextFile("asm/SNES/AMUndo.asm", undoPatch);
+	readTextFile(driver_builddir / "SNES" / "AMUndo.asm", undoPatch);
 	patch.insert(patch.begin(), undoPatch.begin(), undoPatch.end());
 
-	writeTextFile("asm/SNES/temppatch.asm", patch);
+	writeTextFile(driver_builddir / "SNES" / "temppatch.asm", patch);
 
 	Logging::debug("Final compilation...");
 
-	if (!options.doNotPatch)
+	AsarBinding asar4 (driver_builddir / "SNES" / "temppatch.asm");
+	if (!asar4.patchToRom(driver_builddir / "SNES" / "temp.sfc", true))
 	{
-		if (!asarPatchToROM("asm/SNES/temppatch.asm", "asm/SNES/temp.sfc"))
-			printError("asar reported an error.  Refer to temp.log for details.", true);
-
-		std::vector<uint8_t> final;
-		final = romHeader;
-
-		std::vector<uint8_t> tempsfc;
-		openFile("asm/SNES/temp.sfc", tempsfc);
-
-		for (unsigned int i = 0; i < tempsfc.size(); i++)
-			final.push_back(tempsfc[i]);
-
-		fs::remove((std::string)ROMName + "~");		// // //
-		fs::rename((std::string)ROMName, (std::string)ROMName + "~");		// // //
-
-		writeFile(ROMName, final);
-
+		asar4.printErrors();
+		Logging::error("asar reported an error while patching the ROM.");
+		return false;
 	}
+
+	patched_rom.clear();
+	readBinaryFile(driver_builddir / "SNES" / "temp.sfc", patched_rom);
+	patched_rom.insert(patched_rom.begin(), romHeader.begin(), romHeader.end());
+
+	return true;
 }
 
-void ROMEnvironment::_generateMSC()
+void ROMEnvironment::generateMSC(const fs::path& location)
 {
-	std::string mscname = ((std::string)ROMName).substr(0, (unsigned int)((std::string)ROMName).find_last_of('.'));
-
-	mscname += ".msc";
-
 	std::stringstream text;
 
 	for (int i = 0; i < 256; i++)
 	{
 		if (musics[i].exists)
 		{
-			text << hex2 << i << "\t" << 0 << "\t" << musics[i].title << "\n";
-			text << hex2 << i << "\t" << 1 << "\t" << musics[i].title << "\n";
+			text << hex<2>(i) << "\t" << 0 << "\t" << musics[i].title << "\n";
+			text << hex<2>(i) << "\t" << 1 << "\t" << musics[i].title << "\n";
 			//fprintf(fout, "%2X\t0\t%s\n", i, musics[i].title.c_str());
 			//fprintf(fout, "%2X\t1\t%s\n", i, musics[i].title.c_str());
 		}
 	}
-	writeTextFile(mscname, text.str());
+	writeTextFile(location, text.str());
 }
 
 bool ROMEnvironment::_compileMusicROMSide()
