@@ -2,12 +2,12 @@
 	path = third-party/asar
 	url = https://github.com/RPGHacker/asar.git
 	branch = asar_19
-[submodule "third-party/loguru"]
-	path = third-party/loguru
-	url = https://github.com/emilk/loguru.git
 [submodule "third-party/Catch2"]
 	path = third-party/Catch2
 	url = https://github.com/catchorg/Catch2.git
 [submodule "third-party/lodepng"]
 	path = third-party/lodepng
 	url = https://github.com/lvandeve/lodepng.git
+[submodule "third-party/--force"]
+	path = third-party/--force
+	url = https://github.com/jarro2783/cxxopts.git

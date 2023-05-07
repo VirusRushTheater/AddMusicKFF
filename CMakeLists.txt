@@ -21,6 +21,10 @@ set(SNES_DRIVER_SRC					${CMAKE_SOURCE_DIR}/src/package/asm)
 set(AMK_BOILERPLATE_SRC				${CMAKE_SOURCE_DIR}/src/package/boilerplate)
 set(ADDMUSICMREMOVER_FILE			${CMAKE_SOURCE_DIR}/src/addmusicMRemover.pl)
 
+# Target names
+set(ADDMUSICKLIB_TARGETNAME			AddmusicK_lib)
+set(ADDMUSICKCLI_TARGETNAME			AddmusicK)
+
 # Set the output directories for libraries and executables
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_DEPLOY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_DEPLOY_DIR})

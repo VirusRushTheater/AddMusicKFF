@@ -55,4 +55,4 @@ endfunction()
 create_file_package(asm)
 create_file_package(boilerplate)
 
-target_include_directories(AddmusicK PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(${ADDMUSICKLIB_TARGETNAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})

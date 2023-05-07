@@ -9,7 +9,7 @@ target_include_directories(test_units PUBLIC
 )
 
 target_link_libraries(test_units PUBLIC
-    AddmusicK
+    ${ADDMUSICKLIB_TARGETNAME}
     Catch2::Catch2
     ${ASAR_LIB_TARGET}
 )

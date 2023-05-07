@@ -33,15 +33,15 @@ get_target_property(ASAR_INCLUDE_DIR ${ASAR_LIB_TARGET} INCLUDE_DIRECTORIES)
 include_directories(${ASAR_INCLUDE_DIR}/..)
 
 # AddmusicK will act as a library. CLI and GUI will be built elsewhere.
-add_library(AddmusicK STATIC
+add_library(${ADDMUSICKLIB_TARGETNAME} STATIC
 	${ADDMUSICK_SOURCES}
 	${ADDMUSICK_HEADERS}
 )
 
 # Solution to have any application that uses this library to find the include
 # files in this folder.
-target_include_directories(AddmusicK PUBLIC "./")
+target_include_directories(${ADDMUSICKLIB_TARGETNAME} PUBLIC "./")
 
-target_link_libraries(AddmusicK
+target_link_libraries(${ADDMUSICKLIB_TARGETNAME}
 	AM405Remover
 )

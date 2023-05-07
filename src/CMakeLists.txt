@@ -34,3 +34,5 @@ endif(ADDMUSICK_COMPILE_AMMBATCH)
 	
 # Generate resource files out of every folder in "package".
 add_subdirectory(package)
+
+add_subdirectory(AMKCLI)
