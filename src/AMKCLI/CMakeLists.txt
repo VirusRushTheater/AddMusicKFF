@@ -10,8 +10,13 @@ add_executable(${ADDMUSICKCLI_TARGETNAME}
 	${AMKCLI_HEADERS}
 )
 
+target_include_directories(${ADDMUSICKCLI_TARGETNAME} PUBLIC
+    ./
+)
+
 target_link_libraries(${ADDMUSICKCLI_TARGETNAME} PUBLIC
 	${ADDMUSICKLIB_TARGETNAME}
+	cxxopts
 )
 
 # # Install the executable to the bin directory

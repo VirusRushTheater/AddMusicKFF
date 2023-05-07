@@ -15,6 +15,7 @@ endif()
 
 add_subdirectory(asar/src)
 add_subdirectory(Catch2)
+add_subdirectory(cxxopts)
 
 # Asar uses an address sanitizer, which makes the linker complain a lot when
 # you compile AddMusic with debugging symbols.

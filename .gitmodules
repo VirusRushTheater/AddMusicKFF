@@ -8,6 +8,6 @@
 [submodule "third-party/lodepng"]
 	path = third-party/lodepng
 	url = https://github.com/lvandeve/lodepng.git
-[submodule "third-party/--force"]
-	path = third-party/--force
+[submodule "third-party/cxxopts"]
+	path = third-party/cxxopts
 	url = https://github.com/jarro2783/cxxopts.git
