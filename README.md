@@ -51,3 +51,33 @@ In Ubuntu it would be:
 ```
 sudo apt install libasan8
 ```
+
+## Overview of the refactoring ##
+
+The code has been turned from a CLI-centered program into a library-centered
+program where the CLI is just an interface.
+
+The easier way to work with this code as a library is to include the `AddmusicK.h`
+header, and remember the `AddMusic` namespace. You can use the directive
+`using namespace AddMusic;` if you don't want to deal with it.
+
+The `SPCEnvironment` class is the heart of the program, where general options
+and behavior are set in order to compile and adapt the SPC driver to generate
+playable SPC files from MML files and optionally a set of BRR samples.
+
+`ROMEnvironment` extends its functionality and gives it ROM patching
+capabilities, but requires a patcheable Super Mario World ROM with enough
+free space to put songs in.
+
+You can use a convenience struct `SPCEnvironmentOptions` to initialize each one of
+these structs. It holds the command-line options that used to be in the original
+program, such as turning off checks or duplicate sample optimization, among
+others.
+
+A default set of AMK lists and the default SPC driver will be embedded in
+compile time, making this program easier to distribute and more straightforward
+for the user. These are generated scanning the `src/package/asm` and 
+`src/package/boilerplate` folders and generating a Package object for each,
+which you can extract by taking the static objects `asm_package` and
+`boilerplate_package` and run their `extract` method into the path of your
+choice.

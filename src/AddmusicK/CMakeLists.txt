@@ -3,7 +3,7 @@ set(ADDMUSICK_SOURCES
 	Utility.cpp
 
 	SPCEnvironment.cpp
-	# ROMEnvironment.cpp
+	ROMEnvironment.cpp
 	MMLBase.cpp
 	Music.cpp
 	SoundEffect.cpp
@@ -12,14 +12,13 @@ set(ADDMUSICK_SOURCES
 set(ADDMUSICK_HEADERS
 	AddmusicLogging.h
 	asarBinding.h
-	defines.h
 	BankDefine.h
 	Sample.h
 	Utility.h
 	Package.h
 
 	SPCEnvironment.h
-	# ROMEnvironment.h
+	ROMEnvironment.h
 	MMLBase.h
 	Music.h
 	SoundEffect.h
@@ -38,9 +37,15 @@ add_library(${ADDMUSICKLIB_TARGETNAME} STATIC
 	${ADDMUSICK_HEADERS}
 )
 
+# Set some project related constants in a generated defines.h in the build directory.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/defines.h.in "defines.h")
+
 # Solution to have any application that uses this library to find the include
 # files in this folder.
-target_include_directories(${ADDMUSICKLIB_TARGETNAME} PUBLIC "./")
+target_include_directories(${ADDMUSICKLIB_TARGETNAME} PUBLIC
+	"./"
+	${CMAKE_CURRENT_BINARY_DIR}
+)
 
 target_link_libraries(${ADDMUSICKLIB_TARGETNAME}
 	AM405Remover

@@ -13,7 +13,7 @@ if(CMAKE_BYTE_ORDER EQUAL "BIG_ENDIAN")
 endif()
 
 # The compiled program and driver source files will be end up being copied to this folder
-set(PROJECT_DEPLOY_DIR				${CMAKE_BINARY_DIR}/deploy)
+set(PROJECT_DEPLOY_DIR				${CMAKE_BINARY_DIR}/bin)
 set(PROJECT_BUILD_SCRIPTS_DIR		${CMAKE_SOURCE_DIR}/build_scripts)
 
 # Stuff that will be copied verbatim.
@@ -102,8 +102,6 @@ if (ADDMUSICK_COMPILE_TESTS)
 endif()
 
 # Copy the SNES driver source to the deploy folder
-file(COPY ${SNES_DRIVER_SRC} DESTINATION ${PROJECT_DEPLOY_DIR})
-file(COPY ${AMK_BOILERPLATE_SRC} DESTINATION ${PROJECT_DEPLOY_DIR})
 file(COPY ${ADDMUSICMREMOVER_FILE} DESTINATION ${PROJECT_DEPLOY_DIR})
 
 message(STATUS "AddMusicK and the compiling environment will be stored in " ${PROJECT_DEPLOY_DIR})

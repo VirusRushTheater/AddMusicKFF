@@ -9,10 +9,12 @@
 #define strnicmp strncasecmp
 #endif
 
+#define AMKNAME			"@PROJECT_NAME@"
+#define AMKVER_FULL		"@PROJECT_VERSION@"
 
-#define AMKVERSION 		1
-#define AMKMINOR 		0
-#define AMKREVISION 	8			
+#define AMKVERSION 		@PROJECT_VERSION_MAJOR@
+#define AMKMINOR 		@PROJECT_VERSION_MINOR@
+#define AMKREVISION 	@PROJECT_VERSION_PATCH@
 
 #define PARSER_VERSION 	4			// Used to keep track of incompatible changes to the parser
 
