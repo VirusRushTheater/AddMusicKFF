@@ -69,7 +69,7 @@ playable SPC files from MML files and optionally a set of BRR samples.
 capabilities, but requires a patcheable Super Mario World ROM with enough
 free space to put songs in.
 
-You can use a convenience struct `SPCEnvironmentOptions` to initialize each one of
+You can use a convenience struct `EnvironmentOptions` to initialize each one of
 these structs. It holds the command-line options that used to be in the original
 program, such as turning off checks or duplicate sample optimization, among
 others.

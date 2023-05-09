@@ -20,7 +20,7 @@ namespace AddMusic
 class ROMEnvironment : public SPCEnvironment
 {
 public:
-	ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir, SPCEnvironmentOptions opts = SPCEnvironmentOptions());
+	ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir, EnvironmentOptions opts = EnvironmentOptions());
 
 	bool patchROM(const fs::path& patched_rom_location);
 
@@ -52,6 +52,8 @@ protected:
 	std::vector<uint8_t> romHeader;
 
 	std::vector<uint8_t> patched_rom;
+
+	uint24_t bankStart {0x200000};
 };
 
 }

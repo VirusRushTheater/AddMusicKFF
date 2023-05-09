@@ -16,6 +16,7 @@ target_include_directories(${ADDMUSICKCLI_TARGETNAME} PUBLIC
 
 target_link_libraries(${ADDMUSICKCLI_TARGETNAME} PUBLIC
 	${ADDMUSICKLIB_TARGETNAME}
+	${ASAR_LIB_TARGET}
 	cxxopts
 )
 

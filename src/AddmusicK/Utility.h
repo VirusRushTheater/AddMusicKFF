@@ -23,8 +23,19 @@ namespace AddMusic
 class uint24_t {
 public:
     constexpr uint24_t() : value_(0) {}
-    constexpr uint24_t(unsigned long long int value) : value_(value & 0xFFFFFF) {}
-    constexpr operator unsigned long long int() const { return value_; }
+    constexpr uint24_t(uint32_t value) : value_(value & 0xFFFFFF) {}
+    constexpr operator uint32_t() const { return value_; }
+
+	constexpr uint24_t& operator&=(const uint24_t& A) {  return *this = (*this &  A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator|=(const uint24_t& A) {  return *this = (*this |  A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator^=(const uint24_t& A) {  return *this = (*this ^  A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator+=(const uint24_t& A) {  return *this = (*this +  A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator-=(const uint24_t& A) {  return *this = (*this -  A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator*=(const uint24_t& A) {  return *this = (*this *  A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator<<=(const uint24_t& A) { return *this = (*this << A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator>>=(const uint24_t& A) { return *this = (*this >> A.value_) & 0xffffff;   }
+    constexpr uint24_t& operator/=(const uint24_t& A) {  return *this = *this / A.value_; }
+    constexpr uint24_t& operator%=(const uint24_t& A) {  return *this = *this % A.value_; }
 private:
     uint32_t value_;
 };

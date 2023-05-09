@@ -8,9 +8,12 @@
 
 using namespace AddMusic;
 
-ROMEnvironment::ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir, SPCEnvironmentOptions opts) :
+ROMEnvironment::ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir, EnvironmentOptions opts) :
 	SPCEnvironment(work_dir, opts)
 {
+	// Translate the "bank optimizations" option into an address.
+	bankStart = options.bankOptimizations ? 0x200000 : 0x080000;
+
 	ROMName = smw_rom;
 	readBinaryFile(ROMName, rom);
 
@@ -391,7 +394,7 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 			int freeSpace;
 			fs::path musicBinPath {driver_builddir / "SNES" / "bin" / ("music" + hex<2>(i) + ".bin")};
 			requestSize = fs::file_size(musicBinPath);
-			freeSpace = findFreeSpace(requestSize, options.bankStart, rom);
+			freeSpace = findFreeSpace(requestSize, bankStart, rom);
 			if (freeSpace == -1)
 			{
 				Logging::error("Your ROM is out of free space.");
@@ -442,7 +445,7 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 			writeBinaryFile(filename, temp);
 
 			int requestSize = fs::file_size(filename);
-			int freeSpace = findFreeSpace(requestSize, options.bankStart, rom);
+			int freeSpace = findFreeSpace(requestSize, bankStart, rom);
 			if (freeSpace == -1)
 			{
 				Logging::error("Error: Your ROM is out of free space.");
@@ -585,7 +588,7 @@ bool ROMEnvironment::_compileMusicROMSide()
 	s = songSampleList.str();
 	std::stringstream tempstream;
 
-	tempstream << "org $" << hex6 << PCToSNES(findFreeSpace(songSampleListSize, options.bankStart, rom)) << "\n\n" << std::endl;
+	tempstream << "org $" << hex6 << PCToSNES(findFreeSpace(songSampleListSize, bankStart, rom)) << "\n\n" << std::endl;
 
 	s.insert(0, tempstream.str());
 

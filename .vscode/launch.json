@@ -5,10 +5,35 @@
             "name": "Run Tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/deploy/tests/test_units",
+            "program": "${workspaceFolder}/build/bin/tests/test_units",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/deploy/tests",
+            "cwd": "${workspaceFolder}/build/bin/tests",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Tests"
+        },
+        {
+            "name": "Run CLI",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/AddmusicK",
+            "args": [
+                "--rom", "/home/virus/Documentos/Romhacking/Super Mario World (U) EXPANDED.smc",
+                "--list_folder", "/home/virus/Documentos/Programming/git/AddMusicKFF/build/bin/random_env/",
+                "./output.smc"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/bin",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

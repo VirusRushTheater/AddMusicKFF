@@ -11,7 +11,7 @@
 
 using namespace AddMusic;
 
-SPCEnvironment::SPCEnvironment(const fs::path& work_dir, SPCEnvironmentOptions opts) :
+SPCEnvironment::SPCEnvironment(const fs::path& work_dir, EnvironmentOptions opts) :
 	work_dir(work_dir),
 	driver_srcdir(std::filesystem::temp_directory_path() / "amkdriver"),	// /tmp/amkdriver in Linux
 	driver_builddir(driver_srcdir)
@@ -1214,22 +1214,22 @@ void SPCEnvironment::loadSFXList(const fs::path& sfxlistfile)
 	Logging::debug(std::string("Read in all ") + std::to_string(SFXCount) + " sound effects.");
 }
 
-int SPCEnvironment::SNESToPC(int addr)	// Thanks to alcaro.
+uint24_t SPCEnvironment::SNESToPC(uint24_t addr)	// Thanks to alcaro.
 {
-	if (addr < 0 || addr > 0xFFFFFF ||		// not 24bit
-		(addr & 0xFE0000) == 0x7E0000 ||	// wram
+	if ((addr & 0xFE0000) == 0x7E0000 ||	// wram
 		(addr & 0x408000) == 0x000000)		// hardware regs
-		return -1;
+		throw std::runtime_error("Invalid input address.");
+
 	if (usingSA1 && addr >= 0x808000)
 		addr -= 0x400000;
 	addr = ((addr & 0x7F0000) >> 1 | (addr & 0x7FFF));
 	return addr;
 }
 
-int SPCEnvironment::PCToSNES(int addr)
+uint24_t SPCEnvironment::PCToSNES(uint24_t addr)
 {
-	if (addr < 0 || addr >= 0x400000)
-		return -1;
+	if (addr >= 0x400000)
+		throw std::runtime_error("Invalid input address.");
 
 	addr = ((addr << 1) & 0x7F0000) | (addr & 0x7FFF) | 0x8000;
 

@@ -9,6 +9,7 @@
 #include "SoundEffect.h"
 #include "Sample.h"
 #include "Music.h"
+#include "Utility.h"
 
 namespace fs = std::filesystem;
 
@@ -24,7 +25,7 @@ constexpr const char DEFAULT_SFXLIST_FILENAME[] {"Addmusic_sound effects.txt"};
  * @brief Initialization options that combine the SPC and ROM hacking
  * functionality. Normally you won't need to change any of these.
  */
-struct SPCEnvironmentOptions
+struct EnvironmentOptions
 {
 	bool aggressive {false};
 	bool allowSA1 {true};
@@ -41,7 +42,7 @@ struct SPCEnvironmentOptions
 	
 	bool sfxDump {false};
 	bool doNotPatch {false};
-	uint32_t bankStart {0x200000};
+	bool bankOptimizations {true};
 };
 
 /**
@@ -62,7 +63,7 @@ public:
 	/**
 	 * @brief Instance SPCEnvironment with different options.
 	 */
-	SPCEnvironment(const fs::path& work_dir, SPCEnvironmentOptions opts = SPCEnvironmentOptions());
+	SPCEnvironment(const fs::path& work_dir, EnvironmentOptions opts = EnvironmentOptions());
 
 	/**
 	 * @brief Destructor.
@@ -89,11 +90,11 @@ public:
 	 */
 	void loadSFXList(const fs::path& sfxlistfile);
 
-	int SNESToPC(int addr);
+	uint24_t SNESToPC(uint24_t addr);
 
-	int PCToSNES(int addr);
+	uint24_t PCToSNES(uint24_t addr);
 
-	SPCEnvironmentOptions options;							// User-defined options.
+	EnvironmentOptions options;							// User-defined options.
 
 protected:
 	/**
@@ -126,6 +127,7 @@ protected:
 	bool spc_build_plan {false};
 	bool using_custom_spc_driver {false};
 
+	
 	int programUploadPos;
 
 	// Use the SA1 expansion chip. Will be true unless either the ROM says the opposite
