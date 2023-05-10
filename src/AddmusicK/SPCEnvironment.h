@@ -5,9 +5,7 @@
 #include <memory>
 #include <filesystem>
 
-#include "BankDefine.h"
 #include "SoundEffect.h"
-#include "Sample.h"
 #include "Music.h"
 #include "Utility.h"
 
@@ -39,6 +37,8 @@ struct EnvironmentOptions
 
 	bool useCustomSPCDriver {false};
 	fs::path customSPCDriverPath;
+
+	fs::path customSamplesPath;
 	
 	bool sfxDump {false};
 	bool doNotPatch {false};
@@ -121,13 +121,16 @@ protected:
 
 	fs::path driver_srcdir;									// Root directory from which driver ASM files will be found.
 	fs::path driver_builddir;								// Directory in which generated driver files will be put.
+
 	fs::path work_dir;										// Root directory from which user-editable files will be found.
+	fs::path global_samples_dir;							// Directory where to search samples and sample banks.
+	
 	fs::path spc_output_dir;								// Where to store the resulting SPCs.
 	
+
 	bool spc_build_plan {false};
 	bool using_custom_spc_driver {false};
 
-	
 	int programUploadPos;
 
 	// Use the SA1 expansion chip. Will be true unless either the ROM says the opposite

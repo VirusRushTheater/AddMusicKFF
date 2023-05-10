@@ -7,14 +7,30 @@
 #include <initializer_list>
 
 #include "MMLBase.h"
-#include "Sample.h"
 
 namespace AddMusic
 {
-
 namespace fs = std::filesystem;
 
 class SPCEnvironment;
+
+struct BankDefine
+{
+	std::string name;
+	std::vector<std::unique_ptr<const std::string>> samples;
+	std::vector<bool> importants;
+};
+
+struct Sample
+{
+	std::string name;
+	std::vector<uint8_t> data;
+	unsigned short loopPoint {0};
+	bool exists {false};
+	bool important {true};	// If a sample is important, then is should never be excluded.
+							// Otherwise, it's only used if the song has an instrument or $E5/$F3 command that is using it.
+	bool isBNK {false}; 	// Samples generated from a BNK file have specific checks omitted from it due to using an auto-generated name.
+};
 
 struct SpaceInfo
 {
@@ -311,7 +327,7 @@ private:
 
 	void addSample(const fs::path &fileName, bool important);
 	void addSample(const std::vector<uint8_t> &sample, const std::string &name, bool important, bool noLoopHeader, int loopPoint = 0, bool isBNK = false);
-	void addSampleGroup(const fs::path &groupName);
+	void addSampleGroup(const std::string &groupName);
 	void addSampleBank(const fs::path &fileName);
 	int getSample(const fs::path &name);
 

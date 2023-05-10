@@ -142,7 +142,7 @@ void Music::compile(SPCEnvironment* spc_)
 {
 	spc = spc_;
 	// basepath = spc_->work_dir;
-	basepath = "";
+	basepath = spc_->global_samples_dir;
 
 	_init();
 
@@ -3461,13 +3461,13 @@ int Music::multiplyByTempoRatio(int value)
 	return temp;
 }
 
-
+// ISSUE: This method is case sensitive in Linux & Mac. Proceed with caution.
 fs::path Music::_resolvePath(const fs::path &fileName)
 {
 	const fs::path basedir_alternatives[] {
-		this->name.parent_path() / basepath,		// relativeDir
-		this->spc->work_dir / "samples" / basepath,	// absoluteDir (on individual sample)
-		this->spc->work_dir / "samples"				// absoluteDir (on sample group)
+		basepath,	// absoluteDir: work_dir/samples/path_definition (on individual sample)
+		this->name.parent_path() / fs::relative(spc->global_samples_dir, basepath),	// relativeDir
+		spc->global_samples_dir,	// For sample groups
 	};
 
 	fs::path actualPath;
@@ -3546,7 +3546,7 @@ void Music::addSample(const std::vector<uint8_t> &sample, const std::string &nam
 		}
 		//BNK files don't qualify for the next check. 
 		if (!(newSample.isBNK)) {
-			fs::path p1 = "./"+newSample.name;
+			fs::path p1 = fs::path(".") / newSample.name;
 			//If the sample in question was taken from a sample group, then use the sample group's important flag instead.
 			for (int i = 0; i < spc->bankDefines.size(); i++)
 			{
@@ -3571,12 +3571,13 @@ void Music::addSample(const std::vector<uint8_t> &sample, const std::string &nam
 	spc->samples.push_back(newSample);					// This is a sample we haven't encountered before.  Add it.
 }
 
-void Music::addSampleGroup(const fs::path &groupName)
+void Music::addSampleGroup(const std::string &groupName)
 {
 
 	for (int i = 0; i < spc->bankDefines.size(); i++)
 	{
-		if (fs::equivalent(groupName, spc->bankDefines[i]->name))
+		// if (fs::equivalent(groupName, spc->bankDefines[i]->name))
+		if (groupName == spc->bankDefines[i]->name)
 		{
 			for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
 			{
@@ -3589,7 +3590,7 @@ void Music::addSampleGroup(const fs::path &groupName)
 		}
 	}
 	std::cerr << this->name << ":\n";		// // //
-	Logging::error(std::string("The specified sample group, \"") + groupName.string() + "\", could not be found.");
+	Logging::error(std::string("The specified sample group, \"") + groupName + "\", could not be found.");
 }
 
 int bankSampleCount = 0;			// Used to give unique names to sample bank brrs.

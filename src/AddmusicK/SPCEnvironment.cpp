@@ -13,10 +13,15 @@ using namespace AddMusic;
 
 SPCEnvironment::SPCEnvironment(const fs::path& work_dir, EnvironmentOptions opts) :
 	work_dir(work_dir),
+	global_samples_dir(work_dir / "samples"),
 	driver_srcdir(std::filesystem::temp_directory_path() / "amkdriver"),	// /tmp/amkdriver in Linux
 	driver_builddir(driver_srcdir)
 {
 	options = opts;
+
+	// Set another directory for samples, if specified here.
+	if (!options.customSamplesPath.empty())
+		global_samples_dir = options.customSamplesPath;
 
 	// Delegate these "if (verbose)" clauses to this Logging singleton.
 	if (options.verbose)

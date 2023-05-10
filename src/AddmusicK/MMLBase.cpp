@@ -97,7 +97,7 @@ void MMLBase::preprocess()
 			i++;
 
 			// Force AMK version into AMK1.
-			if (text.substr(i, 6) == "#amk=1")					// Special handling so that we can have #amk=1.
+			if (text.substr(i, 5) == "amk=1")					// Special handling so that we can have #amk=1.
 			{
 				if (addmusicversion >= 0)
 					addmusicversion = 1;

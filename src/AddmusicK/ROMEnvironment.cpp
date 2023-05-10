@@ -53,6 +53,13 @@ bool ROMEnvironment::patchROM(const fs::path& patched_rom_location)
 	result &= _compileSFX();
 	result &= _compileGlobalData();
 
+	for (int i = 0; i < 256; i++)
+	{
+		// Load music file in memory.
+		if (musics[i].exists)
+			readTextFile(fs::absolute(musics[i].name), musics[i].text);
+	}
+
 	result &= _compileMusic();
 	result &= _compileMusicROMSide();
 	result &= _fixMusicPointers();
@@ -242,8 +249,8 @@ bool ROMEnvironment::_tryToCleanAMMData()
 			Logging::error("AddmusicM was detected.  In order to remove it from this ROM, you must put AddmusicM's INIT.asm as well as xkasAnti and a clean ROM (named clean.smc) in\nthe same folder as this program. Then attempt to run this program once more.");
 
 		std::cout << "AddmusicM detected.  Attempting to remove..." << std::endl;
-		system( (((std::string)("perl addmusicMRemover.pl ")) + (std::string)ROMName).c_str());
-		system( (((std::string)("xkasAnti clean.smc ")) + (std::string)ROMName + "INIT.asm").c_str());
+		system( (((std::string)("perl addmusicMRemover.pl ")) + ROMName.string()).c_str());
+		system( (((std::string)("xkasAnti clean.smc ")) + ROMName.string() + "INIT.asm").c_str());
 	}
 
 	return true;

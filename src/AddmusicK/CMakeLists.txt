@@ -12,8 +12,6 @@ set(ADDMUSICK_SOURCES
 set(ADDMUSICK_HEADERS
 	AddmusicLogging.h
 	asarBinding.h
-	BankDefine.h
-	Sample.h
 	Utility.h
 	Package.h
 
