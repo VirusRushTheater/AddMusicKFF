@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 
 #include <cxxopts.hpp>
 #include "defines.h"
@@ -38,7 +39,6 @@ int main (int argc, char** argv)
 	
 	options.add_options("SPC generation")
 		("m,mml", "Compile a MML file into SPC (can be set multiple times).", cxxopts::value<std::vector<std::string>>(), "<mml>")
-		("s,samples", "Samples folder", cxxopts::value<std::string>(), "<path>")
 		("visualize", "Plot local song memory usage", cxxopts::value<bool>()->default_value("false"));
 
 	options.add_options("ROM patching")
@@ -109,7 +109,7 @@ int main (int argc, char** argv)
 	// Parsing the custom driver folder, if any.
 	if (argp.count("driver"))
 	{
-		fs::path driver_folder = argp["driver"].as<fs::path>();
+		fs::path driver_folder = fs::path(argp["driver"].as<std::string>());
 		o.spc_options.useCustomSPCDriver = true;
 		o.spc_options.customSPCDriverPath = driver_folder;
 		std::cerr << "Using custom SPC driver at " << fs::absolute(driver_folder).string() << std::endl;
@@ -177,7 +177,29 @@ int main (int argc, char** argv)
 	// ==== MML compilation ====
 	if (argp.count("mml"))
 	{
+		// If output (directory) is not specified, assume we're going to use the CWD.
+		fs::path output = (argp.count("output")) ? fs::path(argp["output"].as<std::string>()) : fs::current_path();
+		// This method is still lists-dependent (and mechanics such as samples must be copied like that as well). We'll change this soon.
+		fs::path list_folder = (argp.count("list_folder")) ? fs::path(argp["list_folder"].as<std::string>()) : ".";
 
+		std::vector<std::string> mml_list = argp["mml"].as<std::vector<std::string>>();
+		std::vector<fs::path> mml_paths;
+		for (auto& mml_i : mml_list)
+		{
+			if (!fs::exists(mml_i))
+			{
+				std::cerr << "The file " << mml_i << " does not exist." << std::endl;
+				exit(1);
+			}
+			mml_paths.push_back(fs::path(mml_i));
+		}
+
+		// Instance a SPCEnvironment and make it work.
+		AddMusic::SPCEnvironment spc_env (list_folder, o.spc_options);
+		spc_env.generateSPCFiles(mml_paths, output);
+
+		std::cout << "Your SPC files have been successfully generated and were stored at " << fs::absolute(output).string() << std::endl;
+		exit(0);
 	}
 	
 	return 0;

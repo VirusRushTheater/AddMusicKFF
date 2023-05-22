@@ -73,7 +73,7 @@ public:
 	/**
 	 * @brief Equivalent of running AddMusicK with the "justSPCsPlease" option. Does not need a SMW ROM to run.
 	 */
-	bool generateSPCFiles(const std::vector<fs::path>& textFilesToCompile, const fs::path& output_folder = ".");
+	bool generateSPCFiles(const std::vector<fs::path>& textFilesToCompile, const fs::path& output_folder = fs::path("."));
 
 	/**
 	 * Loads a sample list file.
@@ -90,9 +90,9 @@ public:
 	 */
 	void loadSFXList(const fs::path& sfxlistfile);
 
-	uint24_t SNESToPC(uint24_t addr);
+	int SNESToPC(int addr);
 
-	uint24_t PCToSNES(uint24_t addr);
+	int PCToSNES(int addr);
 
 	EnvironmentOptions options;							// User-defined options.
 

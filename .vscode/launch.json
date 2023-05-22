@@ -1,6 +1,8 @@
 {
     "version": "0.2.0",
     "configurations": [
+    
+
         {
             "name": "Run Tests",
             "type": "cppdbg",
@@ -28,9 +30,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/AddmusicK",
             "args": [
+                "--driver", "/home/virus/Documentos/Programming/git/kff/AddMusicKFF/asm/",
                 "--rom", "/home/virus/Documentos/Romhacking/Super Mario World (U) EXPANDED.smc",
                 "--list_folder", "/home/virus/Documentos/Programming/git/AddMusicKFF/build/bin/random_env/",
-                "./output.smc"
+                "/home/virus/Documentos/Romhacking/addmusic_comparison/SMW Virus.smc"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/bin",

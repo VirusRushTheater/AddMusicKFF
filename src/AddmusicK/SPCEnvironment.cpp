@@ -62,7 +62,6 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, EnvironmentOptions opts
 		throw fs::filesystem_error("The sample list file was not found within the work directory.", work_dir / DEFAULT_SAMPLELIST_FILENAME, std::error_code());
 	if (!fs::exists(work_dir / DEFAULT_SFXLIST_FILENAME))
 		throw fs::filesystem_error("The SFX list file was not found within the work directory.", work_dir / DEFAULT_SFXLIST_FILENAME, std::error_code());
-
 	
 	
 	// Dynamic allocation of some arrays.
@@ -1219,22 +1218,22 @@ void SPCEnvironment::loadSFXList(const fs::path& sfxlistfile)
 	Logging::debug(std::string("Read in all ") + std::to_string(SFXCount) + " sound effects.");
 }
 
-uint24_t SPCEnvironment::SNESToPC(uint24_t addr)	// Thanks to alcaro.
+int SPCEnvironment::SNESToPC(int addr)					// Thanks to alcaro.
 {
-	if ((addr & 0xFE0000) == 0x7E0000 ||	// wram
+	if (addr < 0 || addr > 0xFFFFFF ||		// not 24bit
+		(addr & 0xFE0000) == 0x7E0000 ||	// wram
 		(addr & 0x408000) == 0x000000)		// hardware regs
-		throw std::runtime_error("Invalid input address.");
-
+		return -1;
 	if (usingSA1 && addr >= 0x808000)
 		addr -= 0x400000;
 	addr = ((addr & 0x7F0000) >> 1 | (addr & 0x7FFF));
 	return addr;
 }
 
-uint24_t SPCEnvironment::PCToSNES(uint24_t addr)
+int SPCEnvironment::PCToSNES(int addr)
 {
-	if (addr >= 0x400000)
-		throw std::runtime_error("Invalid input address.");
+	if (addr < 0 || addr >= 0x400000)
+		return -1;
 
 	addr = ((addr << 1) & 0x7F0000) | (addr & 0x7FFF) | 0x8000;
 
@@ -1245,3 +1244,4 @@ uint24_t SPCEnvironment::PCToSNES(uint24_t addr)
 		addr += 0x400000;
 	return addr;
 }
+

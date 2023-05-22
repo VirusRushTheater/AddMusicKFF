@@ -364,9 +364,9 @@ bool ROMEnvironment::_assembleSNESDriverROMSide()
 
 	readTextFile(driver_builddir / "SNES" / "patch.asm", patch);
 
-	replaceHexValue((uint32_t)reuploadPos, "!ExpARAMRet = ", patch);
-	replaceHexValue((uint32_t)mainLoopPos, "!DefARAMRet = ", patch);
-	replaceHexValue((uint16_t)songCount, "!SongCount = ", patch);
+	replaceHexValue((uint16_t)reuploadPos, "!ExpARAMRet = ", patch);
+	replaceHexValue((uint16_t)mainLoopPos, "!DefARAMRet = ", patch);
+	replaceHexValue((uint8_t)songCount, "!SongCount = ", patch);
 
 	int pos;
 

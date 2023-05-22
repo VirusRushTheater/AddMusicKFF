@@ -7,6 +7,8 @@ set(ADDMUSICK_SOURCES
 	MMLBase.cpp
 	Music.cpp
 	SoundEffect.cpp
+
+	experimental/MMLParserBase.cpp
 )
 
 set(ADDMUSICK_HEADERS
@@ -20,6 +22,8 @@ set(ADDMUSICK_HEADERS
 	MMLBase.h
 	Music.h
 	SoundEffect.h
+
+	experimental/MMLParserBase.h
 )
 
 # Include Asar dependencies as explained in its git repository
@@ -42,6 +46,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/defines.h.in "defines.h")
 # files in this folder.
 target_include_directories(${ADDMUSICKLIB_TARGETNAME} PUBLIC
 	"./"
+	"experimental"
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
