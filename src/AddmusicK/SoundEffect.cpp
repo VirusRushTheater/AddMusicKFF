@@ -378,13 +378,10 @@ void SoundEffect::compile(SPCEnvironment* spc_)
 
 	}
 
-	// TODO: Transform this global directive into something local.
-	/*
-	if (soundEffects[bank][index].add0)
+	if (spc->soundEffects[bank][index].add0)
 		append(0x00);
-	*/
 
-	// compileASM();
+	compileASM();
 }
 
 void SoundEffect::parseASM()
@@ -443,21 +440,20 @@ void SoundEffect::compileASM()
 			"arch spc700-raw\n\n"
 
 			"org $000000\n" 
-			"incsrc \"asm/main.asm\"\n"
+			"incsrc \"main.asm\"\n"
 			"base $" << hex4 << posInARAM + code.size() + data.size() << "\n\n"
 			
 			"org $008000\n\n" <<
 
 			asmStrings[i];
 		
-		AsarBinding asar {asmCode.str(), "."};
-		try
+		writeTextFile(spc->driver_builddir / "tempsfx.asm", asmCode.str());
+		AsarBinding asar_sfx (spc->driver_builddir / "tempsfx.asm");
+		if (!asar_sfx.compileToFile(spc->driver_builddir / "tempsfx.bin"))
 		{
-			asar.compileToBin();
-		}
-		catch(const AsarException& e)
-		{
-			throw AddmusicException(std::string("Asar error: ") + e.what());
+			asar_sfx.printErrors();
+			Logging::error("asar reported an error while assembling SFX binaries.");
+			return;
 		}
 		
 		// writeTextFile("temp.asm", asmCode.str());
@@ -465,7 +461,8 @@ void SoundEffect::compileASM()
 		// if (!asarCompileToBIN("temp.asm", "temp.bin"))
 		// 	throw fileError("asar reported an error.  Refer to temp.log for details.", AddmusicErrorcode::COMPILEASM_ERROR, false);
 
-		std::vector<uint8_t> temp {asar.getCompiledBin()};
+		std::vector<uint8_t> temp;
+		readBinaryFile(spc->driver_builddir / "tempsfx.bin", temp);
 
 		// openFile("temp.bin", temp);
 

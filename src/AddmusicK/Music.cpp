@@ -3603,7 +3603,7 @@ void Music::addSampleBank(const fs::path &fileName)
 	readBinaryFile(actualPath, bankFile);
 
 	if (bankFile.size() != 0x8000)
-		Logging::error("The specified bank file was an illegal size.", this);
+		Logging::error("The specified bank file w` an illegal size.", this);
 	bankFile.erase(bankFile.begin(), bankFile.begin() + 12);
 	//Sample bankSamples[0x40];
 	Sample tempSample;

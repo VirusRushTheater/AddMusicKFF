@@ -221,7 +221,7 @@ bool SPCEnvironment::_compileGlobalData()
 
 	std::ostringstream oss;
 
-	std::vector<unsigned short> DF9Pointers, DFCPointers;
+	std::vector<uint16_t> DF9Pointers, DFCPointers;
 
 	for (int i = 255; i >= 0; i--)
 	{

@@ -57,6 +57,7 @@ struct EnvironmentOptions
  */
 class SPCEnvironment
 {
+	friend class SoundEffect;
 	friend class Music;
 
 public:

@@ -97,7 +97,10 @@ inline void writeBinaryFile(const fs::path &fileName, std::vector<T> &v)
 	std::ofstream ofs (fileName, std::ios::binary);
 	if (!ofs)
 		throw fs::filesystem_error("File cannot be written.", fileName, std::make_error_code(std::errc::no_such_file_or_directory));
-	std::copy(v.begin(), v.end(), std::ostream_iterator<T>(ofs));
+
+	const char* data = reinterpret_cast<const char*>(v.data());
+    size_t size = v.size() * sizeof(T);
+	std::copy(data, data + size, std::ostream_iterator<char>(ofs));
 	ofs.close();
 }
 
