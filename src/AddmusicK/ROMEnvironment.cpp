@@ -4,6 +4,7 @@
 #include "asarBinding.h"
 
 #include <AM405Remover.h>
+#include <cstring>
 #include <iostream>
 
 using namespace AddMusic;

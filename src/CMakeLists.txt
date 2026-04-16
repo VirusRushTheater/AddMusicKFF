@@ -2,16 +2,9 @@ add_subdirectory(AM405Remover)
 add_subdirectory(AddmusicK)
 
 # Controlled by the options in the root CMakeLists.
-# Currently, C# is only supported by Visual Studio pipelines, not Mono.
-# I hope this changes soon.
 if(ADDMUSICK_COMPILE_AMKGUI)
-	if (NOT DEFINED CMAKE_CSharp_COMPILER)
-		message(WARNING "C# compiling system not found! AMKGUI won't be built.")
-		message("Set ADDMUSICK_COMPILE_AMKGUI to OFF to turn off this warning.")
-	else ()
-		message(STATUS "AMKGUI set to build.")
-		add_subdirectory(AMKGUI)
-	endif ()
+	message(STATUS "AMKGUI set to build.")
+	add_subdirectory(AMKGUI)
 else()
 	message(STATUS "AMKGUI set to NOT be built.")
 endif(ADDMUSICK_COMPILE_AMKGUI)

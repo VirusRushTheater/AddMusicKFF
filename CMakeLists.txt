@@ -32,7 +32,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_DEPLOY_DIR})
 
 # Defining AddMusicK compiling options
 option(ADDMUSICK_COMPILE_AMKGUI
-	"Compile AMKGUI (Supported only if you have Visual Studio available)"
+	"Compile AMKGUI (C++ Qt-based GUI)"
 OFF)
 option(ADDMUSICK_COMPILE_AM4BATCH
 	"Compile AM4Batch"
@@ -46,10 +46,6 @@ ON)
 option(ASAR_DYNAMIC_LINKAGE
 	"Link asar dynamically (if OFF, it will link asar statically)"
 OFF)
-
-if (ADDMUSICK_COMPILE_AMKGUI)
-	message(FATAL_ERROR "No support yet for building AMKGUI.")
-endif()
 
 # Standardize this as much as possible.
 set(CMAKE_CXX_STANDARD		17)
@@ -105,6 +101,9 @@ endif()
 file(COPY ${ADDMUSICMREMOVER_FILE} DESTINATION ${PROJECT_DEPLOY_DIR})
 
 message(STATUS "AddMusicK and the compiling environment will be stored in " ${PROJECT_DEPLOY_DIR})
+
+# Copy the AddmusicM remover script
+configure_file(${CMAKE_SOURCE_DIR}/src/addmusicMRemover.py ${PROJECT_DEPLOY_DIR}/addmusicMRemover.py COPYONLY)
 
 # Copy the AddMusicK executable to the deploy folder
 # set_target_properties(AddmusicK
