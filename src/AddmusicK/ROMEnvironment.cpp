@@ -21,20 +21,40 @@ ROMEnvironment::ROMEnvironment(const fs::path& smw_rom, const fs::path& work_dir
 	_tryToCleanAM4Data();
 	_tryToCleanAMMData();
 
+	// Separates header and ROM.
+	// If the ROM has a header, it should be 512 bytes, and the ROM size should be a multiple of 0x8000 (32,768 bytes).
 	if (rom.size() % 0x8000 != 0)
 	{
 		romHeader.assign(rom.begin(), rom.begin() + 0x200);
 		rom.erase(rom.begin(), rom.begin() + 0x200);
 	}
 
+	// If the ROM is smaller than 512 kB, expand it.
 	if (rom.size() <= 0x80000)
 	{
-		throw std::runtime_error("Your ROM is too small. Save a level in Lunar Magic or expand it with Lunar Expand, then try again.");
+		Logging::info("ROM is too small. Expanding to 1,024 kB...");
+		expandROM(1024);
 	}
 
 	usingSA1 = (rom[SNESToPC(0xFFD5)] == 0x23 && options.allowSA1);
 
 	_cleanROM();
+}
+
+void ROMEnvironment::expandROM(size_t targetSizeKB)
+{
+	size_t targetSize = targetSizeKB * 1024;
+	if (rom.size() >= targetSize) return;
+
+	// Pad with zeros
+	rom.resize(targetSize, 0x00);
+
+	// Update header size byte
+	size_t headerOffset = 0xFFD7;
+	size_t sizeKB = targetSize / 1024;
+	int sizeCode = 0;
+	while ((1ULL << sizeCode) < sizeKB) sizeCode++;
+	rom[headerOffset] = sizeCode + 1;  // +1 for the encoding
 }
 
 bool ROMEnvironment::patchROM(const fs::path& patched_rom_location)

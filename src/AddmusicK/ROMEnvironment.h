@@ -24,6 +24,8 @@ public:
 
 	bool patchROM(const fs::path& patched_rom_location);
 
+	void expandROM(size_t targetSizeKB = 1024);
+
 	bool _cleanROM();
 	bool _tryToCleanSampleToolData();
 	bool _tryToCleanAM4Data();

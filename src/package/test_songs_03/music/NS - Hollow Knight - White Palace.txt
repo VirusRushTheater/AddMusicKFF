@@ -1,0 +1,477 @@
+#amk 2
+
+#spc
+{
+	#title "White Palace"
+	#game "Hollow Knight"
+	#author "Christopher Larkin"
+	#length "4:20"
+	#comment "ported by maxodex"
+}
+
+#instruments
+{
+	@0 $de $72 $00 $03 $00
+	@0 $de $70 $00 $03 $00
+	@1 $f1 $e0 $c5 $03 $00
+	@13 $fa $e0 $b8 $03 $00		;@33
+	@1 $f3 $e0 $c5 $03 $00
+	@1 $f8 $e0 $c5 $03 $00		;@35
+	@1 $f6 $e0 $c5 $03 $00		;@36
+	@8 $f6 $e0 $c5 $1e $00		;
+	@1 $f7 $e0 $c5 $03 $00		;@38
+	@8 $f7 $e1 $c5 $1e $00		;
+	@0 $df $6e $b8 $03 $00		;@40
+	@29 $fd $e0 $b8 $06 $00		;@41
+	@1 $f7 $e6 $c5 $03 $00		;@42
+	@6 $fa $e5 $b8 $03 $00		;@43
+	@1 $f8 $e7 $c5 $03 $00		;@44
+	@6 $f5 $e5 $c5 $03 $00		;@45
+	@1 $f6 $e4 $c5 $03 $00		;@46
+	@0 $df $71 $b8 $03 $00		;@47
+	@6 $f7 $e5 $c5 $03 $00		;@48
+}
+
+$ef $ff $22 $ce
+$f1 $06 $c8 $01
+
+(!100)[$f4 $09]
+(!101)[$f4 $09 $de $30 $0c $20]
+(!500)[$fa $01 $ae]
+(!501)[$fa $01 $ac]
+(!502)[$fa $01 $af]
+(!503)[$fa $01 $b2]
+(!504)[$fa $01 $b4 $df]
+(!505)[$fa $01 $b1]
+(!506)[$fa $01 $b9]
+(!507)[$fa $01 $ab]
+
+"ROFF = (!100,0)"
+"AMPOFF = $fa $03 $00"
+"REL1 = (!500,4)"
+"REL2 = (!501,4)"
+"REL3 = (!502,4)"
+"REL4 = (!503,4)"
+"REL5 = (!504,4)"
+
+"VIRBASS = $de $18 $0a $18"
+"VIRLOW = $de $20 $0a $18"
+"VIRMID = $de $20 $0b $18"
+"VIRMIDST = $de $20 $0b $1e"
+
+
+"@histring = @32 (!100,-1)(!500,3) $de $00 $0a $22"
+"@histringnorel = @34 $de $00 $0a $22"
+"@string1 = @32"
+"@string2 = @34"
+"@string3 = @36"
+"@string4 = @38"
+"@string5 = @35"
+"@string6 = @44"
+"@string7 = @46"
+
+"@stringfinal = v110 @36 (!100,-1)(!501,3) q0f o4"
+
+"@flute = @33 (!101,-1)"
+"fluterel1 = (!504,3) v140"
+"fluterel2 = (!502,3) v120"
+"@bassoon = $de $30 $0b $1e @43 v113 (!100,-1) (!500,3)"
+
+"@tromb = @45 (!100,-1) (!507,3) v200"
+"@bass = v200 @37 $de $18 $0a $18"
+"@cello = @39 v150 $de $18 $0b $1f"
+
+
+w220 $f4$02
+
+
+
+#0 r2. / @30 l4
+
+(1)[ v205 [[o3 ^>d+d+]]3 ^ o4 q7c d+ q7b d+ q7f
+[[o3 ^>d+d+]]4
+[[o3 ^>d+d+]]4
+[[o3 ^>cc]]8
+[[o3 ^>cc]]4
+[[o3 ^>cc]]4
+o3 ^bb ^bb
+^bb ^bb
+;^=1 (slowed tempo)
+[[o3 g>d+d+]]4
+o3 g+>d+c [[o3 g+>d+d+ ]]3
+[[o3 g>d+d+]]4
+[[o3 f>cc]]4
+[[o3 d+>cc]]4
+o3 d>cc<d>cc<dbbd+bg
+;;;;;;intenseeee
+v225
+o3 [[cgg]]4
+[[caa]]4
+[[cg+g+]]4
+cggcgg c-ffc-ff
+[[o2 a+>ff]]4
+[[o2 g+>d+d+]]4
+[[o2 g>d+d+]]4
+[[o2 g>dd]]4 ]
+v170
+o6 [c<g+g
+fd+d
+c<g+g
+fd+d]
+o6 c<g+g
+fd+d
+c<a+g+
+gfd+
+*2
+(1)
+
+
+#1 ^2. / ^8 @30 l4
+
+(10)[ v205 [[o4 ccg]]3 q7e c q7c c q7a g q7f
+[[o4 ccf]]4
+[[o4 ccg]]4
+[[o3 aa>f]]4
+[[o3 a-a->f]]4
+[[o3 gg>d+]]4
+[[o3 gg>d]]8
+;^8
+o4 [[ccg]]4
+cfd+ [[ccf]]3
+[[ccg]]4
+[[o3 g+g+>d]]4
+[[o3 gg>d+]]4
+[[o3 gg>d]]3 o3 
+v225 gdb
+;;;;;;intens
+o3 [[d+d+b+]]4
+[[ffb+]]8
+d+d+b+d+d+b+
+ddg+ddg+
+[[dda+]]4
+[[ccg+]]4
+[[ccg]]4
+<g+g+>g<g+g+>g
+ccgc-c-g ]
+v170
+[o5 gfd+
+dc<a+
+gfd+
+dc<a+]
+o5 gfd+
+dc<a+
+g+gf
+d+dc
+*
+o5 gfd+
+dc<a+
+gfd+
+dc<b
+(10)
+
+
+"@histring2 = @42 v145 (!100,-1)(!505,3) VIRMID"
+
+#2 ^2. / y10
+
+(25)[ @31 v235 ROFF
+$fa $03 $30
+q7d o3 g2.g2.g2.g2.
+g+2.g+2.g+2.g+2.
+g2.g2.g2.g2.
+[[f2.]]8
+d+2.d+2.d+2.d+2.
+d2.d2.d2.d2.d2. q7e d2.
+$fa $03 $90 q7f d+2. d2.
+AMPOFF ]
+@flute fluterel1 ;v140
+(20)[o5 c2.g1^1r4
+a+4.g+4. f1^1r4
+f4.d+4.c1.d+2.
+d1^1.^8 r4.
+c2.g1^1r4]
+c2.g1.^8r2^8
+;;;;;;;intxense
+ROFF
+@histring2
+(21)[ o5 c2^8r8g1^1r4
+a+4.a4. f1^1r4
+g+2^8r8 f1^4r4
+d+4.d4.
+f2.d+1^1r4
+d2.f1^1r4
+a+4.g+4. d+1^1r4
+d4.d+4.
+c1^4r4
+d4.c4.
+f1^4r4]
+g1^4r4
+ROFF @31 l4 v175
+[o5 d+c<a+g+gf
+d+c<a+g+gf]
+o5 d+dc<g+gf
+d+dc<a+g+g
+*
+o5 d+c<a+g+gf
+d+d<bg+gf
+(25)
+@tromb
+o2 c2r4 g4^1^4r2.
+a+8r4g+8r4 f4^1^4r2.
+f8r4d+8r4c1r2d+2r4
+d1^1r1>
+q7c
+[[c2.g4^1^4r2.]]2
+q7f
+@stringfinal y11
+d+1^1^1 [[f1^1^1]]2
+d+1.d1. f1^1^1
+[[d+1^1^1]]2 q7f d1.^2.r2.
+
+
+"@cstring = v135 y9 VIRMID @42 (!502,3)"
+
+#3 v70 @histring o6 y11 c2. /
+
+t41 ^8 t52 ^8 $e3 $18 $3a ^2. ^1 ^4 $e3 $60 $31 ^2 t36 ^8 t27 ^8
+t33 ^8 t45 ^8 $e3 $30 $3b ^2. ^1 ^4 $e3 $60 $31 ^8r4^8 t34 ^8 t24 ^8
+o6 q7f @histring y11 v70 t33 g8 t43 ^8 $e3 $20 $3d ^2.^1^4
+$e3 $60 $30 ^4^8r8 t44 ^8 t26 ^8
+@string2 t45 c8 $e3 $38 $3c ^2..^1^2 $e3 $50 $27 ^8r4.
+t48 < g+8 $e3 $20 $3c ^2..^1^4 $e3 $60 $2e ^4^8r4. >
+$e3 $40 $3c c1^1^4 $e3 $60 $2f ^2^4
+t38 ^8 t47 ^8 $e3 $32 $3c ^2^4^1^4.r4^8 t52 ^8 t45 ^8
+t43 c-8 t53 ^8 t60 ^2^4^1^2r=45t46 ^=25 t33 ^=20 t8 ^=4
+$e2 $00 c=1 t40 ^8 $e3 $18 $3b ^2.. $e3 $50 $3d ^1 ^4 $e3 $30 $39 ^2 t49 ^4
+t51 ^8 $e3 $18 $3b ^2^8 $e3 $60 $3d ^1^1 t48 ^4
+t53 ^8 $e3 $30 $3c ^1^1.^8 t48 ^4
+t47 ^8 $e3 $30 $3b ^2.. r2 d2. $e3 $60 $31 ^4 r4 t46 ^8 t41 ^8^=1
+t54 c8 $e3 $90 $40 ^2. ^1 ^2 $e3 $30 $38 ^4 t50 ^8 t42 ^8
+t47 ^8 $e3 $18 $3f ^4. $ed $7f $e8 ^4. ^2. t61 ^2. $e3 $80 $30 ^2.
+t58 $e3 $50 $3f
+@41 o1 v255 y10 c+2.
+@cstring q1f
+o3 d+1^1 t50 ^4
+t46 $e3 $30 $3c a1^1^2. t50 ^8 t30 ^8
+t45 g+8 $e3 $30 $3b ^2..^1^2. t55 ^4
+t54 $e3 $30 $3b d+1. d1 $e3 $30 $30 ^4 $e3 $30 $18 ^4
+t41 d8 t52 ^8 $e3 $18 $3c ^2. ^1 ^4 $e3 $60 $31 ^2 t40 ^8 t38 ^8
+t48 c8 $e3 $18 $3d ^2. ^1 ^2 $e3 $30 $38 ^4. t48 ^8 t40 ^8
+t59
+d+1^1^1
+d1.b1.
+ROFF q7f
+@string5 o2 y10 ;VIRMID
+v180
+c1. d2.d+2. g+1.a+1.
+q7e > c1.d1. < q7d g+1. b1.
+>$ed $78 $eb c1^1^=45
+@flute fluterel2 q7f ; v110
+[o4 g8>c8d+8c8d+8g8^1r1^4]
+o4 g+8>c8d+8c8d+8f8^1r1^4
+*
+o4 $e8$90$82 f8a8>c8<a8>c8d8d+8^=3^1^8 ;^=3
+d4c1r2 f1r8 d+4. g1^4 r4 $fa $01 $c4 q7d ^1.
+f2.g+1^1^4 g1r2
+ROFF
+@40 v145 y12 $df
+(20)
+y10 q7f
+@flute fluterel2
+r2.
+o4 d8g8>c8<g8>c8d8^1r2
+v180
+@string4
+o4 c2. g1..r2
+a+4.a4.f1..r2
+f2.g2.g+2.g4.f4.
+f4.d+4.g1..r2
+d2.f1.d+4.d4.
+d4.c4.d+1^4r4 c2r4
+c1. q7e d2.c1^1^4
+q7d c-1^4.r=23 (!501,3) @string7
+c=1
+
+
+#4 r2. / ROFF q7f v0
+
+$fa $03 $28 (40)[o5 y9
+v30 $e8$ff$5a [[@33 d+24 $fa $01 $b8 ^24]]18 $e8 $ff $1e [[@33 d+24 $fa $01 $b8 ^24]]18 ]2
+AMPOFF
+v210 VIRLOW  q7e
+o3 @string2 d+1^8 @string4 d4. @string5 c4.
+v220
+< @string4 a+4. @string5 g+4. @string4 g4 REL3 ^8
+@string4 f1^1^2 REL1 ^2
+v200
+> @string3 f1^8 @string4 g4. @string5 g+1 REL2 ^2
+@string3 g1^1 REL2 ^1
+v190
+@string3 g1. @string4 g+2.g2 REL2 ^4
+v180
+@string3 b1^1^4 @string4 >c4.d4 REL4 ^8
+;^=1
+v130 q7f
+@string2 d2 REL3 ^4
+@string2 c1^1^1^1^2 REL3 ^2^4
+@string2 v155 <g1^1^2 REL3 ^2
+@string4 g1 REL2 ^2 @string4 g+1 REL2 ^2
+@string3 g1^1^4 REL2 ^2.
+v150 q7d @string3 g2 $fa $01 $a5 ^1 q7f $e8$c0$bc $fa $01 $c2 ^1 REL3 ^2
+;;;;;instensenese
+o4 v140
+@string2 d1^4 REL2 ^4 @string3 c2. @string4 d+2.
+@string3 d1 REL2 ^2 @string3 q7d c1^4 REL3 ^4 v150
+@string2 d1^4 REL3 ^4 @string3 c2. q7f @string2 f2 REL2 ^4
+q7c @string3 d+4. @string4 d4. q7e
+@string3 c1 REL2 ^2 @string3 <b2 REL3 ^4
+q7f @string2 a+1 REL2 ^2
+@string2 >c2 REL3 ^4 @string3 d2 REL3 ^4
+@string3 d2^8 REL3 ^8 @string4 c2 REL3 ^4
+@string3 d+1^8 REL2 ^4. q7d
+@string3 d2 REL2 ^4 @string3 d+2 REL2 ^4
+@string3 c2. REL2 ^4. @string3 d+4.
+d1 q7f ^1^4 REL2 ^2.
+v185
+@string4 VIRMID o3
+q7e c1. d2.d+2. d+1.f2.g2.
+v170
+y12 q7d g+1.a+1.> q7c c1. q7d y11 d2. q7e d+2.
+;;; second half
+q7d $ed $79 $e6 d1^1^2 $fa $01 $ad ^2 q7f
+r1. @bassoon y9
+o3 g+8>c8d+8c8d+8f8^1.r2.
+(41)[o3 g8>c8d+8c8d+8g8^1.r2.]
+o3 f8>c8d+8c8d+8f8^2.
+r1^1^1^1^1^1
+ROFF
+y8 v160
+@string6 o3 d8g8>c8<g8>c8d8^2. REL3 ^1.
+@string6 o3 d8g8b8g8b8>d8^1. @string6 q7d c-2 $e8$30$7d ^4
+$de $30 $0b $1e $ed $79 $e1 q7f y9 v130
+c1^1^1^1^1^1^1^1^1 c-1^1^1
+v140
+@string1 d+1^1^1 @string6 c1. $e8$f0$c4 c-1.
+@stringfinal y8
+t58 $e3 $50 $3f g1^1^2. t53 ^4
+t46 $e3 $30 $3c a1^1^2. t50 ^8 t30 ^8
+t45 g+8 $e3 $30 $3b ^2..^1^2. t55 ^4
+t54 $e3 $30 $3b g1. f1 $e3 $30 $30 ^4 $e3 $30 $18 ^4
+t41 a+8 t52 ^8 $e3 $18 $3c ^2. ^1 ^1
+t48 g+8 $e3 $18 $3c ^2. ^1 ^2 $e3 $30 $38 ^4. t48 ^8 t38 ^8
+t59 g1^1^1 q7f g1.^2.r2 t45 ^4
+
+
+#5 r2. / ROFF v0 $df
+
+$fa $03 $28 (50)[o5 y9 ^24
+v30 q7f $e8 $ff $5a [[@33 g24 $fa $01 $b8 ^24]]18 $e8 $ff $1e [[@33 g24 $fa $01 $b8 ^24]]18 ]
+$e8 $ff $5a [[@33 f24 $fa $01 $b8 ^24]]18 $e8 $ff $1e [[@33 f24 $fa $01 $b8 ^24]]18
+AMPOFF y10
+@bass
+o2 d+1^8 d4. c4^=16
+< a+4. g+4.g4.
+[[f1^1^1]]2
+>d+1^1^1 d1^1^1
+g1^1^2.^16 q7c REL3 ^8. q7f
+@cello
+o3 c1^1^1^1^1^1
+c1^1^1<f1^1^1
+d+1^1^1
+g2^4 $fa $01 $aa ^2^4 $e8$c0$ed $fa $01 $c3 ^1 REL3 ^2
+;;;;intenendese
+@39 v175
+[o3 c1^1^1<f1^1^1
+f1^1^1>c1.<b1.
+a+1^1^1g+1^1^1
+[[g1^1^1]]2 ]
+@string5 v180 VIRMID o4 [[r2]]12 q7b
+y8 c1.d2. q7a d+2. f2. g2. q79 g2.
+(!506,3)(!100,-1) $de $0c $0b $18
+o5 q77 c=18r=18 q76 d+=18r=18 q77 d=18r=18 q76 f=18r=9 t40 ^=9
+;;; second half
+ROFF
+$ed $77 $e5 q75 g1^1^1^1^1^1
+v70 y12 q7f t58
+@string2 >c1^2.. REL2 ^4. @string3 <g2.
+@string5 a1^1^2 REL2 ^2
+@string2 >c1. @string5 d2. d+2.
+@string4 d1^8 REL2 ^4. @string3 c1 REL2 ^2
+q7e
+@string2 g1. @string3 f2.g+1 $ed $76 $e7 ^1^4
+g1. q7f
+v60 @histringnorel
+c1^1^1^1^1^1^1^1^1d1^1^1
+c1^1^1^1. @string3 <b1.
+@39 v175 $de $18 $0b $1f y10
+*
+
+
+#6 r2. /
+
+^1^1^1 [[^2]]6 q7f $df
+$fa $03 $2d (40)
+AMPOFF
+@string2 VIRMID v145 y11
+o3 a1^1^2 REL1 ^2 $ed $78 $eb q7d g+1^1^1 q7f
+[[r2]]18
+@40 v135 y12
+(20)
+o5 c2.g2.
+@41 o1 v80 y10 $e8 $ff $a5 [[d12 $ee $80 c+12 $ee $00]]9
+;;;;;; instancense
+@40 v115 $fa $02 $0c y12 (!100,-1)(!502,3)
+(21)
+o5 g2.
+$fa $02 $00
+(61)[@41 o1 v80 y10 $e8 $60 $9c [[d12 $ee $80 c+12 $ee $00]]4 d12
+v255 d1]
+[[r2]]20 r4
+(!506,3) q77 @string5 v180 y8 $de $0c $0b $18
+o5 t65 q76 r=18d=18r=18f=18 r=18d+=18r=18 t53 q74 g=12 $fa $01 $b3 ^=6
+r1. q7f y9
+@bassoon
+(41)
+[[r2]]27
+ROFF
+y10 @bass q7b
+o2 d1^1^1<g1^1 $fa $01 $ad ^1
+q7f
+[[r2]]30
+@40 v145 y12 $df
+o5 c2.g1.^24
+(70)[@41 o1 v70 y10 $e8 $60 $9c [[d12 $ee $80 d12 $ee $00]]4] d24
+@47 v120 $fa $02 $0c y12 (!100,-1)(!502,3)
+(21)
+o5 g1 $fa $02 $00 ^=95 ROFF
+@8 $ed $77 $e8 y10 v160
+o3 c=1
+
+
+#7 r2. /
+
+[[^2]]12
+$fa $03 $2d (50) AMPOFF
+[[r2]]63 ROFF $f4$01$f4$01 q7f
+@41 o1 v70 y10 $e8 $ff $a5 [[d12 $ee $80 d12 $ee $00]]9 ^12. q79 d4 q7f ^4.
+[[r2]]45
+(70) o1 d24^1
+[[r2]]22
+t41 ^8 t52 ^8 $e3 $18 $3a ^2. ^1 ^4 $e3 $60 $31 ^2 t36 ^8 t27 ^8
+t33 ^8 t45 ^8 $e3 $30 $3b ^2. ^1 ^4 $e3 $60 $31 ^2 t34 ^8 t24 ^8
+t33 ^8 t43 ^8 $e3 $20 $3d ^2 ^4^1^4 $e3 $60 $30 ^2 t44 ^8 t26 ^8
+t45 ^8 $e3 $38 $3c ^2..^1^2 $e3 $50 $27 ^2
+t48 ^8 $e3 $20 $3c ^2..^1^4 $e3 $60 $2e ^2.
+$e3 $40 $3c ^1^1^4 $e3 $60 $2f ^2.
+t49 ^4 $e3 $32 $3c ^2^4^1.. t52 ^8 t45 ^8
+t53 ^4 t57 ^4 t59 ^2^1^2^=46 t46 ^=26 t33 ^=20 t8 ^=4
+t58
+t40 ^8 $e3 $18 $3c ^2.. $e3 $50 $3e ^1 ^4 $e3 $30 $3a ^2 t49 ^4
+t51 ^8 $e3 $18 $3a ^2^8 $e3 $60 $3d ^1^1 t48 ^4
+t53 ^8 $e3 $30 $3c ^1^1.^8 t48 ^4
+t47 ^8 $e3 $30 $3b ^1 t61 ^1^8 $e3 $60 $31 ^4 r4 t46 ^8 t41 ^8
+t54 ^8 $e3 $90 $41 ^2. ^1 ^2 $e3 $30 $38 ^4 t50 ^8 t42 ^8
+t47 ^8 $e3 $18 $3f ^1. t61 ^2.
+t59
+(61)
+[[r2]]46

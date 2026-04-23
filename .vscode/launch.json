@@ -4,7 +4,7 @@
     
 
         {
-            "name": "Run Tests",
+            "name": "AMKCLI - Run Tests",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/tests/test_units",
@@ -25,19 +25,40 @@
             "preLaunchTask": "Build Tests"
         },
         {
-            "name": "Run CLI",
+            "name": "AMKCLI - Extract lists",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/AddmusicK",
             "args": [
-                "--driver", "/home/virus/Documentos/Programming/git/kff/AddMusicKFF/asm/",
-                "--rom", "/home/virus/Documentos/Romhacking/Super Mario World (U) EXPANDED.smc",
-                "--list_folder", "/home/virus/Documentos/Programming/git/AddMusicKFF/build/bin/random_env/",
-                "/home/virus/Documentos/Romhacking/addmusic_comparison/SMW Virus.smc"
+                "--extract_lists", "."
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin",
+            "cwd": "${workspaceFolder}/../Source ROMs/_vanilla/amk_list/",
             "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Tests"
+        },
+        {
+            "name": "Run tests with gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/tests/test_units",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/bin/tests",
+            "environment": [{
+                    "name": "SMW_ROM_LOCATION",
+                    "value": "/home/virus/Documentos/Programming/Proyectos nuevos/AddMusicKFF/Source ROMs/_vanilla/Super Mario World (U) [!].smc"
+            }],
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",

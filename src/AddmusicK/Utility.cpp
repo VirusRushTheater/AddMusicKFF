@@ -39,13 +39,21 @@ void AddMusic::copyDir(const fs::path& src, const fs::path& dst)
 void AddMusic::deleteDir(const fs::path& dir_path)
 {
     if (fs::exists(dir_path)) {
-        for (auto& file : fs::directory_iterator(dir_path)) {
-            if (fs::is_directory(file)) {
-                AddMusic::deleteDir(file.path());
-            } else {
-                fs::remove(file);
-            }
-        }
-        fs::remove(dir_path);
+        fs::remove_all(dir_path);
     }
+}
+
+bool AddMusic::isPathEquivalent(const fs::path& p1, const fs::path& p2)
+{
+    fs::path abs_p1 = p1.lexically_normal();
+    fs::path abs_p2 = p2.lexically_normal();
+#ifdef _WIN32
+    std::string str_p1 = abs_p1.string();
+    std::string str_p2 = abs_p2.string();
+    std::transform(str_p1.begin(), str_p1.end(), str_p1.begin(), ::tolower);
+    std::transform(str_p2.begin(), str_p2.end(), str_p2.begin(), ::tolower);
+    return str_p1 == str_p2;
+#else
+    return abs_p1 == abs_p2;
+#endif
 }

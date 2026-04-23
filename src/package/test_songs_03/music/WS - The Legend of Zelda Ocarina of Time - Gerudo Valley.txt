@@ -1,0 +1,271 @@
+#amk 2
+
+#spc
+{
+#game "Legend of Zelda: Ocarina of Time"
+#title "Gerudo Valley"
+#comment "Ported by Wakana"
+#length "2:36"
+}
+
+#samples
+{
+#optimized
+"oot_trumpet.brr"
+"oot_nylon.brr"
+"oot_clap.brr"
+}
+
+#instruments
+{
+"oot_trumpet.brr" $FF$a8$00$07$95;@30
+"oot_nylon.brr"   $Fd$EF$00$06$C0;@31
+"oot_clap.brr"    $FF$F5$00$15$00;@32
+}
+
+"nylon= @31 v190 "
+"clap= @32 v170 "
+"trump= @30 v150 "
+
+$ef$ff$20$E0
+$f1$04$B5$01
+
+(!800)[$f4$09]
+(!801)[$ed$7f$f7]
+(!802)[$ed$7f$f2]
+
+$f4$02
+
+#0 t49 w210
+
+nylon o3
+c+2r16>f4..
+clap o3 l16
+/
+[
+ y10 q7f c q76 c c
+ y12 q7f c y8 q7a c q76 c
+ y12 q7c c q76 c
+
+ y10 q7f c q76 c c
+ y12 q7f c y8 q76 c c
+ y12 q7c c q76 c
+]99
+
+[r1]100
+
+
+
+
+#1
+
+nylon o3
+r16g+8.r8.>a8r16g+4.
+r1^1
+/
+o4 v130 y11
+[ [[q76 f+ q7f f+f+f+ r f+ q7c f+ q7f f+ q76 f+ q7d f+ q7e f+ q7f f+ r f+ q7d f+f+]]2
+  q76 e q7d e q7f ee r e8e q77 e q7d e q7e e q7f e r q7e e q7d e q7f e
+  q76 f q7d f q7f ff r f8f q77 f q7d f q7e f q7f f r q7e f q7d f q7f f
+]99
+
+
+[r1]100
+
+
+
+
+
+#2
+
+nylon o3
+r8b8.>f+8.r8.b4^16
+r1^1
+/
+o4 v130 y9
+[ q76 c+ q7f c+c+c+ r c+ q7c c+ q7f c+ q76 c+ q7d c+ q7e c+ q7f c+ r c+ q7d c+c+
+  q76 d q7f ddd r d q7c d q7f d q76 d q7d d q7e d q7f d r d q7d dd
+  q76 d q7d d q7f dd r d8d q77 d q7d d q7e d q7f d r q7e d q7d d q7f d<
+  q76 b q7d b q7f bb r b8b q77 b q7d b q7e b q7f b r q7e b q7d b q7f b>
+]99
+
+
+[r1]100
+
+
+
+
+
+
+#3
+
+nylon o4
+r8.d8.r4.>c+2^8
+r1.^8
+[r1]4
+
+(!800,-1)
+(!801,3)
+/
+y10 o4
+[v0 r8 v180 f+8a4f+8a4.
+r8f+8a4f+8a4.
+r8e8g+4e8g+4.]
+r8g+8f2.
+*
+ra8a8r2^8.
+
+r8c+4^8g+4^8c+^1^8.<
+b4^8>f+4^8d4^1
+c+4^8g+4^8c+4^2.d8e4.f+8e4.d8c+1
+
+r8a4.a4.c+4..d8d2^
+^8g+4.g+4.d1^8
+^8<f+8a4f+8a2f+8a4f+8a4
+>d8<b4.>g+8f+4.<b8>c+1
+
+(!802,3)
+
+trump $de$20$0d$30 o4 y11
+v150
+[a8 $e8$50$be a2 $e8$08$96 ^ g+8b8g+8g+8r2.^]
+g+8 $e8$50$be g+2 $e8$08$96 ^ f+8a8f+8f+8r2.^
+*
+b8 $e8$50$be b2 $e8$08$96 ^ a8>c+8e8d8r2.^
+
+(!801,3)
+nylon v180 y10 o3 $df
+[f+8.g+4^]2
+[d8.g+4^]2
+[e8.a+4^]2
+> $f4$01 ded $f4$01 c+2.^
+
+
+
+
+
+
+
+#4 ;BASS
+$f4$03
+nylon o2 v255 y10
+r2^16g+16f16d+16c+2
+r1..<
+(!800,-1)
+(!801,3)
+/
+[
+[[f+4f+r8.]]2
+>[[d4dr8.]]2<
+[[e4er8.]]2
+>c+4c+r8.
+ c+4c+8r8
+]99
+
+
+[r1]100
+
+
+
+
+
+
+
+#5
+nylon o4 v120 y13
+r2^16f16f16f16f4..
+[r1]5 r2.^16
+v180 y10
+
+(!800,-1)
+(!801,3)
+/
+[rc+8g+8r8c+8g+8r4^16
+rd8g+8r8d8g+8r4^16<
+rb8>f+8r8<b8>f+8r4^16]
+rf+8f+8r2^8.
+*
+r8b8g+2.
+^4^ a4.f+4^e4 $f4$01 ef+e $f4$01 d2^
+^4^ g+4.e4^c+4 $f4$01 ded $f4$01 c+2^
+^4^ a4.f+4^e4 $f4$01 ef+e $f4$01 d4..<a8b4.b8b4.g+8g+1
+>
+r4^g+4.g+4^e4.c+2^8
+r4^f+4.e4^c+4 $f4$01 ded $f4$01 c+2^
+<r8.g+8>c+4<g+8>c+2<g+8>d4<g+8>d8.<a8e4.>e8d4.<g+8g+1
+
+(!802,3)
+
+trump $de$20$0d$30 o4 y11
+v150
+[rg+8r4..f+8a8a8a8 $e8$50$be a2.. $e8$08$96 ]
+rf+8r4..e8g+8g+8g+8 $e8$50$be f2.. $e8$08$96
+*
+ra8r4..g+8b8>d8c+8 $e8$50$be c+2.. $e8$08$96 r8
+
+(!801,3)
+nylon v180 y10 o3 $df
+[a4]8 b4b4b4b4
+
+
+
+[r1]100
+
+
+
+
+
+
+
+#7
+nylon o3 v120 y12
+r2^16 b16b16b16b4..
+r1..^16
+
+o3 v110 y8
+(777)[ [[q76 a q7f aaa r a q7c a q7f a q76 a q7d a q7e a q7f a r a q7d aa ]]2
+  [[q76 g+ q7d g+ q7f g+g+ r g+8g+ q77 g+ q7d g+ q7e g+ q7f g+ r q7e g+ q7d g+ q7f g+]]2
+]
+/
+(777)7
+
+trump $de$20$0d$30 y9 o3 v140
+rb8r4..a8>c+8c+8c+8 $e8$50$be c+2.. $e8$08$96
+rc+8r4..<b8>d8f+8f8 $e8$50$be f2.. $e8$08$96
+
+nylon o3 v120 y12 $df
+(777)
+
+[r1]100
+
+
+
+#6
+nylon o3 v120 y11
+r2^16g+16g+16g+16g+4..
+r1..^16
+o3 v100 y11
+(666)[ [[q76 f+ q7f f+f+f+ r f+ q7c f+ q7f f+ q76 f+ q7d f+ q7e f+ q7f f+ r f+ q7d f+f+]]2
+  q76 d q7d d q7f dd r d8d q77 d q7d d q7e d q7f d r q7e d q7d d q7f d
+  q76 f q7d f q7f ff r f8f q77 f q7d f q7e f q7f f r q7e f q7d f q7f f
+]
+/
+(666)
+
+trump $de$20$0d$30 >
+rc+f+g+a8 $ed$7f$f8 ^ $f4$09 c+f+g+ $e8$50$be a4.
+$e8$08$96 ^ df+g+a8 $ed$7f$f8 ^ $f4$09 df+g+ $e8$50$be a4. $e8$08$96 ^ <b>
+ef+g+8 $ed$7f$f8 ^ $f4$09 <b>ef+ $e8$50$be g+4. $e8$08$96 ^aba $e8$50$be g+2 $ed$7f$f1 ^4
+
+nylon v120 y11 $df
+(666)5
+
+trump $de$20$0d$30 y9 o4 v140
+c+8 $e8$50$be c+2 $e8$08$96 ^ <b8>d8<b8b8r2.^>
+d8 $e8$50$be d2 $e8$08$96 ^ c+8e8g+8f+8r2.^
+
+nylon o3 v120 y11 $df
+(666)
+
+
+[r1]100

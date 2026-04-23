@@ -1,0 +1,458 @@
+;Electrospire
+;"Asteroid Antics (Finale)" and "EREPHS EHT RAEF (Tower)"
+;Original by CrispyYoshi
+;Remixed by Jimmy
+;New version by KungFuFurby
+
+#amk 2
+
+#SPC
+{
+	#title "Electrospire"
+	#author "CrispyYoshi"
+	#comment "Abstract/Dream Level 5"
+	#game "SMW Central Production 2"
+}
+
+;Before you reach the actual MML data, I have a whole bunch of defines that
+;I use to keep things nice and consistent for me (and a bit more readable
+;for those of you viewing my files).
+
+"INST_FLUTE=@0"
+"INST_STRINGS=@1"
+"INST_TRIANGLE=@2" ;NOTE: auto-tuned up five semitones
+"INST_MUSICBOX=@3"
+"INST_HORN=@4"
+"INST_STRINGPIZZICATO=@5"
+"INST_OBOE=@6"
+"INST_STEELDRUMS=@7"
+"INST_BASS=@8"
+"INST_PIANO=@9" ;NOTE: auto-tuned down five semitones
+"INST_HISNARE=@10" ;NOTE: auto-tuned up six semitones
+"INST_STRINGSSLOW=@11"
+"INST_BONGOS=@12" ;NOTE: auto-tuned down five semitones
+"INST_EPIANO1=@13"
+"INST_SLAPBASS=@14"
+"INST_ORCHHIT=@15" ;NOTE: auto-tuned up eight semitones
+"INST_EPIANO2=@16"
+"INST_DISTGUITAR=@17"
+"INST_STRINGSFAST=@18"
+
+"INST_KICK=@21"
+"DRUM_KICK=@21 o4e"
+"INST_HIHATCLOSE=@22"
+"DRUM_HIHATCLOSE=@22 o4c"
+"INST_HIHATOPEN=@23"
+"DRUM_HIHATOPEN=@23 o3a"
+"INST_SNARE1=@24"
+"DRUM_SNARE1=@24 o4c"
+"INST_SNARE2=@25"
+"DRUM_SNARE2=@25 o4c"
+"INST_LOWSNARE=@26"
+"DRUM_LOWSNARE=@26 o3e"
+"INST_HISNARE1=@27"
+"DRUM_HISNARE1=@27 o4d"
+"INST_HISNARE2=@28"
+"DRUM_HISNARE2=@28 o4d"
+"INST_SNARE3=@29"
+"DRUM_SNARE3=@29 o3a"
+
+"VCMD_INSTRUMENT=$DA"
+"VCMD_PAN=$DB"
+"VCMD_PANFADE=$DC"
+"VCMD_SLIDETONOTE=$DD"
+"VCMD_VIBRATO=$DE"
+"VCMD_VIBRATOOFF=$DF"
+"VCMD_SONGVOL=$E0"
+"VCMD_SONGVOLFADE=$E1"
+"VCMD_TEMPO=$E2"
+"VCMD_TEMPOFADE=$E3"
+"VCMD_SONGTRANSPOSE=$E4"
+"VCMD_TREMOLO=$E5"
+"VCMD_SUBLOOPSTART=$E6$00"
+"VCMD_SUBLOOPEND=$E6"
+"VCMD_VOLUME=$E7"
+"VCMD_VOLUMEFADE=$E8"
+;Skip $E9 Subroutine with Loop Counter
+"VCMD_VIBRATOFADE=$EA"
+"VCMD_PITCHENVELOPETO=$EB"
+"VCMD_PITCHENVELOPEFROM=$EC"
+"VCMD_ADSRGAIN=$ED"
+"VCMD_FINETUNE=$EE"
+"VCMD_ECHOONVOL=$EF"
+"VCMD_ECHOOFF=$F0"
+"VCMD_ECHODELAYFEEDBACKFIR=$F1"
+"VCMD_ECHOVOLFADE=$F2"
+"VCMD_SAMPLEPLAY=$F3"
+"VCMD_YOSHIDEFAULT=$F4$00"
+"VCMD_LEGATOTOGGLE=$F4$01"
+"VCMD_LIGHTSTACCATOTOGGLE=$F4$02"
+"VCMD_ECHOTOGGLE=$F4$03"
+;$F4 04, reset special square wave, is not in AMK and was overwritten by a
+;VCMD to force SFX to channel 8
+"VCMD_SNESSYNC=$F4$05"
+"VCMD_YOSHITOGGLECH=$F4$06"
+"VCMD_HURRYUPOFF=$F4$07"
+;$F4 $08, N-SPC velocity, is redundant because the SMW velocity table is
+;gone
+"VCMD_INSTRESET=$F4$09"
+"VCMD_ECHOFIR=$F5"
+"VCMD_DSPWRITE=$F6"
+"VCMD_DSPWRITE_V0VOLL=$F6$00"
+"VCMD_DSPWRITE_V0VOLR=$F6$01"
+"VCMD_DSPWRITE_V0PITCHL=$F6$02"
+"VCMD_DSPWRITE_V0PITCHH=$F6$03"
+"VCMD_DSPWRITE_V0SRCN=$F6$04"
+"VCMD_DSPWRITE_V0ADSR1=$F6$05"
+"VCMD_DSPWRITE_V0ADSR2=$F6$06"
+"VCMD_DSPWRITE_V0GAIN=$F6$07"
+"VCMD_DSPWRITE_V1VOLL=$F6$10"
+"VCMD_DSPWRITE_V1VOLR=$F6$11"
+"VCMD_DSPWRITE_V1PITCHL=$F6$12"
+"VCMD_DSPWRITE_V1PITCHH=$F6$13"
+"VCMD_DSPWRITE_V1SRCN=$F6$14"
+"VCMD_DSPWRITE_V1ADSR1=$F6$15"
+"VCMD_DSPWRITE_V1ADSR2=$F6$16"
+"VCMD_DSPWRITE_V1GAIN=$F6$17"
+"VCMD_DSPWRITE_V2VOLL=$F6$20"
+"VCMD_DSPWRITE_V2VOLR=$F6$21"
+"VCMD_DSPWRITE_V2PITCHL=$F6$22"
+"VCMD_DSPWRITE_V2PITCHH=$F6$23"
+"VCMD_DSPWRITE_V2SRCN=$F6$24"
+"VCMD_DSPWRITE_V2ADSR1=$F6$25"
+"VCMD_DSPWRITE_V2ADSR2=$F6$26"
+"VCMD_DSPWRITE_V2GAIN=$F6$27"
+"VCMD_DSPWRITE_V3VOLL=$F6$30"
+"VCMD_DSPWRITE_V3VOLR=$F6$31"
+"VCMD_DSPWRITE_V3PITCHL=$F6$32"
+"VCMD_DSPWRITE_V3PITCHH=$F6$33"
+"VCMD_DSPWRITE_V3SRCN=$F6$34"
+"VCMD_DSPWRITE_V3ADSR1=$F6$35"
+"VCMD_DSPWRITE_V3ADSR2=$F6$36"
+"VCMD_DSPWRITE_V3GAIN=$F6$37"
+"VCMD_DSPWRITE_V4VOLL=$F6$40"
+"VCMD_DSPWRITE_V4VOLR=$F6$41"
+"VCMD_DSPWRITE_V4PITCHL=$F6$42"
+"VCMD_DSPWRITE_V4PITCHH=$F6$43"
+"VCMD_DSPWRITE_V4SRCN=$F6$44"
+"VCMD_DSPWRITE_V4ADSR1=$F6$45"
+"VCMD_DSPWRITE_V4ADSR2=$F6$46"
+"VCMD_DSPWRITE_V4GAIN=$F6$47"
+"VCMD_DSPWRITE_V5VOLL=$F6$50"
+"VCMD_DSPWRITE_V5VOLR=$F6$51"
+"VCMD_DSPWRITE_V5PITCHL=$F6$52"
+"VCMD_DSPWRITE_V5PITCHH=$F6$53"
+"VCMD_DSPWRITE_V5SRCN=$F6$54"
+"VCMD_DSPWRITE_V5ADSR1=$F6$55"
+"VCMD_DSPWRITE_V5ADSR2=$F6$56"
+"VCMD_DSPWRITE_V5GAIN=$F6$57"
+"VCMD_DSPWRITE_V6VOLL=$F6$60"
+"VCMD_DSPWRITE_V6VOLR=$F6$61"
+"VCMD_DSPWRITE_V6PITCHL=$F6$62"
+"VCMD_DSPWRITE_V6PITCHH=$F6$63"
+"VCMD_DSPWRITE_V6SRCN=$F6$64"
+"VCMD_DSPWRITE_V6ADSR1=$F6$65"
+"VCMD_DSPWRITE_V6ADSR2=$F6$66"
+"VCMD_DSPWRITE_V6GAIN=$F6$67"
+"VCMD_DSPWRITE_V7VOLL=$F6$70"
+"VCMD_DSPWRITE_V7VOLR=$F6$71"
+"VCMD_DSPWRITE_V7PITCHL=$F6$72"
+"VCMD_DSPWRITE_V7PITCHH=$F6$73"
+"VCMD_DSPWRITE_V7SRCN=$F6$74"
+"VCMD_DSPWRITE_V7ADSR1=$F6$75"
+"VCMD_DSPWRITE_V7ADSR2=$F6$76"
+"VCMD_DSPWRITE_V7GAIN=$F6$77"
+;$F7, mem write, not used by default (and with memory location conflicts)
+"VCMD_NOISECLOCK=$F8"
+"VCMD_SENDTOSNES=$F9"
+"VCMD_PITCHMOD=$FA$00"
+"VCMD_GAIN=$FA$01"
+"VCMD_TRANSPOSE=$FA$02"
+"VCMD_VOLMUL=$FA$03"
+;Skip $FA $04 Echo buffer reserve
+;$FA $05, gain fade, is not in AMK
+;$FA $06, velocity table ID, is redundant due to one table being removed
+;$FB, arpeggio, was cut out and replaced by a more dangerous echo VCMD
+;Skip $FC remote commands
+"VCMD_TREMOLOOFF=$E5$00$00$00"
+"VCMD_PITCHENVELOPEOFF=$EB$00$00$00"
+
+;Yes, I'm recycling the bells from a different song, since they replicate
+;the bells heard in the remix AND they're used for the death jingle.
+
+;TODO under extreme circumstances, replace #optimized with omissions of any
+;non-SFX samples
+
+#path "Electrospire"
+
+#samples
+{
+	#optimized
+	"bells.brr"
+	"K3M_16.brr"
+	"ESPianoChord1CF.brr"
+	"ESPianoChord2CF.brr"
+	"ESPianoChord3CF.brr"
+	"ESPianoChord4CF.brr"
+	"ESPianoChord5CF.brr"
+	"ESPianoChord6CF.brr"
+	"ESPianoChord7CF.brr"
+	"DR220eSnare.brr"
+	"HH open.brr"
+	"A07-1.brr"
+	"Hat Closed.brr"
+	"BDrum1.brr"
+	"snare1.brr"
+	"linn_bp.brr"
+	"DIGOC5.brr"
+}
+#instruments {
+	"K3M_16.brr" $8F $E0 $80 $04 $00
+	"bells.brr" $FF $EC $B8 $04 $4E
+	"ESPianoChord1CF.brr" $CF $B4 $B8 $01 $51
+	"ESPianoChord2CF.brr" $CF $B4 $B8 $01 $51
+	"ESPianoChord3CF.brr" $CF $B4 $B8 $01 $51
+	"ESPianoChord4CF.brr" $CF $B4 $B8 $01 $51
+	"ESPianoChord5CF.brr" $CF $B4 $B8 $01 $51
+	"ESPianoChord6CF.brr" $CF $B4 $B8 $01 $51
+	"ESPianoChord7CF.brr" $CF $B4 $B8 $01 $51
+	@8 $AE $26 $B8 $0F $00
+	"A07-1.brr" $8F $E0 $B8 $01 $51
+	"DR220eSnare.brr" $8F $E0 $80 $01 $51
+	"HH open.brr" $8F $F4 $80 $01 $51
+	"Hat Closed.brr" $00 $00 $30 $05 $46
+	"BDrum1.brr" $8F $E0 $80 $02 $A3
+	"snare1.brr" $8F $F0 $80 $02 $A3
+	"linn_bp.brr" $8F $EB $B8 $08 $00
+	"DIGOC5.brr" $8F $6A $B8 $08 $00
+}
+"INST_K3M_16=@30"
+"INST_BELLS=@31"
+"INST_PIANOCHORD1=@32" ;ec+<g+  ;relative signed hex notes: $00$FD$F8
+"INST_PIANOCHORD2=@33" ;ec+<f+  ;relative signed hex notes: $00$FD$F6
+"INST_PIANOCHORD3=@34" ;d+c+<g+ ;relative signed hex notes: $00$FE$F9
+"INST_PIANOCHORD4=@35" ;d+b<g+  ;relative signed hex notes: $00$FC$F9
+"INST_PIANOCHORD5=@36" ;e<bg+   ;relative signed hex notes: $00$FB$F8
+"INST_PIANOCHORD6=@37" ;d+c<g+  ;relative signed hex notes: $00$FD$F9
+"INST_PIANOCHORD7=@38" ;f+ec+   ;relative signed hex notes: $00$FE$FB
+;Yup, I'm going out of the normal note range for the default instrument.
+;Thus, I need a "half pitch" instrument. Yes, I can use ASM and modify the
+;sound driver to do this instead, but I'll pass for this case. Plus, I
+;hadn't gotten pitch bends working for negative notes.
+"INST_BASSHALFP=@39"
+"INST_A071=@40"
+"INST_DR220ESNARE=@41"
+"INST_HHOPEN=@42"
+"INST_HATCLOSED=@43"
+"INST_BDRUM1=@44"
+"INST_SNARE1=@45"
+"INST_LINNBP=@46"
+"INST_DIGOC5=@47"
+
+;Optimized samplepack filesize (not counting IDs $0D, $0F and 11)...
+;$24+$24+$87+$B4+$24+$117+$264+$39F+$24+$7A1+$49B+$369+$24+$597+$438+$5F1+$951=$31BF bytes
+;(in raw samples, that's 22,640, which for me is not that small)
+;IDs $0D, $0F and $11 add $183+$120+$22E=$4D1 bytes
+
+(!2000)[VCMD_INSTRESET]
+(!2001)[VCMD_ADSRGAIN$80$B8]
+
+#0
+t55 w144
+VCMD_ECHODELAYFEEDBACKFIR$03$80$00
+VCMD_ECHOONVOL$CA$20$20
+VCMD_ECHOFIR$40$20$10$08$FC$FE$FF$00
+VCMD_LIGHTSTACCATOTOGGLE
+r4/
+VCMD_ECHOONVOL$CA$20$20
+v255 INST_PIANOCHORD1 (1)[l8 o5cc^ccc^c]2
+INST_PIANOCHORD2 (1)
+;No sub-routine here due to an unplanned key off at the end of the
+;subroutine
+INST_PIANOCHORD3 l8 o5cc^ccc^c
+l4 ^ INST_PIANOCHORD4c INST_PIANOCHORD5c INST_PIANOCHORD6c
+[[INST_PIANOCHORD1 (1)2 INST_PIANOCHORD2 (1) INST_PIANOCHORD3 (1)]]3
+INST_PIANOCHORD1 (1)2 INST_PIANOCHORD2 (1) 
+INST_PIANOCHORD3 (2)[l16o5c^cc ^^c^ c^c^ cc^^]
+[[INST_PIANOCHORD1 (3)[l16o5c^cc ^^c^]
+INST_PIANOCHORD5 (3)
+INST_PIANOCHORD7 (3)
+INST_PIANOCHORD5 (3)]]4
+[[INST_PIANOCHORD1 (1)2 INST_PIANOCHORD2 (1) INST_PIANOCHORD3 (1)]]3
+INST_PIANOCHORD1 (1)2 INST_PIANOCHORD2 (1) 
+INST_PIANOCHORD3 (2)
+[[INST_PIANOCHORD1 (3)
+INST_PIANOCHORD5 (3)
+INST_PIANOCHORD7 (3)
+INST_PIANOCHORD5 (3)]]4
+
+#1
+r4/
+(!2000,0) r1^1^1^1^2^4
+
+INST_LINNBP v152 y8 p7,21
+o4b8>c8
+(100)[o5c+8^48{<b32g+32f+32e32c+32}^2d+4
+e2^8e32r16^32f+16g+8^16
+f+2^8e16d+16c+8<g+16
+b16>e2^16r16e8](101)[d+8<b8
+g+4>c+4g+8^16 {g+32a+32b32}>c+4
+d+8^16c+4c+16<b8>c+16<g+8f+16g+16
+>c+16f+32g+16^32b32r16^32g+8f+16g+4^8^16<b8
+b32>c+4^32e16d+16c+4^8^16<b8]
+
+(100)(102)[f+8
+g+8c+4c+4g+8^16{g+32a+32b32}>c+4
+d+8^16e8^16c+16<b16>c+8c+8d+8
+e8f+32r16^32f+8e8c+16d+16e8c+16d+16e16
+d+16c+16<b16g+8^16>d+8^16 c+2^16^32]
+
+r1^2^4^8^32
+(103)[o3b16>c16c+16<g+16>g+16c+16f+16g+16f+16]o4c+2^8^16
+r2^4
+(103)o4c+1^4^8^16
+r1^1^4^8
+
+INST_DIGOC5 v200
+o4c+16<b16>c+16r16<
+{b8>c+8d+8e8d+8<b8}
+f+8^16b8^16>f+8^16
+e8^16d+8<g+8g+16f+16g+2^4^8
+r1^4
+>c+16<b16>c+32r16^32<
+{b8>c+8d+8e8d+8<b8}>e32f+8^32g+8^16
+e8^16d+8^16c+16d+16e16f+16g+32r16^32>c+16<g+16r8
+f+4e8d+8e8a32b16^32g+16b8^16
+b32>c+16^32
+{d+16<g+16e16d+16c+16<b16g+16f+16e16d+16c+16<b16}
+
+INST_A071 v192 y10
+(!2001,3) (!2000,-1)
+o5r8e8e8r8c+8e8e8r8f+8
+f+8r8e8f+8g+8f+8e8r8
+e8e8r8c+8e8e8r8f+8
+f+8r8f+8g+8e8>c+8<b8r8
+e8e8r8c+8e8e8r8f+8
+f+8r8e8f+8g+8f+8e8r8
+e8e8r8c+8e8e8r8f+8
+f+8r8f+8g+8e8>c+8<b8
+
+(105)[o4b1f+2e2r2>c+1<g+2]2
+
+;Original channel ID #2
+;Swapped with the original #7 based on feedback not to put the bassline
+;in a channel that will be constantly overwritten by SFX
+#7
+r4/
+(!2000,0) r1^1^1^1^1o4 INST_LINNBP v108 y12 o4b8>c8
+(100)(101)
+(100)(102)
+r1^2^4^8^32
+(103)o4c+2^8^16
+r2^4
+(103)o4c+1^4^8^16
+r1^2^4^8
+VCMD_ECHOTOGGLE
+INST_DISTGUITAR v224 (!2001,3) (!2000,-1)
+(200)[r4o2e4g+4e4
+b32>c+4^16r32c+32<b4^16r32b32f+8^16^32
+f+4g+4b4g+4
+>e32f+8^16^32e8d+4<b8f+8b8]2
+
+r8 VCMD_ECHOTOGGLE INST_A071 v192 y10 o4b8b8r8g+8b8g+8r8
+>c+8c+8r8<a8>c+8<a8f+8g+8
+r8b8b8r8g+8b8g+8r8
+b8b8r8f+8b8f+8d+8e8
+r8b8b8r8g+8b8g+8r8
+>c+8c+8r8<a8>c+8<a8f+8g+8
+r8b8b8r8g+8b8g+8r8
+b8b8r8f+8b8f+8d+8e8
+
+(201)[r2o5c+1<b2b2>e2d+2]o4c+2
+(201)o5c+4<b4
+
+#3
+r4/
+INST_K3M_16 v128
+(300)[l16 VCMD_LEGATOTOGGLE o4c+<g+>ec+g+ec+>c+<g+e>ec+<g+>ec+g+32VCMD_LEGATOTOGGLE^32]4 r1
+
+(300)16
+(301)[l16 VCMD_LEGATOTOGGLE o5ec+eg+ec+g+c+f+<bg+>f+<bg+>d+<b32 VCMD_LEGATOTOGGLE^32]4
+[[(302)[l16 VCMD_LEGATOTOGGLE o5g+ec+<g+>ec+g+VCMD_LEGATOTOGGLE ^ VCMD_LEGATOTOGGLEg+e]
+(303)[o5c+<g+>ec+g+e32VCMD_LEGATOTOGGLE^32]
+(302)
+(304)[o5f+g+{f+32g+32f+32}ed+<b32VCMD_LEGATOTOGGLE^32] ]]2
+
+(300)8
+v96
+(305)[VCMD_LEGATOTOGGLE o5c+8VCMD_SLIDETONOTE$0C$01g+ c+16VCMD_SLIDETONOTE$0C$01>f+VCMD_LEGATOTOGGLE^16]32
+
+v128
+(301)4
+[[(302)(303)(302)(304)]]2
+
+#4
+(400)[INST_DR220ESNARE VCMD_VOLMUL$00 v255 l16{o6ddd}<bg]
+/
+v255 VCMD_VOLMUL$20
+INST_BDRUM1o5c4 c4 INST_SNARE1o5c16 INST_BDRUM1o5c8 c8 c16 INST_SNARE1o5c8
+  INST_BDRUM1o5c16 c16 INST_SNARE1o5c8 c16 INST_BDRUM1o5c8 INST_SNARE1o5c16 INST_BDRUM1o5c8 c16 c16 INST_SNARE1o5c16 c16 INST_BDRUM1o5c8  
+  c4 INST_SNARE1o5c16 INST_BDRUM1o5c8 INST_SNARE1o5c16 INST_BDRUM1o5c8 INST_SNARE1o5c16 INST_BDRUM1o5c8 c16 INST_SNARE1o5c16 INST_BDRUM1o5c16 
+ c4 INST_SNARE1o5c16 INST_BDRUM1o5c8 INST_SNARE1o5c16 INST_BDRUM1o5c8 c16 c16 q7a INST_SNARE1o5c16 q7b c16 q7d c16 q7f c16
+ r2 INST_BDRUM1o5c8 c16 c16 INST_SNARE1o5c8 c16 c16
+(401)[l4 INST_BDRUM1o5c INST_SNARE1o5c]30
+(402)[INST_BDRUM1o5c8^16 INST_SNARE1o5c8^16 INST_BDRUM1o5c8 INST_SNARE1o5c16 c16 INST_BDRUM1o5c8] (400)
+v255 VCMD_VOLMUL$20
+[[(403)[INST_BDRUM1o5c16 c16r8 INST_SNARE1o5c4 INST_BDRUM1o5c16r8^16]
+INST_SNARE1o5c4]]7
+(403)(400)
+v255 VCMD_VOLMUL$20
+(401)30 (402)(400)
+v255 VCMD_VOLMUL$20
+[[(403)INST_SNARE1o5c4]]7 (403)(400)
+
+#5
+r4/
+v224
+ INST_HATCLOSEDo5c16 c16 INST_HHOPENo6f+8 INST_HATCLOSEDo5c4 c4 c4 
+ c8 c16 INST_HHOPENo6f+16 INST_HATCLOSEDo5c4 c4 c4 
+ c16 c16 INST_HHOPENo6f+8 INST_HATCLOSEDo5c4 c4 c4 
+ c16 c16 INST_HHOPENo6f+8 INST_HATCLOSEDo5c4  c8 c16 c16 q7a INST_HHOPENo6f+16 q7b f+16 q7d f+16 q7f f+16
+r2. (400) v224
+
+[[(500)[INST_HATCLOSEDo5c8 c16 c16 INST_HHOPENo6f+16 f+16 INST_HATCLOSEDo5c16 c16 c8 c16 c16 INST_HHOPENo6f+4
+ INST_HATCLOSEDo5c8 c16 c16 INST_HHOPENo6f+8 INST_HATCLOSEDo5c16 c16 c8 c16 c16]
+(501)[INST_HHOPENo6f+16 f+16 INST_HATCLOSEDo5c16 c16] ]]8
+[[(502)[r8 INST_HHOPENo6f+8 r8 f+8 r16 f+16]
+(503)[INST_HATCLOSEDo5c8r16 INST_HHOPENo6f+16 INST_HATCLOSEDo5c8] ]]8
+[[(500)(501)]]8
+[[(502)(503)]]8
+
+#6
+r4/
+INST_BELLS v224 p7,21
+(600)[l1o3c+ef+g+] r1 (600)4
+;Had it not been for being forced to use MML, I could have done some raw
+;note data hackery to recycle a subroutine with two different durations. Ah
+;well.
+(601)[l2o3c+ef+g+]4
+(600)4
+(601)4
+
+;Original channel ID #7
+;Swapped with the original #2 based on feedback not to put the bassline
+;in a channel that will be constantly overwritten by SFX
+#2
+r4/
+INST_BASSHALFP v255 VCMD_VOLMUL$C0
+(700)[l8 o3c+c+^c+c+c+^c+ <bb^bbb^b aa^aaa^a] (701)[l8 o2bb^bbb^b]
+l4^o2b>f+d+
+[[(700)(701)]]3
+(700)(702)[l16 o2b^bb ^^b^ b^b^ bb^^]
+(703)[l16 o2c+^c+c+ ^^c+^ <b^bb ^^b^]2
+[[(703)(704)[l16o2e^ee ^^e^ d+^d+d+ ^^]l16d+^]]3
+[[(700)(701)]]3
+(700)(702)
+(703)2
+(703)(704)o2b16>c16
+(705)[o3c+16<g+16o4c+16<c+16b16<g+16o4c+16o2c+8c+16o4c+16o2g+16>c+16<g+16c+16<b16]4

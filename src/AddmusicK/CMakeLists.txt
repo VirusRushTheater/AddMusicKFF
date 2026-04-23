@@ -7,6 +7,7 @@ set(ADDMUSICK_SOURCES
 	MMLBase.cpp
 	Music.cpp
 	SoundEffect.cpp
+	SMWTestROMGenerator.cpp
 
 	experimental/MMLParserBase.cpp
 )
@@ -22,6 +23,7 @@ set(ADDMUSICK_HEADERS
 	MMLBase.h
 	Music.h
 	SoundEffect.h
+	SMWTestROMGenerator.h
 
 	experimental/MMLParserBase.h
 )

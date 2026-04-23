@@ -10,6 +10,12 @@
 #include "packageblob_asm.h"
 #include "packageblob_boilerplate.h"
 
+#ifdef ADDMUSICK_COMPILE_TESTS
+#include "packageblob_test_songs_01.h"
+#include "packageblob_test_songs_02.h"
+#include "packageblob_test_songs_03.h"
+#endif
+
 namespace fs = std::filesystem;
 
 namespace AddMusic
@@ -65,5 +71,35 @@ static Package boilerplate_package {
 	__package_ranges_boilerplate,
 	reinterpret_cast<const char*>(__package_blob_boilerplate.data())
 };
+
+/**
+ * @brief Packages which hold test songs for unit testing.
+ * The ADDMUSICK_COMPILE_TESTS control variable is set on the root CMakeLists.txt.
+ */
+#ifdef ADDMUSICK_COMPILE_TESTS
+static Package test_songs_package_01 {
+	__package_file_amount_test_songs_01,
+	__package_files_test_songs_01,
+	__package_lengths_test_songs_01,
+	__package_ranges_test_songs_01,
+	reinterpret_cast<const char*>(__package_blob_test_songs_01.data())
+};
+
+static Package test_songs_package_02 {
+	__package_file_amount_test_songs_02,
+	__package_files_test_songs_02,
+	__package_lengths_test_songs_02,
+	__package_ranges_test_songs_02,
+	reinterpret_cast<const char*>(__package_blob_test_songs_02.data())
+};
+
+static Package test_songs_package_03 {
+	__package_file_amount_test_songs_03,
+	__package_files_test_songs_03,
+	__package_lengths_test_songs_03,
+	__package_ranges_test_songs_03,
+	reinterpret_cast<const char*>(__package_blob_test_songs_03.data())
+};
+#endif
 
 }

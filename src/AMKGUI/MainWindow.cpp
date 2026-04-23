@@ -340,7 +340,7 @@ void MainWindow::runAMK()
                 return;
             }
 
-            if (fs::equivalent(rom_location, output)) {
+            if (isPathEquivalent(rom_location, output)) {
                 QMessageBox::StandardButton reply = QMessageBox::question(this,
                     "Overwrite ROM", "The original ROM file will be overwritten. Is this ok?",
                     QMessageBox::Yes | QMessageBox::No);

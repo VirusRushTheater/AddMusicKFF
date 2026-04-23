@@ -1,0 +1,112 @@
+;Revamped by Dippy
+
+#amk 2
+
+#spc
+{
+	#title "Norveg Incorporated"
+	#game "SMW Central Production 2"
+	#author "S.N.N."
+	#comment "Factory Map theme"
+}
+
+#instruments
+{
+	@1 	$8F $87 $B8 $03 $00		;@30 Lead
+	@1 	$8F $87 $B8 $06 $00		;@31 Lead 2
+	@4 	$FF $E0 $B8 $03 $00		;@32 Bass	
+	@1 	$FF $E0 $B8 $03 $00		;@33 Bass 2
+	@0 	$FF $40 $B8 $06 $00		;@34 Blip
+}
+
+w255 t73
+
+;Macros
+"K=@21 o4 v215 e"
+"S=@29 o3 v185 a"
+"HV=@22 o4 v140 c"
+"H=@22 o4 v180 c"
+
+$EF $FF $40 $40 
+$F1 $04 $3A $01
+
+#0 / @30 l16 v140 $EE$0A
+
+(1)[o2 y12 ff>ccff>ccff>ccff>cc
+y8 ffcc<ffcc<ffcc<ffcc]2
+
+(2)[< y12 f+f+>c+c+f+f+>c+c+f+f+>c+c+f+f+>c+c+
+y8 f+f+c+c+<f+f+c+c+<f+f+c+c+<f+f+c+c+]2
+(1)2(2)2
+
+@30 o4 y12 v165 p40,10,30
+>f4f8d+8f4c4
+d+4d4c4<a+1^4
+a+4>c4c2
+
+#1 / @31 l16 v100 o2 $EE$10
+
+(10)[ry8 ff>ccff>ccff>ccff>c
+r8.< y12 ffcc<ffcc<ffcc<f
+y8 fff>ccff>ccff>ccff>c
+y12 r8.<ffcc<ffcc<ffcc<f]
+
+(11)[y8 ff+f+>c+c+f+f+>c+c+f+f+>c+c+f+f+>c+
+y12 r8.<f+f+c+c+<f+f+c+c+<f+f+c+c+<f+
+y8 f+f+f+>c+c+f+f+>c+c+f+f+>c+c+f+f+>c+
+y12 r8.<f+f+c+c+<f+f+c+c+<f+f+c+c+<f+]
+
+(10)(11)
+
+@34 
+[y11 v130 o5f32<f32>c32<c32 f32<f32>c32<c32 y9 o5c32<c32f32<f32> c32<c32f32<f32]8
+
+#2 / l8
+[K2K4K4[[KKS4]]2K2K2[[KKS4]]2]4
+[KHVHHV]7 KSSS
+ 
+#3 / @32 o1 v125 y12 $EE$05 $F4$01 ;Bass
+[f1^1^1^1f+1^1^1^1]2
+f1^1^1^1
+
+#4 / @9 o3 v160 l8 y11 p0,0,0
+[fff>f4f4.r1<fff>f4ff4r1<
+f+f+f+>f+4f+4.r1<f+f+f+>f+4f+f+4r1<]2
+r1r1
+@0 v140 p55,20
+o4g+8a+8>c8<g+8a+8g+8g4
+d+4f4f2
+
+#5 / @9 o3 v160 l8 y09
+[ccc>c4c4.r1<ccc>c4cc4r1<
+c+c+c+>c+4c+4.r1<c+c+c+>c+4c+c+4r1<]2
+
+[r2]8
+
+#6 / @15 o4 v160 p0,0,0
+f2
+o1
+
+y5 y15 @26 g1^2
+y15 @26 c2 y5 @26 g1^2
+> y5 @26 c+2< y15 @26 f+1^2
+> y15 @26 c+2< y5 @26 f+1^2
+
+
+@32 o4 y11 v90 p40,10,30
+f4>c8f4d+16c16d+16c16<a+8
+>c8<a+8g+8d+4f4f1^2^4^8
+d+8f8
+f+4^8e4f+8g+4
+>c+8f+4^8e8<b4^8
+>e8c+8g+2c+4
+e4f+2e4
+f1
+r1^2
+v70 p0,10,30
+d+4c4
+d+4f4f2
+
+#7 / @33 o1 v175 y08 $EE$10 $F4$01 ;Bass 2
+[f1^1^1^1f+1^1^1^1]2
+f1^1^1^1

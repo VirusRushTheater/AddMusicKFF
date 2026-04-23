@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <array>
 
 #include "AddmusicLogging.h"
 #include "asarBinding.h"
@@ -42,7 +43,7 @@ AsarBinding::~AsarBinding()
 bool AsarBinding::compileToBin()
 {
 	int binlen = 0;
-	int buflen = 0x10000;		// 0x10000 instead of 0x8000 because a few things related to sound effects are stored at 0x8000 at times.
+	constexpr int buflen = 0x10000;		// 0x10000 instead of 0x8000 because a few things related to sound effects are stored at 0x8000 at times.
 
 	int count = 0, currentCount = 0;		// Count to get Asar's stdout and stderr.
 
@@ -51,10 +52,10 @@ bool AsarBinding::compileToBin()
 	_compiledbin.clear();
 
 	// auto binOutput {std::make_unique< uint8_t[] >(buflen)};		// C++ fashion array allocation. Deletion is automatic, don't worry.
-	uint8_t* binOutput = new uint8_t[buflen]();
+	std::array<uint8_t, buflen> binOutput{};
 
 	std::string abspatch_path = std::filesystem::absolute(_patchfilename).string();
-	asar_patch(abspatch_path.c_str(), (char *)binOutput, buflen, &binlen);
+	asar_patch(abspatch_path.c_str(), (char *)binOutput.data(), buflen, &binlen);
 
 	// Clears the buffers.
 	asar_stderr.clear();
@@ -74,8 +75,7 @@ bool AsarBinding::compileToBin()
 		return false;
 	}
 	
-	_compiledbin.assign(binOutput, binOutput + binlen);
-	delete[] (binOutput);
+	_compiledbin.assign(binOutput.begin(), binOutput.begin() + binlen);
 	
 	return true;
 }

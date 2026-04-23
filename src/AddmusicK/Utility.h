@@ -196,4 +196,10 @@ void copyDir(const fs::path& src, const fs::path& dst);
  */
 void deleteDir(const fs::path& dir_path);
 
+/**
+ * @brief Failsafe for fs::equivalent that works when files do not exist.
+ * Compares both absolute paths, and is case insensitive in the case of working with Windows.
+ */
+bool isPathEquivalent(const fs::path& p1, const fs::path& p2);
+
 }

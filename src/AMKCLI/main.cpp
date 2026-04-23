@@ -35,7 +35,7 @@ int main (int argc, char** argv)
 	CLIOptions o;
 
 	// Parsing the CLI options.
-	cxxopts::Options options(AMKNAME, "Toolkit to generate SPC files and patch SMW ROM music.");
+	cxxopts::Options options(AMKNAME, AMKDESCRIPTION);
 	
 	options.add_options("SPC generation")
 		("m,mml", "Compile a MML file into SPC (can be set multiple times).", cxxopts::value<std::vector<std::string>>(), "<mml>")
@@ -92,13 +92,13 @@ int main (int argc, char** argv)
 	// Extract any of the default packages and exit, if at least one of these options are set.
 	if (argp.count("extract_lists"))
 	{
-		fs::path lists_folder = argp["extract_lists"].as<fs::path>();
+		fs::path lists_folder = fs::path(argp["extract_lists"].as<std::string>());
 		AddMusic::boilerplate_package.extract(lists_folder);
 		std::cerr << "AMK lists template extracted at " << fs::absolute(lists_folder).string() << std::endl;
 	}
 	if (argp.count("extract_driver"))
 	{
-		fs::path asm_folder = argp["extract_driver"].as<fs::path>();
+		fs::path asm_folder = fs::path(argp["extract_driver"].as<std::string>());
 		AddMusic::asm_package.extract(asm_folder);
 		std::cerr << "Default SPC driver extracted at " << fs::absolute(asm_folder).string() << std::endl;
 	}
@@ -161,14 +161,19 @@ int main (int argc, char** argv)
 			exit(1);
 		}
 
-		if (fs::equivalent(rom_location, output))
+		if (AddMusic::isPathEquivalent(rom_location, output))
 			prompt("The original ROM file will be overwritten. Is this ok?");
 		else if (fs::exists(output))
 			prompt("The specified output file will be overwritten. Is this ok?");
 		
 		// Instance a ROMEnvironment and make it work.
-		AddMusic::ROMEnvironment rom_env (rom_location, list_folder, o.spc_options);
-		rom_env.patchROM(output);
+		try
+		{
+			AddMusic::ROMEnvironment rom_env (rom_location, list_folder, o.spc_options);
+			rom_env.patchROM(output);
+		} catch (const std::exception& e) {
+			std::cerr << "ROM patching failed." << std::endl << e.what();
+		}
 
 		std::cout << "Your ROM has been successfully patched and was stored at " << fs::absolute(output).string() << std::endl;
 		exit(0);
@@ -195,8 +200,12 @@ int main (int argc, char** argv)
 		}
 
 		// Instance a SPCEnvironment and make it work.
-		AddMusic::SPCEnvironment spc_env (list_folder, o.spc_options);
-		spc_env.generateSPCFiles(mml_paths, output);
+		try {
+			AddMusic::SPCEnvironment spc_env (list_folder, o.spc_options);
+			spc_env.generateSPCFiles(mml_paths, output);
+		} catch (const std::exception& e) {
+			std::cerr << "ROM patching failed. " << std::endl << e.what();
+		}
 
 		std::cout << "Your SPC files have been successfully generated and were stored at " << fs::absolute(output).string() << std::endl;
 		exit(0);

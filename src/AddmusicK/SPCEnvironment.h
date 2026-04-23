@@ -27,7 +27,7 @@ struct EnvironmentOptions
 {
 	bool aggressive {false};
 	bool allowSA1 {true};
-	bool verbose {true};
+	bool verbose {false};
 
 	bool optimizeSampleUsage {true};
 	bool validateHex {true};

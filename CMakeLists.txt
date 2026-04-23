@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(AddMusicK
 	VERSION		1.0.8
-	DESCRIPTION	"AddmusicK 1.0.8 branch by VirusRushTheater"
+	DESCRIPTION	"AddmusicK v1.0.8, branch by VirusRushTheater"
 	LANGUAGES	C CXX
 )
 
@@ -70,30 +70,33 @@ add_subdirectory(src)
 
 # Compile tests
 if (ADDMUSICK_COMPILE_TESTS)
+	message(STATUS "Including test songs in the package.")
+
 	# Generates a test environment with random songs from SMWCentral to test
 	# AddmusicK in the deploy folder.
 	# Will take about one minute to generate.
 	set(RANDOM_SONG_AMOUNT		5)
 	set(AMK_TEST_ENV_FOLDER		random_env)
 
-	if (NOT EXISTS ${PROJECT_DEPLOY_DIR}/${AMK_TEST_ENV_FOLDER})
-		# Detect Python, so we can test Addmusic environments with random sets
-		# of songs.
-		find_program(PYTHON_EXECUTABLE python)
+	# if (NOT EXISTS ${PROJECT_DEPLOY_DIR}/${AMK_TEST_ENV_FOLDER})
+	# 	# Detect Python, so we can test Addmusic environments with random sets
+	# 	# of songs.
+	# 	find_program(PYTHON_EXECUTABLE python)
 
-		if(NOT PYTHON_EXECUTABLE)
-			message(FATAL_ERROR "Python is needed to build tests. Set ADDMUSICK_COMPILE_TESTS to OFF if you don't want to build them.")
-		endif()
+	# 	if(NOT PYTHON_EXECUTABLE)
+	# 		message(FATAL_ERROR "Python is needed to build tests. Set ADDMUSICK_COMPILE_TESTS to OFF if you don't want to build them.")
+	# 	endif()
 
-		message(STATUS "Will now generate a test environment with ${RANDOM_SONG_AMOUNT} random SMWCentral songs at deploy/${AMK_TEST_ENV_FOLDER}.")
-		execute_process(
-			COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_BUILD_SCRIPTS_DIR}/amk_test_toolkit.py" --boilerplate "${AMK_BOILERPLATE_SRC}" --saveto "${PROJECT_DEPLOY_DIR}/${AMK_TEST_ENV_FOLDER}" -n ${RANDOM_SONG_AMOUNT}
-			WORKING_DIRECTORY "${PROJECT_BUILD_SCRIPTS_DIR}"
-		)
-	else()
-		message(STATUS "A test environment at deploy/${AMK_TEST_ENV_FOLDER} has already been generated. Skipping generation.")
-	endif()
+	# 	message(STATUS "Will now generate a test environment with ${RANDOM_SONG_AMOUNT} random SMWCentral songs at deploy/${AMK_TEST_ENV_FOLDER}.")
+	# 	execute_process(
+	# 		COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_BUILD_SCRIPTS_DIR}/amk_test_toolkit.py" --boilerplate "${AMK_BOILERPLATE_SRC}" --saveto "${PROJECT_DEPLOY_DIR}/${AMK_TEST_ENV_FOLDER}" -n ${RANDOM_SONG_AMOUNT}
+	# 		WORKING_DIRECTORY "${PROJECT_BUILD_SCRIPTS_DIR}"
+	# 	)
+	# else()
+	# 	message(STATUS "A test environment at deploy/${AMK_TEST_ENV_FOLDER} has already been generated. Skipping generation.")
+	# endif()
 
+	target_compile_definitions(${ADDMUSICKLIB_TARGETNAME} PUBLIC ADDMUSICK_COMPILE_TESTS)
 	add_subdirectory(tests)
 endif()
 
@@ -101,23 +104,6 @@ endif()
 file(COPY ${ADDMUSICMREMOVER_FILE} DESTINATION ${PROJECT_DEPLOY_DIR})
 
 message(STATUS "AddMusicK and the compiling environment will be stored in " ${PROJECT_DEPLOY_DIR})
-
-# Copy the AddmusicM remover script
-configure_file(${CMAKE_SOURCE_DIR}/src/addmusicMRemover.py ${PROJECT_DEPLOY_DIR}/addmusicMRemover.py COPYONLY)
-
-# Copy the AddMusicK executable to the deploy folder
-# set_target_properties(AddmusicK
-# 	PROPERTIES
-# 	ARCHIVE_OUTPUT_DIRECTORY 	${PROJECT_DEPLOY_DIR}
-# 	LIBRARY_OUTPUT_DIRECTORY 	${PROJECT_DEPLOY_DIR}
-# 	RUNTIME_OUTPUT_DIRECTORY 	${PROJECT_DEPLOY_DIR}
-# )
-
-# And the Asar shared library as well.
-# set_target_properties(${ASAR_LIB_TARGET}
-# 	PROPERTIES
-# 	LIBRARY_OUTPUT_DIRECTORY 	${PROJECT_DEPLOY_DIR}
-# )
 
 # After you run this CMake script, you should have a readily available
 # "deploy" folder with all the programs and components necessary to run

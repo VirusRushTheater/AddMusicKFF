@@ -8,6 +8,12 @@
 
 using namespace AddMusic;
 
+/**
+ * TODO list:
+ * 1. It's necessary to take away the parsing logic out of the state variables and compiling logic. For that
+ *    an Intermediate Representation (IR) class is needed.
+ */
+
 constexpr int tmpTrans[19] 			{ 0, 0, 5, 0, 0, 0, 0, 0, 0, -5, 6, 0, -5, 0, 0, 8, 0, 0, 0 };
 constexpr int instrToSample[30] 	{ 0x00, 0x01, 0x02, 0x03, 0x04, 0x07, 0x08, 0x09, 0x05, 0x0A,	// \ Instruments
 0x0B, 0x01, 0x10, 0x0C, 0x0D, 0x12, 0x0C, 0x11, 0x01,		// /
@@ -3553,7 +3559,8 @@ void Music::addSample(const std::vector<uint8_t> &sample, const std::string &nam
 				for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
 				{
 					fs::path p2 = "./samples/"+*(spc->bankDefines[i]->samples[j]);
-					if (fs::equivalent(p1, p2))
+					// fs::path p2 = spc->work_dir / "samples" / *(spc->bankDefines[i]->samples[j]);
+					if (isPathEquivalent(p1, p2))
 					{
 						//Copy the important flag from the sample group definition.
 						newSample.important = spc->bankDefines[i]->importants[j];
@@ -3576,7 +3583,7 @@ void Music::addSampleGroup(const std::string &groupName)
 
 	for (int i = 0; i < spc->bankDefines.size(); i++)
 	{
-		// if (fs::equivalent(groupName, spc->bankDefines[i]->name))
+		// if (isPathEquivalent(groupName, spc->bankDefines[i]->name))
 		if (groupName == spc->bankDefines[i]->name)
 		{
 			for (int j = 0; j < spc->bankDefines[i]->samples.size(); j++)
@@ -3655,7 +3662,7 @@ int Music::getSample(const fs::path &sp_path)
 	while (it != spc->sampleToIndex.end())
 	{
 		fs::path p2 = it->first;
-		if (fs::equivalent(p1, p2))
+		if (isPathEquivalent(p1, p2))
 			return it->second;
 
 		//if ((std::string)it->first == (std::string)ftemp)

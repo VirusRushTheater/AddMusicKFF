@@ -48,11 +48,19 @@ function(create_file_package SRC_FOLDER)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packageblob.h.in "packageblob_${SRC_FOLDER}.h")
 endfunction()
 
-# Generate packages for the folders "asm" and "boilerplate".
+# Generate packages for the folders "asm", "boilerplate", and "test_songs".
 # These will result in the files:
 # * packageblob_asm.h
 # * packageblob_boilerplate.h
+# * packageblob_test_songs.h
 create_file_package(asm)
 create_file_package(boilerplate)
+
+# Test songs are only included on tests.
+if(ADDMUSICK_COMPILE_TESTS)
+	create_file_package(test_songs_01)
+	create_file_package(test_songs_02)
+	create_file_package(test_songs_03)
+endif()
 
 target_include_directories(${ADDMUSICKLIB_TARGETNAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})

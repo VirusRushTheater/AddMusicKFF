@@ -65,6 +65,8 @@ SPCEnvironment::SPCEnvironment(const fs::path& work_dir, EnvironmentOptions opts
 	
 	
 	// Dynamic allocation of some arrays.
+	// TODO: Check if this is prone to memory leaks. The destructor class destroys these arrays but I need to check
+	// whether there is a way to allocate constant-sized arrays using STL or not.
 	musics = new Music[256];
 	soundEffectsDF9 = new SoundEffect[256];
 	soundEffectsDFC = new SoundEffect[256];
@@ -95,9 +97,10 @@ bool SPCEnvironment::generateSPCFiles(const std::vector<fs::path>& textFilesToCo
 	loadMusicList(work_dir / DEFAULT_SONGLIST_FILENAME);
 	loadSFXList(work_dir / DEFAULT_SFXLIST_FILENAME);
 
+	// These methods pertain to the driver exclusively.
 	_assembleSNESDriver();		// We need this for the upload position, where the SPC file's PC starts.  Luckily, this function is very short.
-
 	_assembleSPCDriver();
+
 	_compileSFX();
 	_compileGlobalData();
 

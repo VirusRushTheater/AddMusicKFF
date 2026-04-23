@@ -9,7 +9,9 @@
 #define strnicmp strncasecmp
 #endif
 
+// Name defines that come from the root CMakeLists.txt
 #define AMKNAME			"@PROJECT_NAME@"
+#define AMKDESCRIPTION  "@PROJECT_DESCRIPTION@"
 #define AMKVER_FULL		"@PROJECT_VERSION@"
 
 #define AMKVERSION 		@PROJECT_VERSION_MAJOR@
